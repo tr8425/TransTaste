@@ -1,0 +1,16 @@
+{
+  "name": "transtaste",
+  "version": "1.0.0",
+  "description": "메뉴 인식 품질 및 API 비용 검증용 테스트 스크립트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0"
+  }
+}

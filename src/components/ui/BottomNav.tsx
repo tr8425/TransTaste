@@ -1,0 +1,118 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const HIDDEN_ROUTES = ["/camera", "/loading-scan"];
+
+interface Tab {
+  href: string;
+  label: string;
+  isCta?: boolean;
+  icon: (active: boolean) => React.ReactNode;
+}
+
+const TABS: Tab[] = [
+  {
+    href: "/",
+    label: "Home",
+    icon: (active: boolean) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill={active ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
+        {!active && <path d="M9 21V12h6v9" />}
+      </svg>
+    ),
+  },
+  {
+    href: "/camera",
+    label: "Scan",
+    isCta: true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    icon: (active: boolean) => (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+        <circle cx="12" cy="13" r="4" />
+      </svg>
+    ),
+  },
+  {
+    href: "/results",
+    label: "History",
+    icon: (active: boolean) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={active ? "2" : "1.5"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    ),
+  },
+];
+
+export default function BottomNav() {
+  const pathname = usePathname();
+
+  if (HIDDEN_ROUTES.includes(pathname)) return null;
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
+      <div className="w-full max-w-mobile bg-cream/95 backdrop-blur-md border-t border-brown-light/10 px-6 pb-6 pt-2">
+        <div className="flex items-center justify-around">
+          {TABS.map((tab) => {
+            const isActive = pathname === tab.href;
+
+            if (tab.isCta) {
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className="w-14 h-14 -mt-5 rounded-full bg-coral shadow-lg shadow-coral/25 flex items-center justify-center hover:bg-coral-dark transition-colors active:scale-95"
+                >
+                  {tab.icon(false)}
+                </Link>
+              );
+            }
+
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${
+                  isActive ? "text-coral" : "text-brown-medium/60 hover:text-brown-medium"
+                }`}
+              >
+                {tab.icon(isActive)}
+                <span className="text-[10px] font-medium">{tab.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+}

@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap");
+
+:root {
+  --color-coral: #D85A30;
+  --color-cream: #FDFAF5;
+  --color-surface: #F8F6F2;
+  --color-text: #2C1A0E;
+  --color-text-secondary: #8B6A50;
+  --color-accent: #BA7517;
+  --color-success: #639922;
+  --color-danger: #E24B4A;
+}
+
+body {
+  color: var(--color-text);
+  background: var(--color-cream);
+  font-family: "Inter", "DM Sans", "Noto Sans KR", "Noto Sans JP", "Noto Sans SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile container */
+@layer components {
+  .mobile-container {
+    @apply mx-auto max-w-mobile min-h-screen relative;
+  }
+}
+
+/* Hide scrollbar for horizontal scroll areas */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
