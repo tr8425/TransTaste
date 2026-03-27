@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MOCK_MENU_RESULT } from "@/lib/mock-data";
 import { selectProvider } from "@/lib/ai/provider";
 import { MenuInput } from "@/lib/ai/provider";
+import { createMenuAnalysisStream } from "@/lib/ai/claude";
 import { isAnalysisError, InputType, MenuAnalysisResult } from "@/lib/types";
 import { buildCacheKey, getCached, setCache } from "@/lib/cache";
 
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
       outputLanguage?: string;
       allergenPreset?: string[];
       dietaryBeliefs?: string[];
+      stream?: boolean;
     };
 
     try {
@@ -85,7 +87,21 @@ export async function POST(request: NextRequest) {
       dietaryBeliefs: body.dietaryBeliefs,
     };
 
-    // Select AI provider and analyze
+    // Streaming mode: return SSE stream
+    if (body.stream) {
+      console.log('[TransTaste] Streaming mode requested, inputType:', inputType);
+      const readable = createMenuAnalysisStream(menuInput, cacheKey);
+      return new Response(readable, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "X-Accel-Buffering": "no",
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Non-streaming mode: select AI provider and analyze
     const provider = await selectProvider(inputType);
     const result = await provider.analyzeMenu(menuInput);
 

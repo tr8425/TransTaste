@@ -1,11 +1,13 @@
 "use client";
 
-import { Dish } from "@/lib/types";
+import { DishLite } from "@/lib/types";
 import AllergyTag from "./AllergyTag";
 
 interface DishRowProps {
-  dish: Dish;
+  dish: DishLite;
   onClick: () => void;
+  onAddToCart?: () => void;
+  isInCart?: boolean;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -18,7 +20,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   dessert: "bg-pink-200",
 };
 
-export default function DishRow({ dish, onClick }: DishRowProps) {
+export default function DishRow({ dish, onClick, onAddToCart, isInCart }: DishRowProps) {
   const bgColor = CATEGORY_COLORS[dish.category] || "bg-cream-dark";
 
   return (
@@ -56,22 +58,53 @@ export default function DishRow({ dish, onClick }: DishRowProps) {
               {dish.translation.english}
             </p>
           </div>
-          {dish.price && (
+          {(dish.price_display || dish.price) && (
             <span className="text-xs font-medium text-amber-brand whitespace-nowrap">
-              {dish.price}
+              {dish.price_display || dish.price}
             </span>
           )}
         </div>
 
         {/* Allergen tags */}
-        {dish.ingredients.allergens.length > 0 && (
+        {dish.allergens?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {dish.ingredients.allergens.map((allergen) => (
+            {dish.allergens?.map((allergen) => (
               <AllergyTag key={allergen} allergen={allergen} />
             ))}
           </div>
         )}
       </div>
+
+      {/* Add to cart button */}
+      {onAddToCart && (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+              onAddToCart();
+            }
+          }}
+          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 self-center transition-colors ${
+            isInCart
+              ? "bg-coral border-coral"
+              : "border-coral hover:bg-coral/10"
+          }`}
+        >
+          {isInCart ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <span className="text-coral text-lg font-medium leading-none">+</span>
+          )}
+        </div>
+      )}
     </button>
   );
 }

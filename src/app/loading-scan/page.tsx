@@ -1,18 +1,65 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import LoadingScreen from "@/components/loading/LoadingScreen";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { Dish } from "@/lib/types";
+import { FUN_FACTS_LOADING } from "@/lib/constants";
+import FunFactCard from "@/components/common/FunFactCard";
+
+const FOOD_EMOJIS = ["🍜", "🍣", "🥘", "🍛", "🍲", "🥟", "🍝", "🌮"];
+const TIMEOUT_MS = 180_000; // 3 minutes
+
+interface MenuMeta {
+  language?: string;
+  restaurant_type?: string;
+  items_found?: number;
+}
 
 export default function LoadingScanPage() {
   const router = useRouter();
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [menuMeta, setMenuMeta] = useState<MenuMeta | null>(null);
+  const [factIndex, setFactIndex] = useState(0);
+  const [emojiIndex, setEmojiIndex] = useState(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const navigatedRef = useRef(false);
+  const startedRef = useRef(false);
 
   useEffect(() => {
+    setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING.length));
+  }, []);
+
+  // Cycle emoji
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setEmojiIndex((prev) => (prev + 1) % FOOD_EMOJIS.length);
+    }, 400);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Cycle fun facts every 8s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFactIndex((prev) => (prev + 1) % FUN_FACTS_LOADING.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const navigateToResults = useCallback(() => {
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
+    router.push("/results");
+  }, [router]);
+
+  useEffect(() => {
+    // Prevent double execution in React Strict Mode
+    if (startedRef.current) return;
+    startedRef.current = true;
+
     const inputType = sessionStorage.getItem("scanInputType") as "image" | "url" | "text" | null;
     const imageData = sessionStorage.getItem("scanImage");
     const textData = sessionStorage.getItem("scanText");
 
-    // Determine the input and type
     let input: string | null = null;
     let type: "image" | "url" | "text" = "image";
 
@@ -29,40 +76,246 @@ export default function LoadingScanPage() {
 
     if (!input) {
       sessionStorage.setItem("scanError", "No image or text provided. Please try again.");
-      router.push("/results");
+      navigateToResults();
       return;
     }
 
-    // Clear stored input data
+    // Preserve menu input for Phase 2 detail requests
+    sessionStorage.setItem("menuInputForDetail", JSON.stringify({
+      input,
+      inputType: type,
+    }));
+
     sessionStorage.removeItem("scanImage");
     sessionStorage.removeItem("scanText");
     sessionStorage.removeItem("scanInputType");
+
+    const abortController = new AbortController();
+    abortRef.current = abortController;
+
+    // 3-minute timeout
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+      sessionStorage.setItem(
+        "scanError",
+        "Analysis timed out after 3 minutes. The menu image may be too complex. Please try again with a clearer photo."
+      );
+      navigateToResults();
+    }, TIMEOUT_MS);
+
+    const consumeStream = async (res: Response) => {
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let sseBuffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        sseBuffer += decoder.decode(value, { stream: true });
+
+        // Parse SSE events (double newline separated)
+        const parts = sseBuffer.split("\n\n");
+        sseBuffer = parts.pop()!;
+
+        for (const part of parts) {
+          if (!part.trim()) continue;
+          const lines = part.split("\n");
+          let eventType = "";
+          let data = "";
+
+          for (const line of lines) {
+            if (line.startsWith("event: ")) eventType = line.slice(7);
+            if (line.startsWith("data: ")) data += line.slice(6);
+          }
+
+          if (!eventType || !data) continue;
+
+          try {
+            const parsed = JSON.parse(data);
+
+            if (eventType === "meta") {
+              setMenuMeta(parsed);
+            } else if (eventType === "dish") {
+              setDishes((prev) => [...prev, parsed]);
+            } else if (eventType === "done") {
+              sessionStorage.setItem("scanResult", JSON.stringify(parsed));
+              navigateToResults();
+              return;
+            } else if (eventType === "error") {
+              sessionStorage.setItem("scanError", parsed.reason || "Analysis failed.");
+              navigateToResults();
+              return;
+            }
+          } catch {
+            // Skip malformed SSE event
+          }
+        }
+      }
+
+      // Stream ended without done/error event
+      if (!navigatedRef.current) {
+        sessionStorage.setItem("scanError", "Stream ended unexpectedly. Please try again.");
+        navigateToResults();
+      }
+    };
 
     const analyze = async () => {
       try {
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input, inputType: type }),
+          body: JSON.stringify({ input, inputType: type, stream: true }),
+          signal: abortController.signal,
         });
 
-        if (!res.ok) {
-          const errBody = await res.text();
-          throw new Error(errBody || `Server error: ${res.status}`);
-        }
+        const contentType = res.headers.get("content-type") || "";
 
-        const result = await res.json();
-        sessionStorage.setItem("scanResult", JSON.stringify(result));
+        if (contentType.includes("text/event-stream")) {
+          await consumeStream(res);
+        } else {
+          // JSON response (mock/cache)
+          if (!res.ok) {
+            const errBody = await res.text();
+            throw new Error(errBody || `Server error: ${res.status}`);
+          }
+          const result = await res.json();
+          sessionStorage.setItem("scanResult", JSON.stringify(result));
+          navigateToResults();
+        }
       } catch (err) {
+        if (abortController.signal.aborted) return;
         const message = err instanceof Error ? err.message : "An unexpected error occurred.";
         sessionStorage.setItem("scanError", message);
+        navigateToResults();
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      router.push("/results");
     };
 
     analyze();
-  }, [router]);
 
-  return <LoadingScreen />;
+    return () => {
+      clearTimeout(timeoutId);
+      // Do NOT abort here — React Strict Mode cleanup would kill the in-flight request.
+      // The 3-minute timeout and page navigation handle cleanup instead.
+    };
+  }, [router, navigateToResults]);
+
+  const statusText =
+    dishes.length > 0
+      ? `Found ${dishes.length} dish${dishes.length === 1 ? "" : "es"}...`
+      : menuMeta
+        ? `Scanning ${menuMeta.restaurant_type || "menu"}...`
+        : "Analyzing your menu...";
+
+  const subtitleText = menuMeta
+    ? `${menuMeta.language || ""} · ${menuMeta.restaurant_type || ""}`.replace(/^ · | · $/g, "")
+    : "Identifying dishes, flavors & allergens";
+
+  return (
+    <div className="fixed inset-0 bg-cream flex flex-col items-center px-6 overflow-y-auto">
+      {/* Top loading section */}
+      <div className="flex flex-col items-center pt-16 pb-4 flex-shrink-0">
+        <div className="text-6xl mb-6 animate-bounce">
+          {FOOD_EMOJIS[emojiIndex]}
+        </div>
+        <h2 className="text-lg font-semibold text-brown-dark mb-1">
+          {statusText}
+        </h2>
+        <p className="text-sm text-brown-medium mb-4">{subtitleText}</p>
+
+        {/* Progress bar (180s animation) */}
+        <div className="w-48 h-1 bg-cream-dark rounded-full overflow-hidden mb-6">
+          <div className="h-full bg-coral rounded-full animate-progress" />
+        </div>
+      </div>
+
+      {/* Streaming dish previews */}
+      {dishes.length > 0 && (
+        <div className="w-full max-w-sm mb-6 flex-shrink-0">
+          <p className="text-xs text-brown-medium mb-2 px-1">
+            {dishes.length} {dishes.length === 1 ? "dish" : "dishes"} found
+            {menuMeta?.items_found ? ` of ~${menuMeta.items_found}` : ""}
+          </p>
+          <div className="space-y-1.5">
+            {dishes.map((dish, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl px-4 py-2.5 shadow-sm animate-slideIn"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-brown-dark truncate">
+                      {dish.translation?.english || dish.original}
+                    </p>
+                    <p className="text-xs text-brown-medium truncate">
+                      {dish.original}
+                    </p>
+                  </div>
+                  {dish.price && (
+                    <span className="text-xs text-brown-medium ml-2 flex-shrink-0">
+                      {dish.price}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Fun fact */}
+      <div className="w-full max-w-sm pb-8">
+        <FunFactCard fact={FUN_FACTS_LOADING[factIndex]} />
+      </div>
+
+      <style jsx>{`
+        @keyframes progress {
+          0% {
+            width: 0%;
+          }
+          5% {
+            width: 10%;
+          }
+          15% {
+            width: 25%;
+          }
+          30% {
+            width: 40%;
+          }
+          50% {
+            width: 55%;
+          }
+          70% {
+            width: 70%;
+          }
+          85% {
+            width: 82%;
+          }
+          100% {
+            width: 95%;
+          }
+        }
+        .animate-progress {
+          animation: progress 180s ease-out forwards;
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
+    </div>
+  );
 }

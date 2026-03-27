@@ -61,7 +61,7 @@ export interface AnalysisError {
   reason: string;
 }
 
-export type AnalysisResponse = MenuAnalysisResult | AnalysisError;
+export type AnalysisResponse = MenuAnalysisResult | MenuAnalysisResultLite | AnalysisError;
 
 export function isAnalysisError(res: AnalysisResponse): res is AnalysisError {
   return 'error' in res;
@@ -69,9 +69,69 @@ export function isAnalysisError(res: AnalysisResponse): res is AnalysisError {
 
 // --- end v2 types ---
 
+// === Phase 1: Lite dish for list view (streamed fast) ===
+export interface DishLite {
+  original: string;
+  price: string | null;
+  currency: string | null;        // ISO 4217 code (KRW, JPY, USD, THB...)
+  price_display: string | null;   // Formatted: ₩17,000, ¥1,200, $14.00
+  language_detected: string;
+  translation: Translation;
+  confidence: "high" | "medium" | "low";
+  category: string;
+  dietary: {
+    halal: boolean | null;
+    vegan: boolean;
+    vegetarian: boolean;
+    gluten_free?: boolean;
+  };
+  allergens: string[]; // flattened from ingredients.allergens
+  allergen_risk: 'danger' | 'warning' | 'check' | 'safe';
+  price_tier: "budget" | "mid" | "premium";
+  image_search_query: string;
+}
+
+// === Phase 2: Detail fetched on demand per dish ===
+export interface DishDetail {
+  flavor_profile: FlavorProfile;
+  ingredients: {
+    core: string[];
+    common_additions?: string[];
+    allergens: string[];
+  };
+  fun_fact: string | null;
+  fun_fact_detail?: FunFactDetail | null;
+  how_to_eat: string | null;
+  warning?: DishWarning | null;
+  disclosure?: Disclosure | null;
+  has_brand_name?: boolean;
+  brand_part?: string;
+  brand_note?: string;
+  food_part?: string;
+  has_customization?: boolean;
+  options?: MenuOption[];
+  allergen_summary?: AllergenSummary;
+}
+
+// Phase 1 result shape
+export interface MenuAnalysisResultLite {
+  menu_meta?: MenuMeta;
+  menu_language?: string;
+  restaurant_type?: string;
+  items_found?: number;
+  dishes: DishLite[];
+  recommended_combo: {
+    budget: { items: string[]; reason: string };
+    balanced: { items: string[]; reason: string };
+  };
+}
+
+// === Legacy full dish (kept for backwards compat) ===
 export interface Dish {
   original: string;
   price: string | null;
+  currency?: string | null;
+  price_display?: string | null;
   language_detected: string;
   translation: Translation;
   confidence: "high" | "medium" | "low";
@@ -89,7 +149,7 @@ export interface Dish {
     gluten_free?: boolean;
   };
   price_tier: "budget" | "mid" | "premium";
-  fun_fact: string;
+  fun_fact: string | null;
   how_to_eat: string | null;
   image_search_query: string;
   // v2 optional fields

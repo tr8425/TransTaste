@@ -3,7 +3,9 @@ import { Dish, MenuAnalysisResult, RecentScan } from "./types";
 export const MOCK_DISHES: Dish[] = [
   {
     original: "불도장",
-    price: "38,000원",
+    price: "38000",
+    currency: "KRW",
+    price_display: "₩38,000",
     language_detected: "ko",
     translation: {
       literal: "Buddha Jumps Over the Wall",
@@ -22,13 +24,20 @@ export const MOCK_DISHES: Dish[] = [
     price_tier: "premium",
     fun_fact:
       "Legend says this dish smells so good that even Buddhist monks would jump over temple walls to get a taste, breaking their vegetarian vows.",
+    fun_fact_detail: {
+      label: "About the name",
+      content: "The name comes from a legend that the dish smells so incredible that even a meditating Buddhist monk would jump over a temple wall to taste it, abandoning his vows.",
+    },
+    warning: null,
     how_to_eat:
       "Served in a clay pot. Lift the lid and enjoy the aroma first, then start with the broth using a spoon.",
     image_search_query: "Buddha Jumps Over the Wall Chinese soup dish",
   },
   {
     original: "삼겹살",
-    price: "15,000원",
+    price: "15000",
+    currency: "KRW",
+    price_display: "₩15,000",
     language_detected: "ko",
     translation: {
       literal: "Three-layer meat",
@@ -47,13 +56,17 @@ export const MOCK_DISHES: Dish[] = [
     price_tier: "mid",
     fun_fact:
       "Samgyeopsal became hugely popular in Korea during the 1997 financial crisis as an affordable way to enjoy meat. Now it's the most consumed pork cut in Korea.",
+    fun_fact_detail: null,
+    warning: null,
     how_to_eat:
       "Grill the slices, then wrap in lettuce with garlic, ssamjang paste, and a slice of grilled kimchi. Eat in one bite.",
     image_search_query: "Korean samgyeopsal grilled pork belly BBQ",
   },
   {
     original: "된장찌개",
-    price: "9,000원",
+    price: "9000",
+    currency: "KRW",
+    price_display: "₩9,000",
     language_detected: "ko",
     translation: {
       literal: "Soybean paste stew",
@@ -78,7 +91,9 @@ export const MOCK_DISHES: Dish[] = [
   },
   {
     original: "비빔냉면",
-    price: "12,000원",
+    price: "12000",
+    currency: "KRW",
+    price_display: "₩12,000",
     language_detected: "ko",
     translation: {
       literal: "Mixed cold noodles",
@@ -103,7 +118,9 @@ export const MOCK_DISHES: Dish[] = [
   },
   {
     original: "막걸리",
-    price: "4,000원",
+    price: "4000",
+    currency: "KRW",
+    price_display: "₩4,000",
     language_detected: "ko",
     translation: {
       literal: "Roughly filtered (alcohol)",
@@ -121,6 +138,11 @@ export const MOCK_DISHES: Dish[] = [
     price_tier: "budget",
     fun_fact:
       "Makgeolli is a living drink with active lactobacillus cultures, similar to yogurt. It continues fermenting in the bottle!",
+    fun_fact_detail: {
+      label: "A living drink",
+      content: "Unlike most alcoholic beverages, makgeolli contains billions of living lactobacillus bacteria \u2014 similar to yogurt. The fermentation continues even after bottling.",
+    },
+    warning: { level: "alcohol", message: "Contains alcohol (6-8% ABV). Tastes sweet but can be stronger than expected." },
     how_to_eat:
       "Shake the bottle gently before pouring (sediment settles). Pour into a bowl-shaped cup. Pairs perfectly with pajeon (green onion pancake).",
     image_search_query: "Korean makgeolli rice wine traditional bowl",

@@ -4,29 +4,58 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { MOCK_MENU_RESULT } from "@/lib/mock-data";
 import { CATEGORY_FILTERS } from "@/lib/constants";
-import { Dish, MenuAnalysisResult } from "@/lib/types";
+import { DishLite, MenuAnalysisResult } from "@/lib/types";
 import DishRow from "@/components/dish/DishRow";
 import DishCard from "@/components/dish/DishCard";
 import LockedBlock from "@/components/common/LockedBlock";
 import ComboRecommendation from "@/components/paywall/ComboRecommendation";
 import TripPassPaywall from "@/components/paywall/TripPassPaywall";
+import { useCart } from "@/hooks/useCart";
+import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 
 export default function ResultsPage() {
-  const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
+  const [selectedDish, setSelectedDish] = useState<DishLite | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [showPaywall, setShowPaywall] = useState(false);
   const [showCombo, setShowCombo] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [menuInput, setMenuInput] = useState<StoredMenuInput | null>(null);
+  const cart = useCart();
 
+  const dishToCartItem = (dish: DishLite) => ({
+    dish_hash: dish.original,
+    name_original: dish.original,
+    name_translated: dish.translation.english,
+    price: dish.price ? parseFloat(dish.price) || undefined : undefined,
+    currency: dish.currency || "\u20A9",
+  });
+
+  const isDishInCart = (dish: DishLite) =>
+    cart.items.some((item) => item.dish_hash === dish.original);
+
+  // Use MenuAnalysisResult for both lite and full results (shape-compatible)
   const [data, setData] = useState<MenuAnalysisResult>(MOCK_MENU_RESULT);
+
+  // Phase 2: detail for selected dish
+  const { detail, isLoading: isDetailLoading, error: detailError, retry: retryDetail } =
+    useDishDetail(selectedDish, menuInput);
 
   useEffect(() => {
     const errorStr = sessionStorage.getItem("scanError");
     const resultStr = sessionStorage.getItem("scanResult");
 
-    // Clear sessionStorage after reading
+    // Preserve menu input for Phase 2 detail requests
+    const savedInput = sessionStorage.getItem("menuInputForDetail");
+    if (savedInput) {
+      try {
+        setMenuInput(JSON.parse(savedInput));
+      } catch { /* ignore */ }
+      // Keep menuInputForDetail in sessionStorage — cleared on next scan
+    }
+
+    // Clear scan results after reading
     sessionStorage.removeItem("scanError");
     sessionStorage.removeItem("scanResult");
 
@@ -40,7 +69,6 @@ export default function ResultsPage() {
         setScanError("Failed to parse scan results.");
       }
     }
-    // If neither found, keep MOCK_MENU_RESULT (dev mode)
   }, []);
 
   const filteredDishes =
@@ -148,7 +176,6 @@ export default function ResultsPage() {
             </button>
           ))}
         </div>
-        {/* Scroll hint fade */}
         <div className="absolute right-5 top-0 bottom-3 w-8 bg-gradient-to-l from-cream to-transparent pointer-events-none" />
       </div>
 
@@ -162,8 +189,10 @@ export default function ResultsPage() {
           filteredDishes.map((dish, i) => (
             <DishRow
               key={i}
-              dish={dish}
-              onClick={() => setSelectedDish(dish)}
+              dish={dish as unknown as DishLite}
+              onClick={() => setSelectedDish(dish as unknown as DishLite)}
+              onAddToCart={() => cart.addItem(dishToCartItem(dish as unknown as DishLite))}
+              isInCart={isDishInCart(dish as unknown as DishLite)}
             />
           ))
         )}
@@ -190,7 +219,7 @@ export default function ResultsPage() {
         </div>
       )}
 
-      {/* Bottom bar — above BottomNav */}
+      {/* Bottom bar */}
       <div className="sticky bottom-[72px] px-5 py-4 bg-cream/90 backdrop-blur-sm border-t border-brown-light/10">
         <button
           onClick={() => {
@@ -204,13 +233,31 @@ export default function ResultsPage() {
         </button>
       </div>
 
+      {/* Floating "View Order" badge */}
+      {cart.totalItems > 0 && (
+        <div className="sticky bottom-[140px] z-10 flex justify-center pointer-events-none">
+          <Link
+            href="/order"
+            className="pointer-events-auto inline-flex items-center gap-1.5 px-4 py-2 bg-coral text-white text-sm font-semibold rounded-full shadow-lg hover:bg-coral-dark transition-colors"
+          >
+            View Order &middot; {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}
+          </Link>
+        </div>
+      )}
+
       {/* Dish detail bottom sheet */}
       <DishCard
         dish={selectedDish}
+        detail={detail}
+        isDetailLoading={isDetailLoading}
+        detailError={detailError}
+        onRetryDetail={retryDetail}
         isOpen={!!selectedDish}
         onClose={() => setSelectedDish(null)}
         isUnlocked={isUnlocked}
         onUnlock={handleUnlock}
+        onAddToCart={selectedDish ? () => cart.addItem(dishToCartItem(selectedDish)) : undefined}
+        isInCart={selectedDish ? isDishInCart(selectedDish) : false}
       />
 
       {/* Paywall */}

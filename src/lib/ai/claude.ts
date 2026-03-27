@@ -1,6 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { MenuAnalysisResult, AnalysisError } from '../types';
 import { AIProvider, MenuInput } from './provider';
+import { IncrementalDishParser } from './stream-parser';
+import { setCache } from '../cache';
 
 const SYSTEM_PROMPT = `You are TransTaste, an expert food menu analyzer for international travelers. You receive a photo or text of a restaurant menu in any language and produce a detailed JSON analysis.
 
@@ -17,7 +19,9 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON mu
   "dishes": [
     {
       "original": "string — exact text from the menu",
-      "price": "string | null — as shown on menu, with currency symbol/unit",
+      "price": "string | null — numeric value as string",
+      "currency": "string | null — ISO 4217 code: KRW, JPY, USD, THB, EUR, etc.",
+      "price_display": "string | null — formatted: ₩17,000, ¥1,200, $14.00, ฿450",
       "language_detected": "string — ISO 639-1 code, e.g. 'ko', 'ja', 'th'",
       "translation": {
         "literal": "string — word-by-word translation",
@@ -46,7 +50,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON mu
         "gluten_free": "boolean"
       },
       "price_tier": "'budget' | 'mid' | 'premium' — relative to this restaurant/region",
-      "fun_fact": "string — engaging cultural context (see TONE RULES below)",
+      "fun_fact": "string | null — engaging cultural context (see FUN FACT RULES below). null if no genuinely interesting fact exists.",
       "how_to_eat": "string | null — practical eating tips if non-obvious",
       "image_search_query": "string — optimal English query to find a photo of this dish",
 
@@ -55,10 +59,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON mu
       "brand_note": "string | undefined — explanation of the brand name if has_brand_name is true",
       "food_part": "string | undefined — the food portion if has_brand_name is true",
 
-      "fun_fact_detail": {
-        "label": "string — short label like 'History', 'Origin', 'Tradition'",
-        "content": "string — the fun fact content"
-      },
+      "fun_fact_detail": "{ label: string, content: string } | null — only when fun_fact is non-null",
 
       "warning": {
         "level": "'taste' | 'intensity' | 'texture' | 'alcohol' | null",
@@ -120,22 +121,30 @@ Many Asian restaurant menus prefix dish names with a brand or restaurant name:
 - Set has_brand_name=true and split into brand_part and food_part
 - In translation.english, translate only the food_part; mention the brand in brand_note
 
-# FUN FACT TONE RULES (STRICT)
-Your fun facts should make travelers excited about the food. Follow these rules:
+# FUN FACT RULES (STRICT)
 
-NEVER use these words or framings:
-- poverty, poor, waste, scraps, leftovers, garbage, offal (in negative context)
-- disgusting, weird, strange, gross, acquired taste (as judgment)
-- Sexual content: stamina, virility, aphrodisiac, sexual prowess
+## When to generate a fun fact (ALL conditions must be met):
+- The dish name has an interesting origin, backstory, or unexpected etymology
+- OR there is a specific cultural tradition, historical event, or regional practice that travelers would genuinely find surprising
+- OR there is a well-known but little-understood aspect that bridges cultural gaps
+- The fact is SPECIFIC to THIS dish, not a generic statement about the cuisine or ingredient category
 
-ALWAYS reframe with positive words:
+## When to return fun_fact: null (return null if ANY of these apply):
+- The dish is a common/universal item (plain rice, cola, water, bread, basic salad)
+- The only "fact" you can think of is a generic statement about the cuisine or main ingredient
+- The fact would be obvious to anyone who has eaten at this type of restaurant before
+- You are stretching to find something interesting — if it feels forced, it IS forced
+
+## Tone rules (when fun_fact IS generated):
+NEVER use: poverty, poor, waste, scraps, leftovers, garbage, disgusting, weird, strange, gross, acquired taste, stamina, virility, aphrodisiac
+ALWAYS reframe positively:
 - "born from scarcity" → "born from culinary creativity"
-- "poor man's food" → "beloved comfort food" or "everyday icon"
-- "waste parts" → "nose-to-tail tradition" or "zero-waste cooking philosophy"
+- "poor man's food" → "beloved comfort food"
+- "waste parts" → "nose-to-tail tradition"
 - "stamina food" → "nutrient-rich" or "traditionally valued for its nutrition"
 
-Every fun fact MUST end with why this food is enjoyable, delicious, or special TODAY.
-Keep fun facts to 1-3 sentences. Be specific and surprising, not generic.
+Every fun fact MUST end with why this food is special TODAY.
+Keep fun facts to 1-2 sentences. Be specific and surprising, not generic.
 
 # WARNING SYSTEM (separate from fun_fact)
 Add a warning object when a dish may surprise or challenge certain diners:
@@ -202,14 +211,159 @@ If you can only read some items:
 {"error": "partial", "reason": "Could only read N of approximately M items due to image quality"}
 Include the items you could read in a partial response — return a valid MenuAnalysisResult with a note.
 
+# PRICE FORMATTING
+- price: numeric string as shown on menu (e.g. "17000", "1200", "14.00")
+- currency: ISO 4217 code derived from country_detected (KRW, JPY, USD, THB, EUR, etc.)
+- price_display: local currency symbol + local formatting: ₩17,000, ¥1,200, $14.00, ฿450
+- Do NOT convert currencies. If menu shows "17.0" for Korean restaurant, interpret as ₩17,000.
+
 # IMPORTANT RULES
 1. Analyze EVERY dish visible on the menu. Do not skip items.
-2. Prices must be kept in the original currency format as shown on the menu.
 3. Flavor profiles should be relative to the cuisine (e.g., Korean "not spicy" is still spicier than Western baseline).
 4. For dietary flags, err on the side of caution. If uncertain about halal, set to null.
 5. image_search_query should be specific enough to find an accurate photo of this exact dish.
 6. If the menu is partially obscured, analyze what you can see and note limitations.
 7. The output language for translations and descriptions should match the user's requested language (default: English).`;
+
+// Phase 1: Lite schema — only fields needed for the dish list view
+const SYSTEM_PROMPT_LITE = `You are TransTaste, an expert food menu analyzer. Analyze the menu and return a LITE JSON with only essential fields for a quick overview.
+
+# OUTPUT FORMAT
+Return ONLY valid JSON (no markdown, no code blocks, no commentary):
+
+{
+  "menu_meta": {
+    "language": "string — ISO language name",
+    "restaurant_type": "string — e.g. 'Korean BBQ'",
+    "country_detected": "string — e.g. 'South Korea'",
+    "items_found": "number"
+  },
+  "dishes": [
+    {
+      "original": "string — exact text from the menu",
+      "price": "string | null — numeric value as string",
+      "currency": "string | null — ISO 4217 code: KRW, JPY, USD, THB, EUR, etc.",
+      "price_display": "string | null — formatted with currency symbol: ₩17,000, ¥1,200, $14.00, ฿450",
+      "language_detected": "string — ISO 639-1 code",
+      "translation": {
+        "literal": "string — word-by-word translation",
+        "meaning": "string — what the dish actually is",
+        "english": "string — natural English name"
+      },
+      "confidence": "'high' | 'medium' | 'low'",
+      "category": "'main' | 'side' | 'soup' | 'noodle' | 'rice' | 'appetizer' | 'dessert' | 'drink' | 'set' | 'salad'",
+      "dietary": {
+        "halal": "boolean | null",
+        "vegan": "boolean",
+        "vegetarian": "boolean",
+        "gluten_free": "boolean"
+      },
+      "allergens": ["string — from: shellfish, pork, gluten, dairy, nuts, egg, soy, fish, sesame, celery, mustard, sulfites"],
+      "allergen_risk": "'danger' | 'warning' | 'check' | 'safe'",
+      "price_tier": "'budget' | 'mid' | 'premium'",
+      "image_search_query": "string — English query to find a photo of this dish"
+    }
+  ],
+  "recommended_combo": {
+    "budget": {
+      "items": ["string — original dish names"],
+      "reason": "string — why this combo works"
+    },
+    "balanced": {
+      "items": ["string — original dish names"],
+      "reason": "string — why this combo works"
+    }
+  }
+}
+
+# ALLERGEN RISK
+- 'danger': allergen IS the core dish (cannot remove)
+- 'warning': allergen is notable but potentially removable
+- 'check': allergen may be in sauces/broths/cross-contamination
+- 'safe': no common allergens detected
+
+# BRAND NAMES
+If a dish name has a brand/restaurant prefix (박가, 최가네, 원조, etc.), translate only the food portion in translation.english.
+
+# ERROR HANDLING
+Not a food menu: {"error": "not_menu", "reason": "..."}
+Unreadable: {"error": "ocr_failed", "reason": "..."}
+
+# PRICE FORMATTING
+- price: numeric string as shown on menu (e.g. "17000", "1200", "14.00")
+- currency: ISO 4217 code derived from country_detected
+- price_display: local currency symbol + local formatting convention:
+  Korea: ₩17,000 (won, thousands with comma)
+  Japan: ¥1,200 (yen, no decimal)
+  USA: $14.00 (dollar, 2 decimals)
+  Thailand: ฿450 (baht)
+  Europe: €12.50 (euro)
+- Do NOT convert currencies. Show exactly what the menu shows.
+- If menu shows "17.0" for a Korean restaurant, interpret as ₩17,000 (만원 단위 표기)
+
+# RULES
+1. Analyze EVERY dish visible. Do not skip items.
+2. If uncertain about halal, set to null.
+3. Output language matches user's requested language (default: English).
+4. Keep this response CONCISE — only the fields above, nothing extra.`;
+
+// Phase 2: Detail prompt — single dish deep analysis
+const SYSTEM_PROMPT_DETAIL = `You are TransTaste. Given a menu and a specific dish name, return a detailed analysis of ONLY that one dish.
+
+# OUTPUT FORMAT
+Return ONLY valid JSON (no markdown, no code blocks):
+
+{
+  "flavor_profile": { "sweet": "0-5", "salty": "0-5", "spicy": "0-5", "sour": "0-5", "umami": "0-5", "rich": "0-5" },
+  "ingredients": {
+    "core": ["string — main ingredients"],
+    "common_additions": ["string — typical sides/garnishes"],
+    "allergens": ["string — from: shellfish, pork, gluten, dairy, nuts, egg, soy, fish, sesame, celery, mustard, sulfites"]
+  },
+  "fun_fact": "string | null — see rules below",
+  "fun_fact_detail": "{ label: string, content: string } | null",
+  "how_to_eat": "string | null — practical tips if non-obvious",
+  "warning": { "level": "'taste' | 'intensity' | 'texture' | 'alcohol' | null", "message": "string" } | null,
+  "disclosure": { "target_culture": "string", "message": "string" } | null,
+  "has_brand_name": "boolean",
+  "brand_part": "string | undefined",
+  "brand_note": "string | undefined",
+  "food_part": "string | undefined",
+  "has_customization": "boolean",
+  "options": [{ "label": "string", "type": "'single'|'multi'|'addon'", "required": "boolean", "choices": [{ "name": "string", "name_translated": "string", "price_delta": "number|undefined", "allergens": ["string"] }] }],
+  "allergen_summary": {
+    "preset_triggered": ["string"],
+    "overall_risk": "'danger'|'warning'|'check'|'safe'",
+    "risk_details": [{ "ingredient": "string", "risk_level": "'main'|'sub'|'possible'" }],
+    "alternative_dishes": ["string"]
+  }
+}
+
+# FUN FACT RULES
+Generate fun_fact ONLY when:
+- The dish has an interesting origin, backstory, or unexpected etymology
+- OR a specific cultural tradition travelers would find surprising
+- The fact is SPECIFIC to THIS dish, not generic
+Return null for common items (rice, cola, bread, basic salads) or when stretching.
+Tone: positive, 1-2 sentences, end with why it's special today.
+NEVER use: poverty, poor, waste, scraps, disgusting, weird, stamina, virility.
+
+# WARNING SYSTEM
+- 'taste': polarizing flavors (fermented, funky). Describe neutrally.
+- 'intensity': extremely spicy/sour/pungent. Suggest alternatives.
+- 'texture': unusual textures (tripe, jellyfish). Compare to familiar.
+- 'alcohol': note ABV. null if no warning needed.
+
+# DISCLOSURE
+Only when significant cultural gap exists. Skip for common cross-cultural foods.
+
+# CUSTOMIZATION
+If menu shows options (size, spice level, toppings): set has_customization=true and list them.
+
+# RULES
+- Flavor profiles relative to the cuisine.
+- If uncertain about halal, set null.
+- Output language matches user's requested language.`;
 
 function buildUserMessage(input: MenuInput): Anthropic.MessageCreateParams['messages'] {
   const contextParts: string[] = [];
@@ -231,33 +385,45 @@ function buildUserMessage(input: MenuInput): Anthropic.MessageCreateParams['mess
     : 'Analyze this menu:';
 
   if (input.inputType === 'image') {
-    // Determine media type from base64 header or default to jpeg
-    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-    let base64Data = input.input;
+    // Support multiple images joined with "|||" delimiter from frontend
+    const imageStrings = input.input.split('|||');
 
-    if (input.input.startsWith('data:')) {
-      const match = input.input.match(/^data:(image\/\w+);base64,(.+)$/);
-      if (match) {
-        mediaType = match[1] as typeof mediaType;
-        base64Data = match[2];
+    const imageBlocks: Anthropic.ImageBlockParam[] = imageStrings.map((imgStr) => {
+      let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+      let base64Data = imgStr.trim();
+
+      if (base64Data.startsWith('data:')) {
+        const commaIdx = base64Data.indexOf(',');
+        if (commaIdx !== -1) {
+          const prefix = base64Data.slice(0, commaIdx);
+          const typeMatch = prefix.match(/image\/(\w+)/);
+          if (typeMatch) {
+            mediaType = `image/${typeMatch[1]}` as typeof mediaType;
+          }
+          base64Data = base64Data.slice(commaIdx + 1);
+        }
       }
-    }
+
+      return {
+        type: 'image' as const,
+        source: {
+          type: 'base64' as const,
+          media_type: mediaType,
+          data: base64Data,
+        },
+      };
+    });
 
     return [
       {
         role: 'user',
         content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType,
-              data: base64Data,
-            },
-          },
+          ...imageBlocks,
           {
             type: 'text',
-            text: contextText,
+            text: imageStrings.length > 1
+              ? `${contextText}\nThese are ${imageStrings.length} photos of the same menu. Analyze ALL menu items across all images as a single combined menu.`
+              : contextText,
           },
         ],
       },
@@ -396,7 +562,7 @@ export const claudeSonnetProvider: AIProvider = {
     try {
       const response = await client.messages.create({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 8192,
+        max_tokens: 16384,
         system: [
           {
             type: 'text',
@@ -411,6 +577,13 @@ export const claudeSonnetProvider: AIProvider = {
       const textBlock = response.content.find((block) => block.type === 'text');
       if (!textBlock || textBlock.type !== 'text') {
         return { error: 'ocr_failed', reason: 'No text response from AI' };
+      }
+
+      console.log('[TransTaste] Claude response stop_reason:', response.stop_reason);
+      console.log('[TransTaste] Claude response text (first 500 chars):', textBlock.text.slice(0, 500));
+
+      if (response.stop_reason === 'max_tokens') {
+        console.warn('[TransTaste] Response was truncated by max_tokens limit!');
       }
 
       const parsed = parseJsonResponse(textBlock.text);
@@ -437,3 +610,198 @@ export const claudeSonnetProvider: AIProvider = {
     return (inputTokens * 3 + outputTokens * 15) / 1_000_000;
   },
 };
+
+/**
+ * Creates a ReadableStream that emits SSE events as Claude analyzes a menu.
+ * Events: meta (menu_meta), dish (individual dish), done (full result), error
+ */
+export function createMenuAnalysisStream(
+  input: MenuInput,
+  cacheKey?: string,
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const parser = new IncrementalDishParser();
+
+  return new ReadableStream({
+    async start(controller) {
+      let closed = false;
+
+      const emit = (event: string, data: unknown) => {
+        if (closed) return;
+        try {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+          );
+        } catch (e) {
+          console.error('[TransTaste] SSE emit error:', e);
+        }
+      };
+
+      const close = () => {
+        if (closed) return;
+        closed = true;
+        try { controller.close(); } catch { /* already closed */ }
+      };
+
+      try {
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) throw new Error('ANTHROPIC_API_KEY not set');
+
+        console.log('[TransTaste] Starting streaming analysis (lite schema)...');
+        const client = new Anthropic({ apiKey });
+        const stream = client.messages.stream({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 8192,
+          system: [
+            {
+              type: 'text',
+              text: SYSTEM_PROMPT_LITE,
+              cache_control: { type: 'ephemeral' },
+            },
+          ],
+          messages: buildUserMessage(input),
+        });
+
+        stream.on('text', (text) => {
+          try {
+            const { newMeta, newDishes } = parser.addChunk(text);
+            if (newMeta) emit('meta', newMeta);
+            for (const dish of newDishes) emit('dish', dish);
+          } catch (e) {
+            console.error('[TransTaste] Parser error on chunk:', e);
+          }
+        });
+
+        console.log('[TransTaste] Waiting for stream to complete...');
+        const finalMessage = await stream.finalMessage();
+        console.log('[TransTaste] Stream complete. stop_reason:', finalMessage.stop_reason);
+
+        if (finalMessage.stop_reason === 'max_tokens') {
+          console.warn('[TransTaste] Streaming response truncated by max_tokens');
+        }
+
+        // Validate full response
+        const textBlock = finalMessage.content.find((b) => b.type === 'text');
+        if (!textBlock || textBlock.type !== 'text') {
+          emit('error', { error: 'ocr_failed', reason: 'No text response from AI' });
+        } else {
+          const parsed = parseJsonResponse(textBlock.text);
+          const result = validateResult(parsed);
+
+          // Cache successful results
+          if (!isAnalysisError(result) && cacheKey) {
+            const country = (result as MenuAnalysisResult).menu_meta?.country_detected;
+            setCache(cacheKey, result, country).catch(() => {});
+          }
+
+          emit('done', result);
+        }
+      } catch (err) {
+        console.error('[TransTaste] Stream error:', err);
+        if (err instanceof Anthropic.APIError) {
+          if (err.status === 429) {
+            emit('error', { error: 'network_error', reason: 'Rate limit exceeded. Please try again.' });
+          } else if (err.status === 401) {
+            emit('error', { error: 'network_error', reason: 'API authentication failed.' });
+          } else {
+            emit('error', { error: 'network_error', reason: `API error: ${err.message}` });
+          }
+        } else {
+          emit('error', {
+            error: 'network_error',
+            reason: err instanceof Error ? err.message : 'Unknown error',
+          });
+        }
+      }
+
+      close();
+    },
+  });
+}
+
+/**
+ * Phase 2: Fetch detailed analysis for a single dish.
+ * Non-streaming, returns DishDetail or null on error.
+ */
+export async function fetchDishDetail(
+  input: MenuInput,
+  dishOriginal: string,
+  dishCategory: string,
+): Promise<{ data: import('../types').DishDetail } | { error: string }> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return { error: 'ANTHROPIC_API_KEY not set' };
+
+  const client = new Anthropic({ apiKey });
+
+  // Build user message with the menu context + dish identifier
+  const baseMessages = buildUserMessage(input);
+  const detailInstruction = `Analyze ONLY the dish named "${dishOriginal}" (category: ${dishCategory}) from this menu. Return the detailed JSON for this single dish following the schema exactly.`;
+
+  // Append the detail instruction to the existing user message
+  const messages = baseMessages.map((msg) => {
+    if (msg.role === 'user') {
+      if (typeof msg.content === 'string') {
+        return { ...msg, content: `${msg.content}\n\n${detailInstruction}` };
+      }
+      return {
+        ...msg,
+        content: [
+          ...msg.content,
+          { type: 'text' as const, text: detailInstruction },
+        ],
+      };
+    }
+    return msg;
+  });
+
+  try {
+    console.log(`[TransTaste] Fetching detail for: "${dishOriginal}"`);
+
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: [
+        {
+          type: 'text',
+          text: SYSTEM_PROMPT_DETAIL,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages,
+    });
+
+    console.log('[TransTaste] Detail stop_reason:', response.stop_reason);
+
+    const textBlock = response.content.find((b) => b.type === 'text');
+    if (!textBlock || textBlock.type !== 'text') {
+      return { error: 'No text response from AI' };
+    }
+
+    console.log('[TransTaste] Detail response (first 500):', textBlock.text.slice(0, 500));
+    console.log('[TransTaste] Detail response (last 200):', textBlock.text.slice(-200));
+    console.log('[TransTaste] Detail response length:', textBlock.text.length);
+
+    // Sanitize: Claude sometimes outputs JavaScript `undefined` instead of JSON `null`
+    const sanitized = textBlock.text.replace(/:\s*undefined\b/g, ': null');
+
+    let parsed: unknown;
+    try {
+      parsed = parseJsonResponse(sanitized);
+    } catch (e) {
+      console.error('[TransTaste] Detail JSON parse error:', (e as Error).message);
+      return { error: `JSON parse failed: ${(e as Error).message}` };
+    }
+
+    if (typeof parsed !== 'object' || parsed === null) {
+      return { error: 'Invalid JSON structure in response' };
+    }
+
+    return { data: parsed as import('../types').DishDetail };
+  } catch (err) {
+    const msg = err instanceof Anthropic.APIError
+      ? `API error ${err.status}: ${err.message}`
+      : err instanceof Error ? err.message : 'Unknown error';
+    console.error('[TransTaste] fetchDishDetail error:', msg);
+    return { error: msg };
+  }
+}

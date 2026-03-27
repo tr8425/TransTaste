@@ -62,8 +62,8 @@ export function useCamera(): UseCameraReturn {
       }
       const canvas = canvasRef.current;
 
-      // Compress: max 1024px dimension, JPEG 80%
-      const scale = Math.min(1024 / video.videoWidth, 1024 / video.videoHeight, 1);
+      // Compress: max 768px dimension, JPEG 80% (768px is sufficient for menu text OCR)
+      const scale = Math.min(768 / video.videoWidth, 768 / video.videoHeight, 1);
       canvas.width = video.videoWidth * scale;
       canvas.height = video.videoHeight * scale;
 
