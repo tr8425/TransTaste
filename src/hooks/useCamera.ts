@@ -9,7 +9,7 @@ interface UseCameraReturn {
   error: string | null;
   start: () => Promise<void>;
   stop: () => void;
-  capture: () => Blob | null;
+  capture: () => Promise<Blob | null>;
   toggleFlash: () => Promise<void>;
   isFlashOn: boolean;
 }
@@ -49,37 +49,40 @@ export function useCamera(): UseCameraReturn {
     setIsFlashOn(false);
   }, [stream]);
 
-  const capture = useCallback((): Blob | null => {
-    const video = videoRef.current;
-    if (!video || !isReady) return null;
+  const capture = useCallback((): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      const video = videoRef.current;
+      if (!video || !isReady) {
+        resolve(null);
+        return;
+      }
 
-    if (!canvasRef.current) {
-      canvasRef.current = document.createElement("canvas");
-    }
-    const canvas = canvasRef.current;
+      if (!canvasRef.current) {
+        canvasRef.current = document.createElement("canvas");
+      }
+      const canvas = canvasRef.current;
 
-    // Compress: max 1024px dimension, JPEG 80%
-    const scale = Math.min(1024 / video.videoWidth, 1024 / video.videoHeight, 1);
-    canvas.width = video.videoWidth * scale;
-    canvas.height = video.videoHeight * scale;
+      // Compress: max 1024px dimension, JPEG 80%
+      const scale = Math.min(1024 / video.videoWidth, 1024 / video.videoHeight, 1);
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    let blob: Blob | null = null;
-    canvas.toBlob(
-      (b) => {
-        blob = b;
-      },
-      "image/jpeg",
-      0.8
-    );
-
-    // toBlob is async but we need sync-ish result for simplicity
-    // In production, this should be Promise-based
-    return blob;
+      canvas.toBlob(
+        (blob) => {
+          resolve(blob);
+        },
+        "image/jpeg",
+        0.8
+      );
+    });
   }, [isReady]);
 
   const toggleFlash = useCallback(async () => {

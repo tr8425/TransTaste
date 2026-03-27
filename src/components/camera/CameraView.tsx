@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useCamera } from "@/hooks/useCamera";
 
 interface CameraViewProps {
-  onCapture: (blob?: Blob | null) => void;
+  onCapture: (blob?: Blob | null) => void | Promise<void>;
   onGallery: () => void;
 }
 
@@ -16,10 +16,10 @@ export default function CameraView({ onCapture, onGallery }: CameraViewProps) {
     start();
   }, [start]);
 
-  const handleCapture = () => {
-    const blob = capture();
+  const handleCapture = async () => {
+    const blob = await capture();
     if (blob) {
-      onCapture(blob);
+      await onCapture(blob);
     }
   };
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { MOCK_MENU_RESULT } from "@/lib/mock-data";
 import { CATEGORY_FILTERS } from "@/lib/constants";
-import { Dish } from "@/lib/types";
+import { Dish, MenuAnalysisResult } from "@/lib/types";
 import DishRow from "@/components/dish/DishRow";
 import DishCard from "@/components/dish/DishCard";
 import LockedBlock from "@/components/common/LockedBlock";
@@ -17,8 +17,31 @@ export default function ResultsPage() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showCombo, setShowCombo] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const comboRef = useRef<HTMLDivElement>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
 
-  const data = MOCK_MENU_RESULT;
+  const [data, setData] = useState<MenuAnalysisResult>(MOCK_MENU_RESULT);
+
+  useEffect(() => {
+    const errorStr = sessionStorage.getItem("scanError");
+    const resultStr = sessionStorage.getItem("scanResult");
+
+    // Clear sessionStorage after reading
+    sessionStorage.removeItem("scanError");
+    sessionStorage.removeItem("scanResult");
+
+    if (errorStr) {
+      setScanError(errorStr);
+    } else if (resultStr) {
+      try {
+        const parsed = JSON.parse(resultStr) as MenuAnalysisResult;
+        setData(parsed);
+      } catch {
+        setScanError("Failed to parse scan results.");
+      }
+    }
+    // If neither found, keep MOCK_MENU_RESULT (dev mode)
+  }, []);
 
   const filteredDishes =
     activeFilter === "all"
@@ -31,6 +54,49 @@ export default function ResultsPage() {
     setIsUnlocked(true);
     setShowPaywall(false);
   };
+
+  // Error state
+  if (scanError) {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
+        <div className="text-center max-w-[320px]">
+          <div className="w-20 h-20 rounded-full bg-coral/10 flex items-center justify-center mx-auto mb-5">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-coral"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-bold text-brown-dark mb-2">
+            Something went wrong
+          </h2>
+          <p className="text-sm text-brown-medium mb-6 leading-relaxed">
+            {scanError}
+          </p>
+          <Link
+            href="/camera"
+            className="inline-block w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors text-center"
+          >
+            Try Again
+          </Link>
+          <Link
+            href="/"
+            className="inline-block mt-3 text-sm text-brown-medium hover:text-coral transition-colors"
+          >
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -87,7 +153,7 @@ export default function ResultsPage() {
       </div>
 
       {/* Dish list */}
-      <div className="flex-1 px-2">
+      <div className="flex-1 px-2 pb-4">
         {filteredDishes.length === 0 ? (
           <div className="text-center py-12 text-brown-medium text-sm">
             No dishes in this category
@@ -105,7 +171,7 @@ export default function ResultsPage() {
 
       {/* Combo recommendation section */}
       {showCombo && (
-        <div className="px-5 py-4 border-t border-brown-light/10">
+        <div ref={comboRef} className="px-5 py-4 border-t border-brown-light/10">
           {isUnlocked ? (
             <ComboRecommendation combo={data.recommended_combo} />
           ) : (
@@ -127,7 +193,11 @@ export default function ResultsPage() {
       {/* Bottom bar — above BottomNav */}
       <div className="sticky bottom-[72px] px-5 py-4 bg-cream/90 backdrop-blur-sm border-t border-brown-light/10">
         <button
-          onClick={() => setShowCombo(!showCombo)}
+          onClick={() => {
+            const next = !showCombo;
+            setShowCombo(next);
+            if (next) setTimeout(() => comboRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+          }}
           className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors"
         >
           {showCombo ? "Hide Combos" : "See Combo Recommendations"}

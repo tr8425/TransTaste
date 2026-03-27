@@ -1,13 +1,73 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CreditBadge from "@/components/common/CreditBadge";
 import RecentHistory from "@/components/common/RecentHistory";
 import { useCredits } from "@/hooks/useCredits";
 import { MOCK_RECENT_SCANS } from "@/lib/mock-data";
 
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export default function HomePage() {
   const credits = useCredits();
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null!);
+  const [showUrlModal, setShowUrlModal] = useState(false);
+  const [showTextModal, setShowTextModal] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [textInput, setTextInput] = useState("");
+
+  // Auto-redirect to onboarding on first launch
+  useEffect(() => {
+    const hasOnboarded = localStorage.getItem("transtaste_user_settings");
+    const skippedOnboarding = localStorage.getItem("transtaste_onboarding_done");
+    if (!hasOnboarded && !skippedOnboarding) {
+      router.push("/onboarding");
+    }
+  }, [router]);
+
+  const handleGallery = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const base64 = await blobToBase64(file);
+      sessionStorage.setItem("scanImage", base64);
+      sessionStorage.setItem("scanInputType", "image");
+      router.push("/loading-scan");
+    }
+  };
+
+  const handleUrlSubmit = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+    sessionStorage.setItem("scanImage", trimmed);
+    sessionStorage.setItem("scanInputType", "url");
+    setShowUrlModal(false);
+    setUrlInput("");
+    router.push("/loading-scan");
+  };
+
+  const handleTextSubmit = () => {
+    const trimmed = textInput.trim();
+    if (!trimmed) return;
+    sessionStorage.setItem("scanText", trimmed);
+    sessionStorage.setItem("scanInputType", "text");
+    setShowTextModal(false);
+    setTextInput("");
+    router.push("/loading-scan");
+  };
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -35,7 +95,7 @@ export default function HomePage() {
         {/* Camera CTA */}
         <Link
           href="/camera"
-          className="w-[72px] h-[72px] rounded-full bg-coral shadow-lg shadow-coral/30 flex items-center justify-center hover:bg-coral-dark transition-colors active:scale-95 mb-3"
+          className="w-[72px] h-[72px] rounded-full bg-coral shadow-lg shadow-coral/30 flex items-center justify-center hover:bg-coral-dark transition-colors active:scale-95 mb-4"
         >
           <svg
             width="28"
@@ -52,29 +112,105 @@ export default function HomePage() {
           </svg>
         </Link>
 
-        <Link
-          href="/results"
-          className="text-sm font-medium text-brown-medium hover:text-coral transition-colors flex items-center gap-1.5 mb-6"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
+        {/* Input row: Gallery | URL | Text */}
+        <div className="flex gap-3 mb-6">
+          {/* Gallery button */}
+          <button
+            onClick={handleGallery}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <path d="M21 15l-5-5L5 21" />
-          </svg>
-          Choose from gallery
-        </Link>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            Gallery
+          </button>
+
+          {/* URL button */}
+          <button
+            onClick={() => setShowUrlModal(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            URL
+          </button>
+
+          {/* Text button */}
+          <button
+            onClick={() => setShowTextModal(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            Text
+          </button>
+        </div>
+
+        {/* Hidden file input for gallery */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
       </div>
 
       {/* Recent scans */}
       <div className="px-5 pt-2 pb-2">
         <RecentHistory items={MOCK_RECENT_SCANS} />
+      </div>
+
+      {/* Quick access tools */}
+      <div className="px-5 pt-4 pb-2">
+        <h3 className="text-xs font-medium text-brown-medium mb-3 px-1 uppercase tracking-wider">
+          Travel Tools
+        </h3>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { href: "/phrases", emoji: "💬", label: "Phrases" },
+            { href: "/tip-culture", emoji: "💡", label: "Tip Guide" },
+            { href: "/order", emoji: "📋", label: "Order" },
+          ].map((tool) => (
+            <Link
+              key={tool.href}
+              href={tool.href}
+              className="bg-cream-dark rounded-xl p-3 flex flex-col items-center gap-1.5 hover:bg-brown-light/10 transition-colors"
+            >
+              <span className="text-xl">{tool.emoji}</span>
+              <span className="text-xs font-medium text-brown-dark">{tool.label}</span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Trending dishes section */}
@@ -104,6 +240,88 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* URL Modal */}
+      {showUrlModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-8 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-brown-dark flex items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D85A30" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                Paste Menu Image URL
+              </h3>
+              <button
+                onClick={() => { setShowUrlModal(false); setUrlInput(""); }}
+                className="text-brown-medium hover:text-brown-dark p-1"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <input
+              type="url"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="https://example.com/menu.jpg"
+              className="w-full px-4 py-3 rounded-xl bg-cream-dark text-brown-dark text-sm placeholder:text-brown-medium/50 border border-brown-light/20 focus:outline-none focus:border-coral mb-4"
+              autoFocus
+              onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+            />
+            <p className="text-[11px] text-brown-medium/60 mb-3 -mt-2">
+              Paste a direct link to a menu image (JPG, PNG, or PDF)
+            </p>
+            <button
+              onClick={handleUrlSubmit}
+              disabled={!urlInput.trim()}
+              className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Fetch & Analyze
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Text Modal */}
+      {showTextModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-8 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-brown-dark">
+                Type Dish Names
+              </h3>
+              <button
+                onClick={() => { setShowTextModal(false); setTextInput(""); }}
+                className="text-brown-medium hover:text-brown-dark p-1"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <textarea
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              placeholder={"Enter dish names, one per line:\nPad Thai\nTom Yum Goong\nSom Tam"}
+              rows={5}
+              className="w-full px-4 py-3 rounded-xl bg-cream-dark text-brown-dark text-sm placeholder:text-brown-medium/50 border border-brown-light/20 focus:outline-none focus:border-coral mb-4 resize-none"
+              autoFocus
+            />
+            <button
+              onClick={handleTextSubmit}
+              disabled={!textInput.trim()}
+              className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Analyze Dishes
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

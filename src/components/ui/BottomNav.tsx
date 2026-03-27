@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const HIDDEN_ROUTES = ["/camera", "/loading-scan"];
+const HIDDEN_ROUTES = ["/camera", "/loading-scan", "/order/present"];
 
 interface Tab {
   href: string;
@@ -54,7 +54,7 @@ const TABS: Tab[] = [
     ),
   },
   {
-    href: "/results",
+    href: "/history",
     label: "History",
     icon: (active: boolean) => (
       <svg
@@ -69,6 +69,25 @@ const TABS: Tab[] = [
       >
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
+      </svg>
+    ),
+  },
+  {
+    href: "/profile",
+    label: "Profile",
+    icon: (active: boolean) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill={active ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
       </svg>
     ),
   },
