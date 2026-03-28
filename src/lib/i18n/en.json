@@ -11,7 +11,8 @@
     "tryAgain": "Try Again",
     "backToHome": "Back to Home",
     "scanAMenu": "Scan a Menu",
-    "version": "TransTaste v0.2.0"
+    "version": "TransTaste v0.2.0",
+    "about": "About"
   },
 
   "onboarding": {
@@ -47,7 +48,8 @@
     "fetchAndAnalyze": "Fetch & Analyze",
     "textModalTitle": "Type Dish Names",
     "textPlaceholder": "Enter dish names, one per line:\nPad Thai\nTom Yum Goong\nSom Tam",
-    "analyzeDishes": "Analyze Dishes"
+    "analyzeDishes": "Analyze Dishes",
+    "urlHint": "Paste a direct link to a menu image (JPG, PNG, or PDF)"
   },
 
   "loading": {
@@ -274,7 +276,10 @@
     "dessert": "Dessert",
     "appetizer": "Appetizer",
     "set": "Set",
-    "salad": "Salad"
+    "salad": "Salad",
+    "budget": "Budget",
+    "mid": "Mid",
+    "premium": "Premium"
   },
 
   "flavor": {

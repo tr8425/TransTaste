@@ -273,7 +273,7 @@ export default function HomePage() {
               onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
             />
             <p className="text-[11px] text-brown-medium/60 mb-3 -mt-2">
-              Paste a direct link to a menu image (JPG, PNG, or PDF)
+              {t("home.urlHint")}
             </p>
             <button
               onClick={handleUrlSubmit}

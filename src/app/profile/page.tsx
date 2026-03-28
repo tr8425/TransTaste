@@ -335,7 +335,7 @@ function ProfileContent() {
                     key={a}
                     className="inline-flex items-center gap-1 text-xs font-medium bg-danger text-white px-2.5 py-1 rounded-full"
                   >
-                    {cfg?.emoji} {cfg?.label}
+                    {cfg?.emoji} {t(`allergens.${a}`)}
                   </span>
                 );
               })}
@@ -367,7 +367,7 @@ function ProfileContent() {
                     }`}
                   >
                     <span className="text-base">{a.emoji}</span>
-                    {a.label}
+                    {t(`allergens.${a.value}`)}
                   </button>
                 );
               })}
@@ -382,13 +382,12 @@ function ProfileContent() {
             {settings.dietary_beliefs.length > 0 ? (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {settings.dietary_beliefs.map((d) => {
-                  const cfg = ALL_DIETARY.find((x) => x.value === d);
                   return (
                     <span
                       key={d}
                       className="inline-flex items-center text-xs font-medium bg-success text-white px-2.5 py-1 rounded-full"
                     >
-                      {cfg?.label}
+                      {t(`dietary.${d}`)}
                     </span>
                   );
                 })}
@@ -419,7 +418,7 @@ function ProfileContent() {
                           : "bg-cream text-brown-dark hover:bg-brown-light/10"
                       }`}
                     >
-                      {d.label}
+                      {t(`dietary.${d.value}`)}
                     </button>
                   );
                 })}

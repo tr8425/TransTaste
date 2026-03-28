@@ -1,11 +1,14 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n";
+
 interface CreditBadgeProps {
   credits: number;
   hasPass?: boolean;
 }
 
 export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
+  const { t } = useTranslation();
   if (hasPass) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">
@@ -43,7 +46,7 @@ export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
       >
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
-      <span>{credits} scans left</span>
+      <span>{t("profile.scansLeft", { count: credits })}</span>
     </span>
   );
 }

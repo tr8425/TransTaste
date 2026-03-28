@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { RecentScan } from "@/lib/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface RecentHistoryProps {
   items: RecentScan[];
 }
 
 export default function RecentHistory({ items }: RecentHistoryProps) {
+  const { t } = useTranslation();
   if (items.length === 0) return null;
 
   return (
     <div className="w-full">
       <h3 className="text-xs font-medium text-brown-medium mb-2 px-1 uppercase tracking-wider">
-        Recent Scans
+        {t("home.recentScans")}
       </h3>
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {items.map((item, i) => (

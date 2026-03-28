@@ -7,6 +7,7 @@ import IngredientChip from "./IngredientChip";
 import FlavorRadar from "./FlavorRadar";
 import FunFactCard from "@/components/common/FunFactCard";
 import LockedBlock from "@/components/common/LockedBlock";
+import { useTranslation } from "@/lib/i18n";
 
 interface DishCardProps {
   dish: DishLite | null;
@@ -65,6 +66,7 @@ export default function DishCard({
   onAddToCart,
   isInCart,
 }: DishCardProps) {
+  const { t } = useTranslation();
   if (!dish) return null;
 
   const gradient =
@@ -79,13 +81,13 @@ export default function DishCard({
     if (detailError) {
       return (
         <div className="text-center py-6">
-          <p className="text-sm text-brown-medium mb-2">Could not load details</p>
+          <p className="text-sm text-brown-medium mb-2">{t("dish.couldNotLoad")}</p>
           {onRetryDetail && (
             <button
               onClick={onRetryDetail}
               className="text-sm text-coral font-medium hover:underline"
             >
-              Tap to retry
+              {t("dish.tapToRetry")}
             </button>
           )}
         </div>
@@ -99,7 +101,7 @@ export default function DishCard({
         {/* Flavor Radar */}
         <div className="mb-4">
           <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
-            Flavor Profile
+            {t("dish.flavorProfile")}
           </h3>
           <div className="flex justify-center">
             <FlavorRadar profile={detail.flavor_profile} size={140} />
@@ -110,7 +112,7 @@ export default function DishCard({
         {detail.ingredients?.core && detail.ingredients.core.length > 0 && (
           <div className="mb-4">
             <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
-              Ingredients
+              {t("dish.ingredients")}
             </h3>
             <div className="flex flex-wrap gap-1.5">
               {detail.ingredients.core.map((ingredient) => (
@@ -141,7 +143,7 @@ export default function DishCard({
           <div className="mb-4">
             <div className="bg-cream-dark rounded-xl p-4 border-l-4 border-l-coral">
               <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
-                How to Eat
+                {t("dish.howToEat")}
               </h4>
               <p className="text-sm text-brown-dark leading-relaxed">
                 {detail.how_to_eat}
@@ -155,7 +157,7 @@ export default function DishCard({
           <div className="mb-4">
             <div className="bg-brown-dark/5 rounded-xl p-4 border-l-4 border-l-brown-medium">
               <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
-                Cultural Note
+                {t("dish.culturalNote")}
               </h4>
               <p className="text-sm text-brown-dark leading-relaxed">
                 {detail.disclosure.message}
@@ -210,17 +212,17 @@ export default function DishCard({
           </span>
         )}
         <span className="text-xs text-brown-medium bg-cream-dark px-2 py-0.5 rounded-full capitalize">
-          {dish.price_tier}
+          {t(`categories.${dish.price_tier}`)}
         </span>
         <span className="text-xs text-brown-medium bg-cream-dark px-2 py-0.5 rounded-full capitalize">
-          {dish.category}
+          {t(`categories.${dish.category}`)}
         </span>
       </div>
 
       {/* Allergens & dietary — Phase 1 data */}
       <div className="mb-4">
         <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
-          Allergens & Dietary
+          {t("dish.allergensAndDietary")}
         </h3>
 
         {/* Risk-level action guide */}
@@ -228,7 +230,7 @@ export default function DishCard({
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-danger/10 rounded-lg border border-danger/20">
             <span className="text-sm flex-shrink-0">{"❌"}</span>
             <p className="text-xs text-danger font-medium leading-relaxed">
-              Contains your allergen. Consider an alternative dish.
+              {t("dish.allergenDanger")}
             </p>
           </div>
         )}
@@ -236,7 +238,7 @@ export default function DishCard({
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
             <span className="text-sm flex-shrink-0">{"⚠️"}</span>
             <p className="text-xs text-amber-700 font-medium leading-relaxed">
-              May contain allergens. Ask staff if it can be prepared without.
+              {t("dish.allergenWarning")}
             </p>
           </div>
         )}
@@ -244,7 +246,7 @@ export default function DishCard({
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-amber-brand/10 rounded-lg border border-amber-brand/20">
             <span className="text-sm flex-shrink-0">{"〰️"}</span>
             <p className="text-xs text-amber-brand font-medium leading-relaxed">
-              Possible allergen presence. Ask staff to confirm ingredients.
+              {t("dish.allergenCheck")}
             </p>
           </div>
         )}
@@ -255,17 +257,17 @@ export default function DishCard({
           ))}
           {dish.dietary.vegan && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
-              Vegan
+              {t("dietary.vegan")}
             </span>
           )}
           {dish.dietary.vegetarian && !dish.dietary.vegan && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
-              Vegetarian
+              {t("dietary.vegetarian")}
             </span>
           )}
           {dish.dietary.halal && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
-              Halal
+              {t("dietary.halal")}
             </span>
           )}
         </div>
@@ -275,13 +277,13 @@ export default function DishCard({
           <div className="flex items-start gap-2 mt-2.5 p-2.5 bg-brown-medium/10 rounded-lg">
             <span className="text-sm flex-shrink-0">{"😐"}</span>
             <p className="text-xs text-brown-dark leading-relaxed">
-              Contains ingredients you dislike: <strong>{dish.disliked_ingredients.join(", ")}</strong>
+              {t("dish.dislikedWarning", { items: dish.disliked_ingredients.join(", ") })}
             </p>
           </div>
         )}
 
         <p className="text-[10px] text-brown-medium/40 mt-2 leading-relaxed">
-          AI-generated info for reference only. Confirm allergens with restaurant staff.
+          {t("disclaimer.dishCard")}
         </p>
       </div>
 
@@ -297,7 +299,7 @@ export default function DishCard({
               <div className="space-y-4">
                 <div>
                   <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
-                    Flavor Profile
+                    {t("dish.flavorProfile")}
                   </h3>
                   <div className="flex justify-center py-2">
                     <FlavorRadar profile={detail.flavor_profile} size={140} />
@@ -316,7 +318,7 @@ export default function DishCard({
               <div className="space-y-4 py-2">
                 <div>
                   <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
-                    Flavor Profile
+                    {t("dish.flavorProfile")}
                   </h3>
                   <div className="flex justify-center py-2">
                     <FlavorRadar
@@ -358,10 +360,10 @@ export default function DishCard({
                 clipRule="evenodd"
               />
             </svg>
-            Unlock flavors, facts & more — $2.99
+            {t("dish.unlockFlavors")}
           </button>
           <p className="text-center text-xs text-brown-medium/60">
-            7-Day Trip Pass &middot; One-time payment
+            {t("dish.tripPassNote")}
           </p>
         </div>
       )}
@@ -376,7 +378,7 @@ export default function DishCard({
               : "border-coral text-coral hover:bg-coral/10"
           }`}
         >
-          {isInCart ? "Added \u2713" : "Add to Order"}
+          {isInCart ? t("results.added") : t("results.addToOrder")}
         </button>
       )}
     </BottomSheet>

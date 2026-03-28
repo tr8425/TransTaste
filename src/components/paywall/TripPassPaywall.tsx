@@ -48,7 +48,9 @@ export default function TripPassPaywall({
 
         {/* Plan cards */}
         <div className="space-y-3 mb-6">
-          {PASS_OPTIONS.map((plan) => (
+          {PASS_OPTIONS.map((plan) => {
+            const keyId = plan.id === "7d" ? "7d" : plan.id === "30d" ? "30d" : "credits50";
+            return (
             <button
               key={plan.id}
               onClick={() => onPurchase(plan.id)}
@@ -62,7 +64,7 @@ export default function TripPassPaywall({
                 <div>
                   {plan.badge && (
                     <span className="inline-block text-[10px] font-bold text-coral bg-coral/10 px-2 py-0.5 rounded-full uppercase tracking-wider mb-1.5">
-                      {plan.badge}
+                      {t(`paywall.pass${keyId}Badge`)}
                     </span>
                   )}
                   <h3
@@ -70,10 +72,10 @@ export default function TripPassPaywall({
                       plan.featured ? "text-brown-dark text-base" : "text-brown-dark text-sm"
                     }`}
                   >
-                    {plan.label}
+                    {t(`paywall.pass${keyId}`)}
                   </h3>
                   <p className="text-xs text-brown-medium mt-0.5">
-                    {plan.description}
+                    {t(`paywall.pass${keyId}Desc`)}
                   </p>
                 </div>
                 <span
@@ -85,7 +87,8 @@ export default function TripPassPaywall({
                 </span>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* Reassurance */}

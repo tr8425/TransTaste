@@ -109,8 +109,8 @@ export default function ResultsPage() {
               className="flex items-center justify-between w-full p-3.5 bg-coral/5 border-2 border-coral rounded-xl hover:bg-coral/10 transition-colors"
             >
               <div>
-                <p className="text-sm font-semibold text-brown-dark">7-Day Trip Pass</p>
-                <p className="text-xs text-brown-medium">Unlimited scans for your trip</p>
+                <p className="text-sm font-semibold text-brown-dark">{t("paywall.pass7d")}</p>
+                <p className="text-xs text-brown-medium">{t("paywall.unlimitedScans")}</p>
               </div>
               <span className="text-lg font-bold text-coral">$2.99</span>
             </Link>
@@ -119,8 +119,8 @@ export default function ResultsPage() {
               className="flex items-center justify-between w-full p-3.5 bg-cream-dark border border-brown-light/20 rounded-xl hover:border-coral/30 transition-colors"
             >
               <div>
-                <p className="text-sm font-semibold text-brown-dark">50 Scan Credits</p>
-                <p className="text-xs text-brown-medium">Pay as you go</p>
+                <p className="text-sm font-semibold text-brown-dark">{t("paywall.credits50")}</p>
+                <p className="text-xs text-brown-medium">{t("paywall.credits50Desc")}</p>
               </div>
               <span className="text-base font-bold text-brown-dark">$1.99</span>
             </Link>
@@ -129,8 +129,8 @@ export default function ResultsPage() {
               className="flex items-center justify-between w-full p-3.5 bg-cream-dark border border-brown-light/20 rounded-xl hover:border-coral/30 transition-colors"
             >
               <div>
-                <p className="text-sm font-semibold text-brown-dark">30-Day Trip Pass</p>
-                <p className="text-xs text-brown-medium">For the extended explorer</p>
+                <p className="text-sm font-semibold text-brown-dark">{t("paywall.pass30d")}</p>
+                <p className="text-xs text-brown-medium">{t("paywall.pass30dDesc")}</p>
               </div>
               <span className="text-base font-bold text-brown-dark">$5.99</span>
             </Link>
@@ -140,7 +140,7 @@ export default function ResultsPage() {
             href="/"
             className="block w-full py-3 text-brown-medium font-medium text-sm text-center"
           >
-            Back to Home
+            {t("common.backToHome")}
           </Link>
         </div>
       </div>
@@ -177,13 +177,13 @@ export default function ResultsPage() {
             href="/camera"
             className="inline-block w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors text-center"
           >
-            Try Again
+            {t("common.tryAgain")}
           </Link>
           <Link
             href="/"
             className="inline-block mt-3 text-sm text-brown-medium hover:text-coral transition-colors"
           >
-            Back to Home
+            {t("common.backToHome")}
           </Link>
         </div>
       </div>
@@ -209,17 +209,17 @@ export default function ResultsPage() {
             >
               <path d="M15 18l-6-6 6-6" />
             </svg>
-            Back
+            {t("common.back")}
           </Link>
           <span className="text-xs text-brown-medium bg-cream-dark px-2.5 py-1 rounded-full">
             {data.restaurant_type}
           </span>
         </div>
         <h1 className="text-lg font-bold text-brown-dark">
-          Menu Results
+          {t("results.menuResults")}
         </h1>
         <p className="text-xs text-brown-medium">
-          {data.items_found} dishes found &middot; {data.menu_language}
+          {t("results.dishesFound", { count: data.items_found ?? 0 })} &middot; {data.menu_language}
         </p>
       </div>
 
@@ -247,7 +247,7 @@ export default function ResultsPage() {
       <div className="flex-1 px-2 pb-4">
         {filteredDishes.length === 0 ? (
           <div className="text-center py-12 text-brown-medium text-sm">
-            No dishes in this category
+            {t("results.noCategory")}
           </div>
         ) : (
           filteredDishes.map((dish, i) => (
@@ -293,7 +293,7 @@ export default function ResultsPage() {
           }}
           className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors"
         >
-          {showCombo ? "Hide Combos" : "See Combo Recommendations"}
+          {showCombo ? t("results.hideCombo") : t("results.seeCombo")}
         </button>
       </div>
 
@@ -304,7 +304,7 @@ export default function ResultsPage() {
             href="/order"
             className="pointer-events-auto inline-flex items-center gap-1.5 px-4 py-2 bg-coral text-white text-sm font-semibold rounded-full shadow-lg hover:bg-coral-dark transition-colors"
           >
-            View Order &middot; {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}
+            {t("results.viewOrder")} &middot; {cart.totalItems} {cart.totalItems === 1 ? t("results.item") : t("results.items")}
           </Link>
         </div>
       )}

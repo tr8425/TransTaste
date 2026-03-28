@@ -11,7 +11,8 @@
     "tryAgain": "다시 시도",
     "backToHome": "홈으로 돌아가기",
     "scanAMenu": "메뉴 스캔하기",
-    "version": "TransTaste v0.2.0"
+    "version": "TransTaste v0.2.0",
+    "about": "정보"
   },
 
   "onboarding": {
@@ -47,7 +48,8 @@
     "fetchAndAnalyze": "불러와서 분석",
     "textModalTitle": "요리명 입력",
     "textPlaceholder": "요리명을 한 줄씩 입력하세요:\n팟타이\n똠얌꿍\n솜탐",
-    "analyzeDishes": "요리 분석"
+    "analyzeDishes": "요리 분석",
+    "urlHint": "메뉴 이미지 직접 링크를 붙여넣으세요 (JPG, PNG, PDF)"
   },
 
   "loading": {
@@ -274,7 +276,10 @@
     "dessert": "디저트",
     "appetizer": "전채",
     "set": "세트",
-    "salad": "샐러드"
+    "salad": "샐러드",
+    "budget": "저가",
+    "mid": "중간",
+    "premium": "고가"
   },
 
   "flavor": {
