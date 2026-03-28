@@ -83,11 +83,16 @@ function CheckIcon({ className = "" }: { className?: string }) {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, setLocale } = useTranslation();
   const [step, setStep] = useState(0);
 
   // Step 2 state
   const [language, setLanguage] = useState("en");
+
+  const handleLanguageChange = (code: string) => {
+    setLanguage(code);
+    setLocale(code);
+  };
   const [allergens, setAllergens] = useState<string[]>([]);
   const [dietary, setDietary] = useState<string[]>([]);
 
@@ -221,7 +226,7 @@ export default function OnboardingPage() {
                 return (
                   <button
                     key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
+                    onClick={() => handleLanguageChange(lang.code)}
                     className={`relative flex items-center justify-center py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
                       selected
                         ? "border-2 border-coral bg-coral/10 text-brown-dark"

@@ -110,5 +110,5 @@ export function useTranslation() {
     params?: Record<string, string | number>,
   ): string => t(key, params, locale);
 
-  return { t: translate, locale };
+  return { t: translate, locale, setLocale };
 }

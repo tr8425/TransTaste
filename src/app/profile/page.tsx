@@ -94,6 +94,7 @@ function ProfileContent() {
   const [showAllergenGrid, setShowAllergenGrid] = useState(false);
   const [showDietaryGrid, setShowDietaryGrid] = useState(false);
   const [paymentBanner, setPaymentBanner] = useState<"success" | "cancelled" | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState("");
 
   // Handle payment redirect query params — delay timer until after first paint
   useEffect(() => {
@@ -121,6 +122,9 @@ function ProfileContent() {
     } catch {
       // Ignore parse errors
     }
+    try {
+      setApiKeyInput(localStorage.getItem("transtaste_api_key") || "");
+    } catch { /* ignore */ }
   }, []);
 
   // Persist helper
@@ -458,13 +462,12 @@ function ProfileContent() {
           <input
             type="password"
             placeholder="sk-ant-api03-..."
-            value={(() => {
-              try { return localStorage.getItem("transtaste_api_key") || ""; } catch { return ""; }
-            })()}
+            value={apiKeyInput}
             onChange={(e) => {
+              const v = e.target.value;
+              setApiKeyInput(v);
               try {
-                const v = e.target.value.trim();
-                if (v) localStorage.setItem("transtaste_api_key", v);
+                if (v.trim()) localStorage.setItem("transtaste_api_key", v.trim());
                 else localStorage.removeItem("transtaste_api_key");
               } catch { /* ignore */ }
             }}
