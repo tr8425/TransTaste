@@ -382,6 +382,10 @@ function buildUserMessage(input: MenuInput): Anthropic.MessageCreateParams['mess
     contextParts.push(`User dietary preferences: ${input.dietaryBeliefs.join(', ')}. Highlight compatible and incompatible dishes.`);
   }
 
+  if (input.dislikedIngredients && input.dislikedIngredients.length > 0) {
+    contextParts.push(`User dislikes these ingredients (not allergies, personal preference): ${input.dislikedIngredients.join(', ')}. If a dish likely contains any of these, add a "disliked_ingredients" array field with the matching items in the dish JSON.`);
+  }
+
   const contextText = contextParts.length > 0
     ? `\n\nUser context:\n${contextParts.join('\n')}\n\nAnalyze this menu:`
     : 'Analyze this menu:';

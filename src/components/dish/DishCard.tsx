@@ -269,6 +269,17 @@ export default function DishCard({
             </span>
           )}
         </div>
+
+        {/* Disliked ingredients warning */}
+        {dish.disliked_ingredients && dish.disliked_ingredients.length > 0 && (
+          <div className="flex items-start gap-2 mt-2.5 p-2.5 bg-brown-medium/10 rounded-lg">
+            <span className="text-sm flex-shrink-0">{"😐"}</span>
+            <p className="text-xs text-brown-dark leading-relaxed">
+              Contains ingredients you dislike: <strong>{dish.disliked_ingredients.join(", ")}</strong>
+            </p>
+          </div>
+        )}
+
         <p className="text-[10px] text-brown-medium/40 mt-2 leading-relaxed">
           AI-generated info for reference only. Confirm allergens with restaurant staff.
         </p>

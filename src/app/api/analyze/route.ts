@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       outputLanguage?: string;
       allergenPreset?: string[];
       dietaryBeliefs?: string[];
+      dislikedIngredients?: string[];
       stream?: boolean;
     };
 
@@ -100,6 +101,7 @@ export async function POST(request: NextRequest) {
       outputLanguage: body.outputLanguage,
       allergenPreset: body.allergenPreset,
       dietaryBeliefs: body.dietaryBeliefs,
+      dislikedIngredients: body.dislikedIngredients,
       apiKey,
     };
 

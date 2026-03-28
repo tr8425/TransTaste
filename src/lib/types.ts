@@ -87,6 +87,7 @@ export interface DishLite {
   };
   allergens: string[]; // flattened from ingredients.allergens
   allergen_risk: 'danger' | 'warning' | 'check' | 'safe';
+  disliked_ingredients?: string[];
   price_tier: "budget" | "mid" | "premium";
   image_search_query: string;
 }

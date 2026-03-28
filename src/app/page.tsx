@@ -7,6 +7,7 @@ import CreditBadge from "@/components/common/CreditBadge";
 import RecentHistory from "@/components/common/RecentHistory";
 import { useCredits } from "@/hooks/useCredits";
 import { MOCK_RECENT_SCANS } from "@/lib/mock-data";
+import { useTranslation } from "@/lib/i18n";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -18,6 +19,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const credits = useCredits();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null!);
@@ -86,10 +88,10 @@ export default function HomePage() {
         </div>
 
         <h2 className="text-lg font-semibold text-brown-dark text-center mb-1">
-          Scan any menu, understand every dish
+          {t("home.heroTitle")}
         </h2>
         <p className="text-sm text-brown-medium text-center mb-6 max-w-[280px]">
-          Point your camera at a foreign menu and get instant translations, allergens & fun facts
+          {t("home.heroDesc")}
         </p>
 
         {/* Camera CTA */}
@@ -131,7 +133,7 @@ export default function HomePage() {
               <circle cx="8.5" cy="8.5" r="1.5" />
               <path d="M21 15l-5-5L5 21" />
             </svg>
-            Gallery
+            {t("home.gallery")}
           </button>
 
           {/* URL button */}
@@ -150,7 +152,7 @@ export default function HomePage() {
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
-            URL
+            {t("home.url")}
           </button>
 
           {/* Text button */}
@@ -171,7 +173,7 @@ export default function HomePage() {
               <line x1="16" y1="13" x2="8" y2="13" />
               <line x1="16" y1="17" x2="8" y2="17" />
             </svg>
-            Text
+            {t("home.text")}
           </button>
         </div>
 
@@ -201,8 +203,8 @@ export default function HomePage() {
               <span className="text-lg">{"\u{1F30D}"}</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-brown-dark">Travel Tools</p>
-              <p className="text-xs text-brown-medium">Phrases, tips & dining guide</p>
+              <p className="text-sm font-semibold text-brown-dark">{t("home.travelTools")}</p>
+              <p className="text-xs text-brown-medium">{t("home.travelToolsDesc")}</p>
             </div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4A882" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -214,7 +216,7 @@ export default function HomePage() {
       {/* Trending dishes section */}
       <div className="px-5 pt-4 pb-28">
         <h3 className="text-xs font-medium text-brown-medium mb-3 px-1 uppercase tracking-wider">
-          Popular Dishes Nearby
+          {t("home.popularDishes")}
         </h3>
         <div className="grid grid-cols-2 gap-2.5">
           {[
@@ -249,7 +251,7 @@ export default function HomePage() {
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
-                Paste Menu Image URL
+                {t("home.urlModalTitle")}
               </h3>
               <button
                 onClick={() => { setShowUrlModal(false); setUrlInput(""); }}
@@ -278,7 +280,7 @@ export default function HomePage() {
               disabled={!urlInput.trim()}
               className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Fetch & Analyze
+              {t("home.fetchAndAnalyze")}
             </button>
           </div>
         </div>
@@ -290,7 +292,7 @@ export default function HomePage() {
           <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-8 animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-brown-dark">
-                Type Dish Names
+                {t("home.textModalTitle")}
               </h3>
               <button
                 onClick={() => { setShowTextModal(false); setTextInput(""); }}
@@ -305,7 +307,7 @@ export default function HomePage() {
             <textarea
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder={"Enter dish names, one per line:\nPad Thai\nTom Yum Goong\nSom Tam"}
+              placeholder={t("home.textPlaceholder")}
               rows={5}
               className="w-full px-4 py-3 rounded-xl bg-cream-dark text-brown-dark text-sm placeholder:text-brown-medium/50 border border-brown-light/20 focus:outline-none focus:border-coral mb-4 resize-none"
               autoFocus
@@ -315,7 +317,7 @@ export default function HomePage() {
               disabled={!textInput.trim()}
               className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Analyze Dishes
+              {t("home.analyzeDishes")}
             </button>
           </div>
         </div>

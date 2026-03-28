@@ -12,8 +12,10 @@ import ComboRecommendation from "@/components/paywall/ComboRecommendation";
 import TripPassPaywall from "@/components/paywall/TripPassPaywall";
 import { useCart } from "@/hooks/useCart";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
+import { useTranslation } from "@/lib/i18n";
 
 export default function ResultsPage() {
+  const { t } = useTranslation();
   const [selectedDish, setSelectedDish] = useState<DishLite | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [showPaywall, setShowPaywall] = useState(false);
@@ -93,10 +95,10 @@ export default function ResultsPage() {
               <span className="text-3xl">{"\u{1F50D}"}</span>
             </div>
             <h2 className="text-lg font-bold text-brown-dark mb-2">
-              No scans remaining
+              {t("results.noScans")}
             </h2>
             <p className="text-sm text-brown-medium leading-relaxed">
-              You&apos;ve used all your free scans. Pick an option to keep exploring:
+              {t("results.noScansDesc")}
             </p>
           </div>
 
@@ -166,7 +168,7 @@ export default function ResultsPage() {
             </svg>
           </div>
           <h2 className="text-lg font-bold text-brown-dark mb-2">
-            Something went wrong
+            {t("results.somethingWrong")}
           </h2>
           <p className="text-sm text-brown-medium mb-6 leading-relaxed">
             {scanError}
@@ -228,13 +230,13 @@ export default function ResultsPage() {
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium capitalize transition-colors ${
+              className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 activeFilter === cat
                   ? "bg-coral text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >
-              {cat}
+              {t(`categories.${cat}`)}
             </button>
           ))}
         </div>

@@ -6,6 +6,7 @@ import { Dish } from "@/lib/types";
 import { FUN_FACTS_LOADING } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
 import { useCredits } from "@/hooks/useCredits";
+import { useTranslation } from "@/lib/i18n";
 
 const FOOD_EMOJIS = ["🍜", "🍣", "🥘", "🍛", "🍲", "🥟", "🍝", "🌮"];
 const TIMEOUT_MS = 180_000; // 3 minutes
@@ -19,6 +20,7 @@ interface MenuMeta {
 export default function LoadingScanPage() {
   const router = useRouter();
   const credits = useCredits();
+  const { t } = useTranslation();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [menuMeta, setMenuMeta] = useState<MenuMeta | null>(null);
   const [factIndex, setFactIndex] = useState(0);
@@ -190,15 +192,26 @@ export default function LoadingScanPage() {
     const analyze = async () => {
       try {
         const headers: Record<string, string> = { "Content-Type": "application/json" };
+        let userSettings: Record<string, unknown> = {};
         try {
           const userKey = localStorage.getItem("transtaste_api_key");
           if (userKey) headers["x-api-key"] = userKey;
+          const raw = localStorage.getItem("transtaste_user_settings");
+          if (raw) userSettings = JSON.parse(raw);
         } catch { /* ignore */ }
 
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers,
-          body: JSON.stringify({ input, inputType: type, stream: true }),
+          body: JSON.stringify({
+            input,
+            inputType: type,
+            stream: true,
+            outputLanguage: userSettings.output_language as string || undefined,
+            allergenPreset: userSettings.allergen_preset as string[] || undefined,
+            dietaryBeliefs: userSettings.dietary_beliefs as string[] || undefined,
+            dislikedIngredients: userSettings.disliked_ingredients as string[] || undefined,
+          }),
           signal: abortController.signal,
         });
 
@@ -237,14 +250,14 @@ export default function LoadingScanPage() {
 
   const statusText =
     dishes.length > 0
-      ? `Found ${dishes.length} dish${dishes.length === 1 ? "" : "es"}...`
+      ? t("loading.found", { count: dishes.length })
       : menuMeta
-        ? `Scanning ${menuMeta.restaurant_type || "menu"}...`
-        : "Analyzing your menu...";
+        ? t("loading.scanning", { type: menuMeta.restaurant_type || "menu" })
+        : t("loading.analyzing");
 
   const subtitleText = menuMeta
     ? `${menuMeta.language || ""} · ${menuMeta.restaurant_type || ""}`.replace(/^ · | · $/g, "")
-    : "Identifying dishes, flavors & allergens";
+    : t("loading.identifying");
 
   return (
     <div className="fixed inset-0 bg-cream flex flex-col items-center px-6 overflow-y-auto">

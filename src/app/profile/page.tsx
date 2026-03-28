@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCredits } from "@/hooks/useCredits";
 import TripPassPaywall from "@/components/paywall/TripPassPaywall";
+import { useTranslation } from "@/lib/i18n";
 
 /* ─── Constants ─── */
 
@@ -65,6 +66,7 @@ interface UserSettings {
   menu_language: string;
   allergen_preset: string[];
   dietary_beliefs: string[];
+  disliked_ingredients: string[];
   email: string | null;
 }
 
@@ -73,6 +75,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   menu_language: "auto",
   allergen_preset: [],
   dietary_beliefs: [],
+  disliked_ingredients: [],
   email: null,
 };
 
@@ -89,8 +92,10 @@ export default function ProfilePage() {
 function ProfileContent() {
   const credits = useCredits();
   const searchParams = useSearchParams();
+  const { t, setLocale } = useTranslation();
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [dislikedInput, setDislikedInput] = useState("");
   const [showAllergenGrid, setShowAllergenGrid] = useState(false);
   const [showDietaryGrid, setShowDietaryGrid] = useState(false);
   const [paymentBanner, setPaymentBanner] = useState<"success" | "cancelled" | null>(null);
@@ -197,7 +202,7 @@ function ProfileContent() {
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
-        <h1 className="text-xl font-bold text-brown-dark">Profile</h1>
+        <h1 className="text-xl font-bold text-brown-dark">{t("profile.title")}</h1>
       </div>
 
       {/* Payment feedback banner */}
@@ -211,8 +216,8 @@ function ProfileContent() {
         >
           <span>
             {paymentBanner === "success"
-              ? "Payment successful! Your scans have been updated."
-              : "Payment was cancelled. No charges were made."}
+              ? t("payment.success")
+              : t("payment.cancelled")}
           </span>
           <button
             onClick={() => setPaymentBanner(null)}
@@ -241,48 +246,49 @@ function ProfileContent() {
               {credits.hasPass ? (
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-brown-dark">
-                    Trip Pass Active
+                    {t("profile.tripPassActive")}
                   </span>
                   <span className="text-[10px] font-bold text-success bg-success/15 px-2 py-0.5 rounded-full">
-                    Active
+                    {t("profile.active")}
                   </span>
                 </div>
               ) : (
                 <span className="text-sm font-semibold text-brown-dark">
-                  {credits.remaining} scans left
+                  {t("profile.scansLeft", { count: credits.remaining })}
                 </span>
               )}
             </div>
           </div>
           {credits.hasPass && passExpiry && (
             <p className="text-xs text-brown-medium mt-1 ml-7">
-              Expires {passExpiry}
+              {t("profile.expires", { date: passExpiry || "" })}
             </p>
           )}
           <button
             onClick={() => setPaywallOpen(true)}
             className="mt-3 w-full py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors active:scale-[0.98]"
           >
-            Get More Scans
+            {t("profile.getMoreScans")}
           </button>
         </div>
 
         {/* ── Language Settings ── */}
         <div className="bg-cream-dark rounded-xl p-4">
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-            Language
+            {t("profile.language")}
           </h2>
 
           {/* Output language */}
           <label className="block mb-3">
             <span className="text-xs text-brown-medium mb-1 block">
-              I speak
+              {t("profile.iSpeak")}
             </span>
             <select
               value={settings.output_language}
-              onChange={(e) =>
-                save({ ...settings, output_language: e.target.value })
-              }
+              onChange={(e) => {
+                save({ ...settings, output_language: e.target.value });
+                setLocale(e.target.value);
+              }}
               className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark appearance-none focus:outline-none focus:ring-2 focus:ring-coral/30"
             >
               {OUTPUT_LANGUAGES.map((l) => (
@@ -296,7 +302,7 @@ function ProfileContent() {
           {/* Menu language */}
           <label className="block">
             <span className="text-xs text-brown-medium mb-1 block">
-              Menu language
+              {t("profile.menuLanguage")}
             </span>
             <select
               value={settings.menu_language}
@@ -318,7 +324,7 @@ function ProfileContent() {
         <div className="bg-cream-dark rounded-xl p-4">
           {/* Allergens */}
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-            Allergies
+            {t("profile.allergies")}
           </h2>
           {settings.allergen_preset.length > 0 ? (
             <div className="flex flex-wrap gap-1.5 mb-2">
@@ -336,14 +342,14 @@ function ProfileContent() {
             </div>
           ) : (
             <p className="text-xs text-brown-medium/60 mb-2">
-              No allergens selected
+              {t("profile.noAllergens")}
             </p>
           )}
           <button
             onClick={() => setShowAllergenGrid(!showAllergenGrid)}
             className="text-xs font-medium text-coral hover:text-coral-dark transition-colors"
           >
-            {showAllergenGrid ? "Done" : "Edit"}
+            {showAllergenGrid ? t("common.done") : t("common.edit")}
           </button>
 
           {showAllergenGrid && (
@@ -371,7 +377,7 @@ function ProfileContent() {
           {/* Dietary */}
           <div className="mt-4 pt-4 border-t border-brown-light/10">
             <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-              Dietary Preferences
+              {t("profile.dietaryPrefs")}
             </h2>
             {settings.dietary_beliefs.length > 0 ? (
               <div className="flex flex-wrap gap-1.5 mb-2">
@@ -389,14 +395,14 @@ function ProfileContent() {
               </div>
             ) : (
               <p className="text-xs text-brown-medium/60 mb-2">
-                No dietary preferences selected
+                {t("profile.noDietary")}
               </p>
             )}
             <button
               onClick={() => setShowDietaryGrid(!showDietaryGrid)}
               className="text-xs font-medium text-coral hover:text-coral-dark transition-colors"
             >
-              {showDietaryGrid ? "Done" : "Edit"}
+              {showDietaryGrid ? t("common.done") : t("common.edit")}
             </button>
 
             {showDietaryGrid && (
@@ -422,17 +428,71 @@ function ProfileContent() {
           </div>
         </div>
 
+        {/* ── Disliked Ingredients ── */}
+        <div className="bg-cream-dark rounded-xl p-4">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+            {t("profile.dislikedIngredients")}
+          </h2>
+          <p className="text-xs text-brown-medium/60 mb-2">
+            {t("profile.dislikedDesc")}
+          </p>
+
+          {/* Tags */}
+          {settings.disliked_ingredients.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {settings.disliked_ingredients.map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-1 text-xs font-medium bg-brown-medium/15 text-brown-dark px-2.5 py-1 rounded-full"
+                >
+                  {item}
+                  <button
+                    onClick={() =>
+                      save({
+                        ...settings,
+                        disliked_ingredients: settings.disliked_ingredients.filter((x) => x !== item),
+                      })
+                    }
+                    className="text-brown-medium hover:text-danger ml-0.5"
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <input
+            type="text"
+            placeholder={t("profile.dislikedPlaceholder")}
+            value={dislikedInput}
+            onChange={(e) => setDislikedInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                const v = dislikedInput.trim();
+                if (v && !settings.disliked_ingredients.includes(v)) {
+                  save({
+                    ...settings,
+                    disliked_ingredients: [...settings.disliked_ingredients, v],
+                  });
+                }
+                setDislikedInput("");
+              }
+            }}
+            className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30"
+          />
+        </div>
+
         {/* ── Tip Guide Settings ── */}
         <div className="bg-cream-dark rounded-xl p-4">
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-            Tip Guide
+            {t("profile.tipGuide")}
           </h2>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-brown-dark">No-tip country info</p>
-              <p className="text-xs text-brown-medium/60">
-                Show banner when visiting countries where tipping isn&apos;t expected
-              </p>
+              <p className="text-sm text-brown-dark">{t("profile.tipGuideDesc")}</p>
             </div>
             <button
               onClick={() => {
@@ -446,7 +506,7 @@ function ProfileContent() {
               }}
               className="text-xs font-medium text-coral hover:text-coral-dark transition-colors whitespace-nowrap ml-3"
             >
-              Reset
+              {t("common.reset")}
             </button>
           </div>
         </div>
@@ -454,10 +514,10 @@ function ProfileContent() {
         {/* ── API Key (dev/demo) ── */}
         <div className="bg-cream-dark rounded-xl p-4">
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-            API Key
+            {t("profile.apiKey")}
           </h2>
           <p className="text-xs text-brown-medium/60 mb-2">
-            Use your own Anthropic API key for unlimited scans
+            {t("profile.apiKeyDesc")}
           </p>
           <input
             type="password"
@@ -474,14 +534,14 @@ function ProfileContent() {
             className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30 font-mono"
           />
           <p className="text-[10px] text-brown-medium/40 mt-1.5">
-            Stored locally on your device only. Never sent to our servers.
+            {t("profile.apiKeyNote")}
           </p>
         </div>
 
         {/* ── Account ── */}
         <div className="bg-cream-dark rounded-xl p-4">
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-            Account
+            {t("profile.account")}
           </h2>
           {settings.email ? (
             <>
@@ -490,14 +550,14 @@ function ProfileContent() {
                 onClick={() => save({ ...settings, email: null })}
                 className="mt-2 text-sm font-medium text-coral hover:text-coral-dark transition-colors"
               >
-                Sign Out
+                {t("profile.signOut")}
               </button>
             </>
           ) : (
             <>
-              <p className="text-xs text-brown-medium/60">Not signed in</p>
+              <p className="text-xs text-brown-medium/60">{t("profile.notSignedIn")}</p>
               <button className="mt-2 text-sm font-medium text-coral hover:text-coral-dark transition-colors">
-                Sign In
+                {t("profile.signIn")}
               </button>
             </>
           )}
@@ -510,11 +570,11 @@ function ProfileContent() {
           </p>
           <div className="flex items-center justify-center gap-3 text-xs text-brown-medium/50">
             <Link href="/terms" className="hover:text-brown-medium transition-colors underline">
-              Terms
+              {t("profile.terms")}
             </Link>
             <span>/</span>
             <Link href="/privacy" className="hover:text-brown-medium transition-colors underline">
-              Privacy
+              {t("profile.privacy")}
             </Link>
           </div>
         </div>

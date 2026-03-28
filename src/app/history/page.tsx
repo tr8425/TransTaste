@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { RecentScan } from "@/lib/types";
 import { MOCK_RECENT_SCANS } from "@/lib/mock-data";
+import { useTranslation } from "@/lib/i18n";
 
 export default function HistoryPage() {
+  const { t } = useTranslation();
   const [scans, setScans] = useState<RecentScan[]>([]);
 
   useEffect(() => {
@@ -17,9 +19,9 @@ export default function HistoryPage() {
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
-        <h1 className="text-xl font-bold text-brown-dark">Scan History</h1>
+        <h1 className="text-xl font-bold text-brown-dark">{t("history.title")}</h1>
         <p className="text-xs text-brown-medium mt-0.5">
-          Your recently scanned menus
+          {t("history.subtitle")}
         </p>
       </div>
 
@@ -42,17 +44,16 @@ export default function HistoryPage() {
               <polyline points="12 6 12 12 16 14" />
             </svg>
             <p className="text-sm font-medium text-brown-dark mb-1">
-              No scans yet
+              {t("history.noHistory")}
             </p>
             <p className="text-xs text-brown-medium mb-4 max-w-[220px]">
-              Scan a menu to see your history here. Results are saved for offline
-              viewing.
+              {t("history.noHistoryDesc")}
             </p>
             <Link
               href="/camera"
               className="px-5 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors"
             >
-              Scan a Menu
+              {t("common.scanAMenu")}
             </Link>
           </div>
         ) : (

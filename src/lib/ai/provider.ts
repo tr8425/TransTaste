@@ -7,6 +7,7 @@ export interface MenuInput {
   menuLanguage?: string;
   allergenPreset?: string[];
   dietaryBeliefs?: string[];
+  dislikedIngredients?: string[];
   apiKey?: string; // user-provided key overrides server env
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { PASS_OPTIONS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n";
 
 interface TripPassPaywallProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export default function TripPassPaywall({
   onClose,
   onPurchase,
 }: TripPassPaywallProps) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -30,17 +32,17 @@ export default function TripPassPaywall({
           onClick={onClose}
           className="absolute top-4 right-4 text-brown-medium/60 text-sm"
         >
-          Skip
+          {t("paywall.skip")}
         </button>
 
         {/* Header */}
         <div className="text-center mb-6 pt-2">
           <span className="text-3xl mb-2 block">🌏</span>
           <h2 className="text-xl font-bold text-brown-dark">
-            Want to explore deeper?
+            {t("paywall.title")}
           </h2>
           <p className="text-sm text-brown-medium mt-1">
-            Unlock flavor profiles, fun facts & eating guides
+            {t("paywall.subtitle")}
           </p>
         </div>
 
@@ -88,7 +90,7 @@ export default function TripPassPaywall({
 
         {/* Reassurance */}
         <p className="text-center text-xs text-brown-medium/70">
-          One-time payment &middot; No subscription &middot; Instant access
+          {t("paywall.reassurance")}
         </p>
 
         <style jsx>{`

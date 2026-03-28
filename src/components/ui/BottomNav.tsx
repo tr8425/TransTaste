@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation } from "@/lib/i18n";
 
 const HIDDEN_ROUTES = ["/camera", "/loading-scan", "/order/present"];
 
 interface Tab {
   href: string;
-  label: string;
+  labelKey: string;
   isCta?: boolean;
   icon: (active: boolean) => React.ReactNode;
 }
@@ -15,7 +16,7 @@ interface Tab {
 const TABS: Tab[] = [
   {
     href: "/",
-    label: "Home",
+    labelKey: "nav.home",
     icon: (active: boolean) => (
       <svg
         width="22"
@@ -34,7 +35,7 @@ const TABS: Tab[] = [
   },
   {
     href: "/travel",
-    label: "Travel",
+    labelKey: "nav.travel",
     icon: (active: boolean) => (
       <svg
         width="22"
@@ -53,7 +54,7 @@ const TABS: Tab[] = [
   },
   {
     href: "/camera",
-    label: "Scan",
+    labelKey: "nav.scan",
     isCta: true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon: (active: boolean) => (
@@ -74,7 +75,7 @@ const TABS: Tab[] = [
   },
   {
     href: "/history",
-    label: "History",
+    labelKey: "nav.history",
     icon: (active: boolean) => (
       <svg
         width="22"
@@ -93,7 +94,7 @@ const TABS: Tab[] = [
   },
   {
     href: "/profile",
-    label: "Profile",
+    labelKey: "nav.profile",
     icon: (active: boolean) => (
       <svg
         width="22"
@@ -114,6 +115,7 @@ const TABS: Tab[] = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   if (HIDDEN_ROUTES.includes(pathname)) return null;
 
@@ -145,7 +147,7 @@ export default function BottomNav() {
                 }`}
               >
                 {tab.icon(isActive)}
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                <span className="text-[10px] font-medium">{t(tab.labelKey)}</span>
               </Link>
             );
           })}
