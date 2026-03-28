@@ -88,7 +88,7 @@ export default function TripPassPaywall({
 
         {/* Reassurance */}
         <p className="text-center text-xs text-brown-medium/70">
-          One-time payment &middot; No subscription &middot; Cancel anytime
+          One-time payment &middot; No subscription &middot; Instant access
         </p>
 
         <style jsx>{`

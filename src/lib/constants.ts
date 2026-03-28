@@ -66,7 +66,7 @@ export const PASS_OPTIONS = [
     description: "For the extended explorer",
   },
   {
-    id: "credits50" as const,
+    id: "credits_50" as const,
     label: "50 Credits",
     price: "$1.99",
     featured: false,

@@ -33,6 +33,25 @@ const TABS: Tab[] = [
     ),
   },
   {
+    href: "/travel",
+    label: "Travel",
+    icon: (active: boolean) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill={active ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="10" r="3" />
+        <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 7 8 11.7z" />
+      </svg>
+    ),
+  },
+  {
     href: "/camera",
     label: "Scan",
     isCta: true,
@@ -100,7 +119,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
-      <div className="w-full max-w-mobile bg-cream/95 backdrop-blur-md border-t border-brown-light/10 px-6 pb-6 pt-2">
+      <div className="w-full max-w-mobile bg-cream/95 backdrop-blur-md border-t border-brown-light/10 px-3 pb-6 pt-2">
         <div className="flex items-center justify-around">
           {TABS.map((tab) => {
             const isActive = pathname === tab.href;
@@ -121,7 +140,7 @@ export default function BottomNav() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1 px-1 transition-colors ${
                   isActive ? "text-coral" : "text-brown-medium/60 hover:text-brown-medium"
                 }`}
               >

@@ -5,7 +5,7 @@ import { CreditState } from "@/lib/types";
 
 const STORAGE_KEY = "transtaste_credits";
 const DEFAULT_STATE: CreditState = {
-  remaining: 7,
+  remaining: 10,
   hasPass: false,
 };
 

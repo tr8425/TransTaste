@@ -93,9 +93,35 @@ function CultureChip({ children }: { children: React.ReactNode }) {
   );
 }
 
+const NO_TIP_DISMISS_KEY = "transtaste_no_tip_dismissed";
+
+function isNoTipDismissed(): boolean {
+  try {
+    const raw = localStorage.getItem(NO_TIP_DISMISS_KEY);
+    if (!raw) return false;
+    const expiry = new Date(raw);
+    if (expiry > new Date()) return true;
+    localStorage.removeItem(NO_TIP_DISMISS_KEY);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function dismissNoTipBanner() {
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + 7);
+  localStorage.setItem(NO_TIP_DISMISS_KEY, expiry.toISOString());
+}
+
 export default function TipCulturePage() {
   const [selectedCode, setSelectedCode] = useState("JP");
   const [detectedCountry, setDetectedCountry] = useState<{ code: string; name: string; flag: string } | null>(null);
+  const [noTipDismissed, setNoTipDismissed] = useState(true); // default true to avoid flash
+
+  useEffect(() => {
+    setNoTipDismissed(isNoTipDismissed());
+  }, []);
 
   useEffect(() => {
     try {
@@ -200,6 +226,27 @@ export default function TipCulturePage() {
           <p className="text-xs text-brown-medium leading-relaxed">{selected.tip.note}</p>
 
           {selected.tip.type !== "none" && <TipCalculator tip={selected.tip} />}
+
+          {/* No-tip country info banner */}
+          {selected.tip.type === "none" && !noTipDismissed && (
+            <div className="mt-3 bg-success/10 border border-success/20 rounded-xl p-3">
+              <p className="text-xs font-semibold text-success mb-1">
+                No tip needed here!
+              </p>
+              <p className="text-xs text-brown-medium leading-relaxed mb-2">
+                Tipping is not expected in {selected.name}. You can pay the exact amount without worry.
+              </p>
+              <button
+                onClick={() => {
+                  dismissNoTipBanner();
+                  setNoTipDismissed(true);
+                }}
+                className="text-xs font-medium text-brown-medium hover:text-brown-dark transition-colors underline"
+              >
+                Don&apos;t show for this trip (7 days)
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Culture chips */}

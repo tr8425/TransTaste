@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Dish } from "@/lib/types";
 import { FUN_FACTS_LOADING } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
+import { useCredits } from "@/hooks/useCredits";
 
 const FOOD_EMOJIS = ["🍜", "🍣", "🥘", "🍛", "🍲", "🥟", "🍝", "🌮"];
 const TIMEOUT_MS = 180_000; // 3 minutes
@@ -17,6 +18,7 @@ interface MenuMeta {
 
 export default function LoadingScanPage() {
   const router = useRouter();
+  const credits = useCredits();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [menuMeta, setMenuMeta] = useState<MenuMeta | null>(null);
   const [factIndex, setFactIndex] = useState(0);
@@ -24,6 +26,7 @@ export default function LoadingScanPage() {
   const abortRef = useRef<AbortController | null>(null);
   const navigatedRef = useRef(false);
   const startedRef = useRef(false);
+  const creditUsedRef = useRef(false);
 
   useEffect(() => {
     setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING.length));
@@ -78,6 +81,30 @@ export default function LoadingScanPage() {
       sessionStorage.setItem("scanError", "No image or text provided. Please try again.");
       navigateToResults();
       return;
+    }
+
+    // Credit check — read directly from localStorage to avoid race condition
+    if (!creditUsedRef.current) {
+      let canScan = false;
+      try {
+        const raw = localStorage.getItem("transtaste_credits");
+        if (raw) {
+          const stored = JSON.parse(raw);
+          canScan = stored.hasPass || (stored.remaining > 0);
+        } else {
+          canScan = true; // first visit, default 10 credits
+        }
+      } catch {
+        canScan = true;
+      }
+
+      if (!canScan) {
+        sessionStorage.setItem("scanError", "no_credits");
+        navigateToResults();
+        return;
+      }
+      credits.useCredit();
+      creditUsedRef.current = true;
     }
 
     // Preserve menu input for Phase 2 detail requests
@@ -162,9 +189,15 @@ export default function LoadingScanPage() {
 
     const analyze = async () => {
       try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        try {
+          const userKey = localStorage.getItem("transtaste_api_key");
+          if (userKey) headers["x-api-key"] = userKey;
+        } catch { /* ignore */ }
+
         const res = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ input, inputType: type, stream: true }),
           signal: abortController.signal,
         });

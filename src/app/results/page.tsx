@@ -83,6 +83,68 @@ export default function ResultsPage() {
     setShowPaywall(false);
   };
 
+  // No credits state — soft paywall with inline pricing
+  if (scanError === "no_credits") {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-[340px]">
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-amber-brand/10 flex items-center justify-center mx-auto mb-5">
+              <span className="text-3xl">{"\u{1F50D}"}</span>
+            </div>
+            <h2 className="text-lg font-bold text-brown-dark mb-2">
+              No scans remaining
+            </h2>
+            <p className="text-sm text-brown-medium leading-relaxed">
+              You&apos;ve used all your free scans. Pick an option to keep exploring:
+            </p>
+          </div>
+
+          {/* Inline pricing options */}
+          <div className="space-y-2.5 mb-4">
+            <Link
+              href="/profile"
+              className="flex items-center justify-between w-full p-3.5 bg-coral/5 border-2 border-coral rounded-xl hover:bg-coral/10 transition-colors"
+            >
+              <div>
+                <p className="text-sm font-semibold text-brown-dark">7-Day Trip Pass</p>
+                <p className="text-xs text-brown-medium">Unlimited scans for your trip</p>
+              </div>
+              <span className="text-lg font-bold text-coral">$2.99</span>
+            </Link>
+            <Link
+              href="/profile"
+              className="flex items-center justify-between w-full p-3.5 bg-cream-dark border border-brown-light/20 rounded-xl hover:border-coral/30 transition-colors"
+            >
+              <div>
+                <p className="text-sm font-semibold text-brown-dark">50 Scan Credits</p>
+                <p className="text-xs text-brown-medium">Pay as you go</p>
+              </div>
+              <span className="text-base font-bold text-brown-dark">$1.99</span>
+            </Link>
+            <Link
+              href="/profile"
+              className="flex items-center justify-between w-full p-3.5 bg-cream-dark border border-brown-light/20 rounded-xl hover:border-coral/30 transition-colors"
+            >
+              <div>
+                <p className="text-sm font-semibold text-brown-dark">30-Day Trip Pass</p>
+                <p className="text-xs text-brown-medium">For the extended explorer</p>
+              </div>
+              <span className="text-base font-bold text-brown-dark">$5.99</span>
+            </Link>
+          </div>
+
+          <Link
+            href="/"
+            className="block w-full py-3 text-brown-medium font-medium text-sm text-center"
+          >
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   // Error state
   if (scanError) {
     return (

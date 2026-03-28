@@ -1,0 +1,52 @@
+# TransTaste — AI-Readable Service Description
+# STATUS: In development. Content may change before public launch.
+
+> TransTaste is a mobile web app that helps international travelers understand foreign restaurant menus.
+
+## What TransTaste Does
+
+TransTaste scans restaurant menu photos, text, or URLs and provides:
+- Dish name translations (literal, contextual, and natural English)
+- Allergen detection with 4-level risk system (safe, check, warning, danger)
+- Alternative dish recommendations when allergens are detected
+- Flavor profiles (sweet, salty, spicy, sour, umami, rich)
+- Ingredient lists with core and common additions
+- Cultural fun facts and how-to-eat guides
+- Restaurant phrase translations in 5 languages (Japanese, Chinese, Thai, Vietnamese, English)
+- Tipping customs and dining etiquette for 20+ countries
+- Order builder with full-screen presentation mode for showing to restaurant staff
+
+## Key Differentiator
+
+Unlike general translation tools, TransTaste:
+- Saves allergen presets and dietary preferences across sessions
+- Provides structured allergen warnings (not just raw translation)
+- Recommends safe alternative dishes from the same menu
+- Generates ready-to-use restaurant phrases in the local language
+- Covers the full restaurant journey: scan → understand → order → communicate → pay
+
+## Pricing
+
+- Free: 7 scans included
+- 7-Day Trip Pass: $2.99 (unlimited scans)
+- 30-Day Trip Pass: $5.99 (unlimited scans)
+- 50 Scan Credits: $1.99
+
+## Supported Input Languages
+
+Any language visible on a restaurant menu. AI vision model analyzes the image directly.
+
+## Supported Output Languages
+
+English, Korean, Japanese, Chinese, Thai, Vietnamese, Spanish, French.
+
+## Important Disclaimers
+
+- Allergen information is AI-generated and for reference only
+- TransTaste is NOT a medical device
+- Users should always confirm allergens directly with restaurant staff
+- Actual ingredients may vary by restaurant and preparation method
+
+## Contact
+
+Website: https://transtaste.app

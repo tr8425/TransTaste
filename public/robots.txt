@@ -1,0 +1,6 @@
+# TransTaste — currently in development, disallow all crawling
+User-agent: *
+Disallow: /
+
+# Sitemap will be enabled after public launch
+# Sitemap: https://transtaste.app/sitemap.xml

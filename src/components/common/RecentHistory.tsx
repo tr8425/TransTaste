@@ -20,7 +20,7 @@ export default function RecentHistory({ items }: RecentHistoryProps) {
           <Link
             key={i}
             href="/results"
-            className="flex-shrink-0 flex items-center gap-2 bg-cream-dark rounded-full px-3 py-1.5 border border-brown-light/10 hover:border-coral/30 transition-colors"
+            className="flex-shrink-0 flex items-center gap-2 bg-cream-dark rounded-full px-3 py-2.5 min-h-[44px] border border-brown-light/10 hover:border-coral/30 transition-colors"
           >
             <span className="text-sm font-medium text-brown-dark truncate max-w-[120px]">
               {item.original}

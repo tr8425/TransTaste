@@ -4,6 +4,7 @@ import { MenuInput } from "@/lib/ai/provider";
 import { InputType, DishDetail } from "@/lib/types";
 import { buildCacheKey, getCached, setCache } from "@/lib/cache";
 import { createHash } from "crypto";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,8 +24,22 @@ function buildDishCacheKey(phase1Key: string, dishOriginal: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Mock mode
-    if (!process.env.ANTHROPIC_API_KEY) {
+    // Rate limit by IP — 30 detail requests per hour
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rl = await checkRateLimit(`detail:${ip}`, 30, 3600);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "rate_limited", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
+        { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.reset) } }
+      );
+    }
+
+    // Resolve API key: user-provided > server env
+    const userApiKey = request.headers.get("x-api-key");
+    const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
+
+    // Mock mode — no key at all
+    if (!apiKey) {
       return NextResponse.json(
         { error: "network_error", reason: "No API key configured (mock mode)" },
         { status: 422, headers: corsHeaders }
@@ -82,6 +97,7 @@ export async function POST(request: NextRequest) {
       outputLanguage: body.outputLanguage,
       allergenPreset: body.allergenPreset,
       dietaryBeliefs: body.dietaryBeliefs,
+      apiKey,
     };
 
     const result = await fetchDishDetail(

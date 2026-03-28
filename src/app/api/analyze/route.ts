@@ -5,6 +5,7 @@ import { MenuInput } from "@/lib/ai/provider";
 import { createMenuAnalysisStream } from "@/lib/ai/claude";
 import { isAnalysisError, InputType, MenuAnalysisResult } from "@/lib/types";
 import { buildCacheKey, getCached, setCache } from "@/lib/cache";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const VALID_INPUT_TYPES: InputType[] = ['image', 'url', 'text'];
 
@@ -20,8 +21,22 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
-    // If no API key, return mock data for development
-    if (!process.env.ANTHROPIC_API_KEY) {
+    // Rate limit by IP — 20 requests per hour
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rl = await checkRateLimit(`analyze:${ip}`, 20, 3600);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "rate_limited", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
+        { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.reset) } }
+      );
+    }
+
+    // Resolve API key: user-provided (x-api-key header) > server env
+    const userApiKey = request.headers.get("x-api-key");
+    const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
+
+    // If no API key at all, return mock data
+    if (!apiKey) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       return NextResponse.json(MOCK_MENU_RESULT, { headers: corsHeaders });
     }
@@ -85,6 +100,7 @@ export async function POST(request: NextRequest) {
       outputLanguage: body.outputLanguage,
       allergenPreset: body.allergenPreset,
       dietaryBeliefs: body.dietaryBeliefs,
+      apiKey,
     };
 
     // Streaming mode: return SSE stream

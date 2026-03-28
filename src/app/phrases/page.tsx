@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases-data";
+import { useTranslation } from "@/lib/i18n";
 
 const LANGUAGES = [
   { code: "ja", label: "Japanese" },
@@ -23,6 +24,7 @@ function PhraseCard({
   targetLang: LangCode;
   userLang: string;
 }) {
+  const { t } = useTranslation();
   const [bookmarked, setBookmarked] = useState(false);
   const translation = phrase.translations[targetLang];
   const responses = phrase.expectedResponses?.[targetLang] ?? [];
@@ -55,7 +57,7 @@ function PhraseCard({
         <>
           <div className="border-t border-brown-light/20 my-3" />
           <p className="text-xs font-medium text-brown-medium mb-2">
-            Server might say:
+            {t("phrases.serverMightSay")}
           </p>
           <div className="flex flex-wrap gap-2">
             {responses.map((r, i) => (
@@ -99,6 +101,7 @@ function PhraseCard({
 }
 
 export default function PhrasesPage() {
+  const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>("ja");
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("basic");
   const [userLang, setUserLang] = useState("en");
@@ -126,20 +129,20 @@ export default function PhrasesPage() {
     <main className="min-h-screen bg-cream pb-28">
       {/* Header */}
       <header className="px-5 pt-14 pb-4">
-        <h1 className="text-2xl font-bold text-brown-dark">Restaurant Talk</h1>
+        <h1 className="text-2xl font-bold text-brown-dark">{t("phrases.title")}</h1>
         <p className="text-sm text-brown-medium mt-0.5">
-          Show your phone to communicate
+          {t("phrases.subtitle")}
         </p>
       </header>
 
       {/* Language selector */}
       <div className="px-5 mb-4">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex gap-1.5 pb-1">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => setSelectedLanguage(lang.code)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex-1 min-w-0 px-1 py-1.5 rounded-full text-xs font-medium transition-colors text-center ${
                 selectedLanguage === lang.code
                   ? "bg-coral text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"

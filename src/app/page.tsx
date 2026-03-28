@@ -117,7 +117,7 @@ export default function HomePage() {
           {/* Gallery button */}
           <button
             onClick={handleGallery}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
           >
             <svg
               width="16"
@@ -137,7 +137,7 @@ export default function HomePage() {
           {/* URL button */}
           <button
             onClick={() => setShowUrlModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
           >
             <svg
               width="16"
@@ -156,7 +156,7 @@ export default function HomePage() {
           {/* Text button */}
           <button
             onClick={() => setShowTextModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
           >
             <svg
               width="16"
@@ -190,27 +190,25 @@ export default function HomePage() {
         <RecentHistory items={MOCK_RECENT_SCANS} />
       </div>
 
-      {/* Quick access tools */}
+      {/* Quick access — Travel Tools */}
       <div className="px-5 pt-4 pb-2">
-        <h3 className="text-xs font-medium text-brown-medium mb-3 px-1 uppercase tracking-wider">
-          Travel Tools
-        </h3>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { href: "/phrases", emoji: "💬", label: "Phrases" },
-            { href: "/tip-culture", emoji: "💡", label: "Tip Guide" },
-            { href: "/order", emoji: "📋", label: "Order" },
-          ].map((tool) => (
-            <Link
-              key={tool.href}
-              href={tool.href}
-              className="bg-cream-dark rounded-xl p-3 flex flex-col items-center gap-1.5 hover:bg-brown-light/10 transition-colors"
-            >
-              <span className="text-xl">{tool.emoji}</span>
-              <span className="text-xs font-medium text-brown-dark">{tool.label}</span>
-            </Link>
-          ))}
-        </div>
+        <Link
+          href="/travel"
+          className="flex items-center justify-between bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors active:scale-[0.98]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-coral/10 flex items-center justify-center">
+              <span className="text-lg">{"\u{1F30D}"}</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-brown-dark">Travel Tools</p>
+              <p className="text-xs text-brown-medium">Phrases, tips & dining guide</p>
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4A882" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </Link>
       </div>
 
       {/* Trending dishes section */}

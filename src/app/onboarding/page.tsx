@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/lib/i18n";
 
 /* ── Data ──────────────────────────────────────────────── */
 
@@ -82,6 +83,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
 
   // Step 2 state
@@ -152,9 +154,9 @@ export default function OnboardingPage() {
                 <CameraIcon />
               </div>
               <div>
-                <p className="text-sm font-semibold text-brown-dark">Scan any menu</p>
+                <p className="text-sm font-semibold text-brown-dark">{t("onboarding.feature1Title")}</p>
                 <p className="text-sm text-brown-medium mt-0.5">
-                  Get instant translations and dish info
+                  {t("onboarding.feature1Desc")}
                 </p>
               </div>
             </div>
@@ -165,9 +167,9 @@ export default function OnboardingPage() {
                 <ShieldIcon />
               </div>
               <div>
-                <p className="text-sm font-semibold text-brown-dark">Know your allergens</p>
+                <p className="text-sm font-semibold text-brown-dark">{t("onboarding.feature2Title")}</p>
                 <p className="text-sm text-brown-medium mt-0.5">
-                  Set your dietary preferences once, stay safe everywhere
+                  {t("onboarding.feature2Desc")}
                 </p>
               </div>
             </div>
@@ -178,9 +180,9 @@ export default function OnboardingPage() {
                 <ChatIcon />
               </div>
               <div>
-                <p className="text-sm font-semibold text-brown-dark">Talk to servers</p>
+                <p className="text-sm font-semibold text-brown-dark">{t("onboarding.feature3Title")}</p>
                 <p className="text-sm text-brown-medium mt-0.5">
-                  Ready-made phrases in the local language
+                  {t("onboarding.feature3Desc")}
                 </p>
               </div>
             </div>
@@ -189,7 +191,7 @@ export default function OnboardingPage() {
           {/* Free scans badge */}
           <div className="flex justify-center mb-8">
             <span className="bg-coral text-white text-xs font-semibold px-4 py-1.5 rounded-full">
-              10 free scans included
+              {t("onboarding.freeScans")}
             </span>
           </div>
 
@@ -198,7 +200,7 @@ export default function OnboardingPage() {
             onClick={() => setStep(1)}
             className="w-full py-3.5 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors active:scale-[0.98]"
           >
-            Get Started
+            {t("onboarding.getStarted")}
           </button>
         </div>
 
@@ -212,7 +214,7 @@ export default function OnboardingPage() {
         >
           {/* Output Language */}
           <section className="mb-8">
-            <h2 className="text-lg font-semibold text-brown-dark mb-3">I speak...</h2>
+            <h2 className="text-lg font-semibold text-brown-dark mb-3">{t("onboarding.iSpeak")}</h2>
             <div className="grid grid-cols-2 gap-2">
               {LANGUAGES.map((lang) => {
                 const selected = language === lang.code;
@@ -238,9 +240,9 @@ export default function OnboardingPage() {
 
           {/* Allergy Preset */}
           <section className="mb-8">
-            <h2 className="text-lg font-semibold text-brown-dark mb-1">Any allergies?</h2>
+            <h2 className="text-lg font-semibold text-brown-dark mb-1">{t("onboarding.anyAllergies")}</h2>
             <p className="text-sm text-brown-medium mb-3">
-              We&apos;ll flag these in every scan
+              {t("onboarding.allergySubtitle")}
             </p>
             <div className="grid grid-cols-3 gap-2">
               {ALLERGENS.map((item) => {
@@ -262,9 +264,14 @@ export default function OnboardingPage() {
             </div>
           </section>
 
+          {/* Disclaimer */}
+          <p className="text-[10px] text-brown-medium/50 leading-relaxed mb-6">
+            {t("disclaimer.onboarding")}
+          </p>
+
           {/* Dietary Beliefs */}
           <section className="mb-8">
-            <h2 className="text-lg font-semibold text-brown-dark mb-3">Dietary preferences</h2>
+            <h2 className="text-lg font-semibold text-brown-dark mb-3">{t("onboarding.dietaryPrefs")}</h2>
             <div className="flex flex-wrap gap-2">
               {DIETARY.map((item) => {
                 const selected = dietary.includes(item.id);
@@ -291,13 +298,13 @@ export default function OnboardingPage() {
               onClick={handleSave}
               className="w-full py-3.5 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors active:scale-[0.98] mb-3"
             >
-              Save &amp; Start Scanning
+              {t("onboarding.saveAndStart")}
             </button>
             <button
               onClick={handleSkip}
               className="w-full py-2 text-sm text-brown-medium font-medium hover:text-brown-dark transition-colors"
             >
-              Skip for now
+              {t("onboarding.skipForNow")}
             </button>
           </div>
         </div>

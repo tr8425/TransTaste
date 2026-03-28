@@ -149,6 +149,20 @@ export default function DishCard({
             </div>
           </div>
         )}
+
+        {/* Disclosure — cultural context note */}
+        {detail.disclosure && (
+          <div className="mb-4">
+            <div className="bg-brown-dark/5 rounded-xl p-4 border-l-4 border-l-brown-medium">
+              <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
+                Cultural Note
+              </h4>
+              <p className="text-sm text-brown-dark leading-relaxed">
+                {detail.disclosure.message}
+              </p>
+            </div>
+          </div>
+        )}
       </>
     );
   };
@@ -208,6 +222,33 @@ export default function DishCard({
         <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
           Allergens & Dietary
         </h3>
+
+        {/* Risk-level action guide */}
+        {dish.allergen_risk === "danger" && (
+          <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-danger/10 rounded-lg border border-danger/20">
+            <span className="text-sm flex-shrink-0">{"❌"}</span>
+            <p className="text-xs text-danger font-medium leading-relaxed">
+              Contains your allergen. Consider an alternative dish.
+            </p>
+          </div>
+        )}
+        {dish.allergen_risk === "warning" && (
+          <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+            <span className="text-sm flex-shrink-0">{"⚠️"}</span>
+            <p className="text-xs text-amber-700 font-medium leading-relaxed">
+              May contain allergens. Ask staff if it can be prepared without.
+            </p>
+          </div>
+        )}
+        {dish.allergen_risk === "check" && (
+          <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-amber-brand/10 rounded-lg border border-amber-brand/20">
+            <span className="text-sm flex-shrink-0">{"〰️"}</span>
+            <p className="text-xs text-amber-brand font-medium leading-relaxed">
+              Possible allergen presence. Ask staff to confirm ingredients.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-1.5">
           {dish.allergens?.map((allergen) => (
             <AllergyTag key={allergen} allergen={allergen} />
@@ -228,6 +269,9 @@ export default function DishCard({
             </span>
           )}
         </div>
+        <p className="text-[10px] text-brown-medium/40 mt-2 leading-relaxed">
+          AI-generated info for reference only. Confirm allergens with restaurant staff.
+        </p>
       </div>
 
       <hr className="border-brown-light/10 my-4" />
@@ -237,7 +281,7 @@ export default function DishCard({
         renderDetail()
       ) : (
         <div className="space-y-3">
-          <LockedBlock showIcon={false}>
+          <LockedBlock showIcon={true}>
             {detail ? (
               <div className="space-y-4">
                 <div>
@@ -258,7 +302,37 @@ export default function DishCard({
                 )}
               </div>
             ) : (
-              <DetailSkeleton />
+              <div className="space-y-4 py-2">
+                <div>
+                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
+                    Flavor Profile
+                  </h3>
+                  <div className="flex justify-center py-2">
+                    <FlavorRadar
+                      profile={{ sweet: 3, salty: 4, spicy: 2, sour: 1, umami: 5, rich: 3 }}
+                      size={140}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
+                    Ingredients
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["Main ingredient", "Seasoning", "Spice"].map((name) => (
+                      <IngredientChip key={name} name={name} isAllergen={false} />
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-cream-dark rounded-xl p-4">
+                  <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
+                    Fun Fact
+                  </h4>
+                  <p className="text-sm text-brown-dark leading-relaxed">
+                    Unlock to discover the story behind this dish, how to eat it, and more.
+                  </p>
+                </div>
+              </div>
             )}
           </LockedBlock>
 

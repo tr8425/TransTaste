@@ -18,7 +18,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON mu
   },
   "dishes": [
     {
-      "original": "string — exact text from the menu",
+      "original": "string — dish name only, WITHOUT price numbers (e.g. '불고기' not '불고기 18000')",
       "price": "string | null — numeric value as string",
       "currency": "string | null — ISO 4217 code: KRW, JPY, USD, THB, EUR, etc.",
       "price_display": "string | null — formatted: ₩17,000, ¥1,200, $14.00, ฿450",
@@ -219,6 +219,7 @@ Include the items you could read in a partial response — return a valid MenuAn
 
 # IMPORTANT RULES
 1. Analyze EVERY dish visible on the menu. Do not skip items.
+2. The "original" field must contain ONLY the dish name — strip all price numbers, currency symbols, and quantity info. Prices go in the "price" field.
 3. Flavor profiles should be relative to the cuisine (e.g., Korean "not spicy" is still spicier than Western baseline).
 4. For dietary flags, err on the side of caution. If uncertain about halal, set to null.
 5. image_search_query should be specific enough to find an accurate photo of this exact dish.
@@ -240,7 +241,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary):
   },
   "dishes": [
     {
-      "original": "string — exact text from the menu",
+      "original": "string — dish name only, WITHOUT price numbers (e.g. '불고기' not '불고기 18000')",
       "price": "string | null — numeric value as string",
       "currency": "string | null — ISO 4217 code: KRW, JPY, USD, THB, EUR, etc.",
       "price_display": "string | null — formatted with currency symbol: ₩17,000, ¥1,200, $14.00, ฿450",
@@ -303,9 +304,10 @@ Unreadable: {"error": "ocr_failed", "reason": "..."}
 
 # RULES
 1. Analyze EVERY dish visible. Do not skip items.
-2. If uncertain about halal, set to null.
-3. Output language matches user's requested language (default: English).
-4. Keep this response CONCISE — only the fields above, nothing extra.`;
+2. The "original" field must contain ONLY the dish name — strip all price numbers, currency symbols, and quantity info. Prices go in the "price" field.
+3. If uncertain about halal, set to null.
+4. Output language matches user's requested language (default: English).
+5. Keep this response CONCISE — only the fields above, nothing extra.`;
 
 // Phase 2: Detail prompt — single dish deep analysis
 const SYSTEM_PROMPT_DETAIL = `You are TransTaste. Given a menu and a specific dish name, return a detailed analysis of ONLY that one dish.
@@ -552,7 +554,7 @@ export const claudeSonnetProvider: AIProvider = {
   name: 'claude-sonnet',
 
   async analyzeMenu(input: MenuInput): Promise<MenuAnalysisResult | AnalysisError> {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = input.apiKey || process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is not set');
     }
@@ -644,7 +646,7 @@ export function createMenuAnalysisStream(
       };
 
       try {
-        const apiKey = process.env.ANTHROPIC_API_KEY;
+        const apiKey = input.apiKey || process.env.ANTHROPIC_API_KEY;
         if (!apiKey) throw new Error('ANTHROPIC_API_KEY not set');
 
         console.log('[TransTaste] Starting streaming analysis (lite schema)...');
@@ -728,7 +730,7 @@ export async function fetchDishDetail(
   dishOriginal: string,
   dishCategory: string,
 ): Promise<{ data: import('../types').DishDetail } | { error: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = input.apiKey || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return { error: 'ANTHROPIC_API_KEY not set' };
 
   const client = new Anthropic({ apiKey });

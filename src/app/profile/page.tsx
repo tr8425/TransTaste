@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useCredits } from "@/hooks/useCredits";
 import TripPassPaywall from "@/components/paywall/TripPassPaywall";
-import { AllergenType, DietaryLabel } from "@/lib/types";
 
 /* ─── Constants ─── */
 
@@ -31,49 +32,84 @@ const MENU_LANGUAGES = [
   { value: "fr", label: "French" },
 ];
 
-const ALL_ALLERGENS: { value: AllergenType; label: string; emoji: string }[] = [
+const ALL_ALLERGENS: { value: string; label: string; emoji: string }[] = [
   { value: "shellfish", label: "Shellfish", emoji: "🦐" },
-  { value: "pork", label: "Pork", emoji: "🥓" },
-  { value: "gluten", label: "Gluten", emoji: "🌾" },
-  { value: "dairy", label: "Dairy", emoji: "🥛" },
-  { value: "nuts", label: "Nuts", emoji: "🥜" },
-  { value: "egg", label: "Egg", emoji: "🥚" },
+  { value: "peanuts", label: "Peanuts", emoji: "🥜" },
+  { value: "tree_nuts", label: "Tree Nuts", emoji: "🌰" },
+  { value: "milk", label: "Milk", emoji: "🥛" },
+  { value: "eggs", label: "Eggs", emoji: "🥚" },
+  { value: "fish", label: "Fish", emoji: "🐟" },
   { value: "soy", label: "Soy", emoji: "🫘" },
+  { value: "wheat_gluten", label: "Wheat/Gluten", emoji: "🌾" },
+  { value: "sesame", label: "Sesame", emoji: "🫘" },
+  { value: "celery", label: "Celery", emoji: "🥬" },
+  { value: "mustard", label: "Mustard", emoji: "🟡" },
+  { value: "lupin", label: "Lupin", emoji: "🌿" },
+  { value: "molluscs", label: "Molluscs", emoji: "🐚" },
+  { value: "sulphites", label: "Sulphites", emoji: "🧪" },
 ];
 
-const ALL_DIETARY: { value: DietaryLabel; label: string }[] = [
+const ALL_DIETARY: { value: string; label: string }[] = [
   { value: "vegan", label: "Vegan" },
   { value: "vegetarian", label: "Vegetarian" },
   { value: "halal", label: "Halal" },
-  { value: "gluten-free", label: "Gluten-Free" },
+  { value: "kosher", label: "Kosher" },
+  { value: "no_beef", label: "No Beef (Hindu)" },
+  { value: "no_alcohol", label: "No Alcohol" },
 ];
 
 /* ─── Settings Shape ─── */
 
 interface UserSettings {
-  outputLanguage: string;
-  menuLanguage: string;
-  allergens: AllergenType[];
-  dietary: DietaryLabel[];
+  output_language: string;
+  menu_language: string;
+  allergen_preset: string[];
+  dietary_beliefs: string[];
   email: string | null;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
-  outputLanguage: "en",
-  menuLanguage: "auto",
-  allergens: [],
-  dietary: [],
+  output_language: "en",
+  menu_language: "auto",
+  allergen_preset: [],
+  dietary_beliefs: [],
   email: null,
 };
 
 /* ─── Page ─── */
 
 export default function ProfilePage() {
+  return (
+    <Suspense fallback={null}>
+      <ProfileContent />
+    </Suspense>
+  );
+}
+
+function ProfileContent() {
   const credits = useCredits();
+  const searchParams = useSearchParams();
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [showAllergenGrid, setShowAllergenGrid] = useState(false);
   const [showDietaryGrid, setShowDietaryGrid] = useState(false);
+  const [paymentBanner, setPaymentBanner] = useState<"success" | "cancelled" | null>(null);
+
+  // Handle payment redirect query params — delay timer until after first paint
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success" || payment === "cancelled") {
+      setPaymentBanner(payment);
+      const rafId = requestAnimationFrame(() => {
+        timer = setTimeout(() => setPaymentBanner(null), 6000);
+      });
+      let timer: ReturnType<typeof setTimeout>;
+      return () => {
+        cancelAnimationFrame(rafId);
+        clearTimeout(timer);
+      };
+    }
+  }, [searchParams]);
 
   // Load settings on mount
   useEffect(() => {
@@ -97,24 +133,49 @@ export default function ProfilePage() {
     }
   }, []);
 
-  const toggleAllergen = (a: AllergenType) => {
-    const next = settings.allergens.includes(a)
-      ? settings.allergens.filter((x) => x !== a)
-      : [...settings.allergens, a];
-    save({ ...settings, allergens: next });
+  const toggleAllergen = (a: string) => {
+    const next = settings.allergen_preset.includes(a)
+      ? settings.allergen_preset.filter((x) => x !== a)
+      : [...settings.allergen_preset, a];
+    save({ ...settings, allergen_preset: next });
   };
 
-  const toggleDietary = (d: DietaryLabel) => {
-    const next = settings.dietary.includes(d)
-      ? settings.dietary.filter((x) => x !== d)
-      : [...settings.dietary, d];
-    save({ ...settings, dietary: next });
+  const toggleDietary = (d: string) => {
+    const next = settings.dietary_beliefs.includes(d)
+      ? settings.dietary_beliefs.filter((x) => x !== d)
+      : [...settings.dietary_beliefs, d];
+    save({ ...settings, dietary_beliefs: next });
   };
 
-  const handlePurchase = (planId: string) => {
+  const handlePurchase = async (planId: string) => {
+    // Map UI plan IDs to Stripe product IDs
+    const stripeProductId =
+      planId === "7d" ? "pass_7d" :
+      planId === "30d" ? "pass_30d" :
+      planId;
+
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: stripeProductId }),
+      });
+
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) {
+          window.location.href = url;
+          return;
+        }
+      }
+    } catch {
+      // Stripe unavailable — fall through to local purchase
+    }
+
+    // Fallback: local credit management (dev/demo mode)
     if (planId === "7d" || planId === "30d") {
       credits.purchasePass(planId);
-    } else if (planId === "credits50") {
+    } else if (planId === "credits_50") {
       credits.purchaseCredits(50);
     }
     setPaywallOpen(false);
@@ -134,6 +195,29 @@ export default function ProfilePage() {
       <div className="px-5 pt-12 pb-4">
         <h1 className="text-xl font-bold text-brown-dark">Profile</h1>
       </div>
+
+      {/* Payment feedback banner */}
+      {paymentBanner && (
+        <div
+          className={`mx-5 mb-2 px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between ${
+            paymentBanner === "success"
+              ? "bg-success/15 text-success"
+              : "bg-amber-brand/15 text-amber-brand"
+          }`}
+        >
+          <span>
+            {paymentBanner === "success"
+              ? "Payment successful! Your scans have been updated."
+              : "Payment was cancelled. No charges were made."}
+          </span>
+          <button
+            onClick={() => setPaymentBanner(null)}
+            className="ml-2 text-current opacity-60 hover:opacity-100"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 px-5 pb-28 space-y-4">
@@ -191,9 +275,9 @@ export default function ProfilePage() {
               I speak
             </span>
             <select
-              value={settings.outputLanguage}
+              value={settings.output_language}
               onChange={(e) =>
-                save({ ...settings, outputLanguage: e.target.value })
+                save({ ...settings, output_language: e.target.value })
               }
               className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark appearance-none focus:outline-none focus:ring-2 focus:ring-coral/30"
             >
@@ -211,9 +295,9 @@ export default function ProfilePage() {
               Menu language
             </span>
             <select
-              value={settings.menuLanguage}
+              value={settings.menu_language}
               onChange={(e) =>
-                save({ ...settings, menuLanguage: e.target.value })
+                save({ ...settings, menu_language: e.target.value })
               }
               className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark appearance-none focus:outline-none focus:ring-2 focus:ring-coral/30"
             >
@@ -232,9 +316,9 @@ export default function ProfilePage() {
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
             Allergies
           </h2>
-          {settings.allergens.length > 0 ? (
+          {settings.allergen_preset.length > 0 ? (
             <div className="flex flex-wrap gap-1.5 mb-2">
-              {settings.allergens.map((a) => {
+              {settings.allergen_preset.map((a) => {
                 const cfg = ALL_ALLERGENS.find((x) => x.value === a);
                 return (
                   <span
@@ -261,7 +345,7 @@ export default function ProfilePage() {
           {showAllergenGrid && (
             <div className="grid grid-cols-3 gap-2 mt-3">
               {ALL_ALLERGENS.map((a) => {
-                const selected = settings.allergens.includes(a.value);
+                const selected = settings.allergen_preset.includes(a.value);
                 return (
                   <button
                     key={a.value}
@@ -285,9 +369,9 @@ export default function ProfilePage() {
             <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
               Dietary Preferences
             </h2>
-            {settings.dietary.length > 0 ? (
+            {settings.dietary_beliefs.length > 0 ? (
               <div className="flex flex-wrap gap-1.5 mb-2">
-                {settings.dietary.map((d) => {
+                {settings.dietary_beliefs.map((d) => {
                   const cfg = ALL_DIETARY.find((x) => x.value === d);
                   return (
                     <span
@@ -314,7 +398,7 @@ export default function ProfilePage() {
             {showDietaryGrid && (
               <div className="grid grid-cols-2 gap-2 mt-3">
                 {ALL_DIETARY.map((d) => {
-                  const selected = settings.dietary.includes(d.value);
+                  const selected = settings.dietary_beliefs.includes(d.value);
                   return (
                     <button
                       key={d.value}
@@ -332,6 +416,63 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* ── Tip Guide Settings ── */}
+        <div className="bg-cream-dark rounded-xl p-4">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+            Tip Guide
+          </h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-brown-dark">No-tip country info</p>
+              <p className="text-xs text-brown-medium/60">
+                Show banner when visiting countries where tipping isn&apos;t expected
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                try {
+                  const key = "transtaste_no_tip_dismissed";
+                  const raw = localStorage.getItem(key);
+                  if (raw && new Date(raw) > new Date()) {
+                    localStorage.removeItem(key);
+                  }
+                } catch { /* ignore */ }
+              }}
+              className="text-xs font-medium text-coral hover:text-coral-dark transition-colors whitespace-nowrap ml-3"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        {/* ── API Key (dev/demo) ── */}
+        <div className="bg-cream-dark rounded-xl p-4">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+            API Key
+          </h2>
+          <p className="text-xs text-brown-medium/60 mb-2">
+            Use your own Anthropic API key for unlimited scans
+          </p>
+          <input
+            type="password"
+            placeholder="sk-ant-api03-..."
+            value={(() => {
+              try { return localStorage.getItem("transtaste_api_key") || ""; } catch { return ""; }
+            })()}
+            onChange={(e) => {
+              try {
+                const v = e.target.value.trim();
+                if (v) localStorage.setItem("transtaste_api_key", v);
+                else localStorage.removeItem("transtaste_api_key");
+              } catch { /* ignore */ }
+            }}
+            className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30 font-mono"
+          />
+          <p className="text-[10px] text-brown-medium/40 mt-1.5">
+            Stored locally on your device only. Never sent to our servers.
+          </p>
         </div>
 
         {/* ── Account ── */}
@@ -365,13 +506,13 @@ export default function ProfilePage() {
             TransTaste v0.2.0
           </p>
           <div className="flex items-center justify-center gap-3 text-xs text-brown-medium/50">
-            <button className="hover:text-brown-medium transition-colors underline">
+            <Link href="/terms" className="hover:text-brown-medium transition-colors underline">
               Terms
-            </button>
+            </Link>
             <span>/</span>
-            <button className="hover:text-brown-medium transition-colors underline">
+            <Link href="/privacy" className="hover:text-brown-medium transition-colors underline">
               Privacy
-            </button>
+            </Link>
           </div>
         </div>
       </div>

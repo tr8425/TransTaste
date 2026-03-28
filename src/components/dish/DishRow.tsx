@@ -10,6 +10,13 @@ interface DishRowProps {
   isInCart?: boolean;
 }
 
+const RISK_BADGE: Record<string, { label: string; className: string } | null> = {
+  danger: { label: "Allergen", className: "bg-danger text-white" },
+  warning: { label: "Check", className: "bg-amber-500 text-white" },
+  check: { label: "Ask staff", className: "bg-amber-brand/20 text-amber-brand" },
+  safe: null,
+};
+
 const CATEGORY_COLORS: Record<string, string> = {
   main: "bg-coral/20",
   soup: "bg-amber-brand/20",
@@ -22,6 +29,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function DishRow({ dish, onClick, onAddToCart, isInCart }: DishRowProps) {
   const bgColor = CATEGORY_COLORS[dish.category] || "bg-cream-dark";
+  const riskBadge = dish.allergen_risk ? RISK_BADGE[dish.allergen_risk] : null;
 
   return (
     <button
@@ -65,9 +73,14 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart }: DishRo
           )}
         </div>
 
-        {/* Allergen tags */}
+        {/* Allergen risk badge + tags */}
         {dish.allergens?.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1.5">
+          <div className="flex flex-wrap items-center gap-1 mt-1.5">
+            {riskBadge && (
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${riskBadge.className}`}>
+                {riskBadge.label}
+              </span>
+            )}
             {dish.allergens?.map((allergen) => (
               <AllergyTag key={allergen} allergen={allergen} />
             ))}

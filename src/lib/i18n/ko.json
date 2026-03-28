@@ -1,0 +1,228 @@
+{
+  "common": {
+    "appName": "TransTaste",
+    "back": "뒤로",
+    "cancel": "취소",
+    "save": "저장",
+    "edit": "편집",
+    "done": "완료",
+    "reset": "초기화",
+    "skip": "건너뛰기",
+    "tryAgain": "다시 시도",
+    "backToHome": "홈으로 돌아가기",
+    "scanAMenu": "메뉴 스캔하기",
+    "version": "TransTaste v0.2.0"
+  },
+
+  "onboarding": {
+    "getStarted": "시작하기",
+    "skipForNow": "나중에 하기",
+    "saveAndStart": "저장하고 스캔 시작",
+    "freeScans": "무료 스캔 10회 포함",
+    "iSpeak": "내가 사용하는 언어...",
+    "anyAllergies": "알레르기가 있으세요?",
+    "allergySubtitle": "매번 스캔할 때 알려드릴게요",
+    "dietaryPrefs": "식이 선호도",
+    "feature1Title": "어떤 메뉴판도 스캔",
+    "feature1Desc": "즉시 번역과 요리 정보를 확인하세요",
+    "feature2Title": "알레르기 확인",
+    "feature2Desc": "한 번 설정하면 어디서든 안심",
+    "feature3Title": "직원과 대화",
+    "feature3Desc": "현지어로 된 레스토랑 회화"
+  },
+
+  "home": {
+    "heroTitle": "메뉴판을 찍으면, 모든 요리를 이해합니다",
+    "heroDesc": "외국 메뉴판에 카메라를 가리키면 번역, 알레르기, 재미있는 사실을 즉시 확인하세요",
+    "scanMenu": "메뉴 스캔",
+    "gallery": "갤러리",
+    "url": "URL",
+    "text": "텍스트",
+    "travelTools": "여행 도구",
+    "travelToolsDesc": "회화, 팁, 식사 가이드",
+    "popularDishes": "근처 인기 요리",
+    "recentScans": "최근 스캔",
+    "urlModalTitle": "메뉴 이미지 URL 붙여넣기",
+    "urlPlaceholder": "https://example.com/menu.jpg",
+    "fetchAndAnalyze": "불러와서 분석",
+    "textModalTitle": "요리명 입력",
+    "textPlaceholder": "요리명을 한 줄씩 입력하세요:\n팟타이\n똠얌꿍\n솜탐",
+    "analyzeDishes": "요리 분석"
+  },
+
+  "loading": {
+    "analyzing": "메뉴를 분석하고 있어요...",
+    "identifying": "요리, 맛, 알레르기를 확인하는 중",
+    "scanning": "{type} 스캔 중...",
+    "found": "{count}개 요리 발견"
+  },
+
+  "results": {
+    "menuResults": "메뉴 분석 결과",
+    "dishesFound": "{count}개 요리 발견",
+    "noCategory": "이 카테고리에 요리가 없습니다",
+    "seeCombo": "콤보 추천 보기",
+    "hideCombo": "콤보 숨기기",
+    "viewOrder": "주문 보기",
+    "item": "개",
+    "items": "개",
+    "addToOrder": "주문에 추가",
+    "added": "추가됨 ✓",
+    "noScans": "스캔 횟수가 없습니다",
+    "noScansDesc": "무료 스캔을 모두 사용했습니다. 계속 사용하려면:",
+    "somethingWrong": "문제가 발생했습니다"
+  },
+
+  "dish": {
+    "flavorProfile": "맛 프로필",
+    "ingredients": "재료",
+    "howToEat": "먹는 방법",
+    "culturalNote": "문화 정보",
+    "allergensAndDietary": "알레르기 & 식이",
+    "unlockFlavors": "맛, 재미있는 사실 등 잠금 해제 — $2.99",
+    "tripPassNote": "7일 트립 패스 · 일회성 결제",
+    "allergenDanger": "알레르기 성분이 포함되어 있습니다. 다른 요리를 고려해보세요.",
+    "allergenWarning": "알레르기 성분이 있을 수 있습니다. 직원에게 빼달라고 요청해보세요.",
+    "allergenCheck": "알레르기 성분이 들어갈 수 있습니다. 직원에게 재료를 확인해보세요.",
+    "couldNotLoad": "상세 정보를 불러올 수 없습니다",
+    "tapToRetry": "탭하여 다시 시도"
+  },
+
+  "order": {
+    "yourOrder": "내 주문",
+    "emptyCart": "주문이 비어있습니다",
+    "emptyCartDesc": "결과 화면에서 요리를 추가하세요",
+    "browseMenu": "메뉴 보기",
+    "total": "합계",
+    "showToServer": "직원에게 보여주기",
+    "allergyBanner": "알레르기 있음",
+    "tipSuggestion": "팁 추천"
+  },
+
+  "present": {
+    "noItems": "주문 항목이 없습니다",
+    "goBack": "돌아가기",
+    "disclaimer": "이 주문서는 AI(TransTaste)가 생성했습니다. 식당 직원에게 항목을 확인해주세요. 알레르기 정보는 참고용이며 실제 조리 방식과 다를 수 있습니다."
+  },
+
+  "travel": {
+    "title": "여행 도구",
+    "subtitle": "식당에서 필요한 모든 것",
+    "phrases": "회화",
+    "phrasesDesc": "현지어 레스토랑 회화",
+    "tipCulture": "팁 & 문화",
+    "tipCultureDesc": "팁 문화와 식사 예절",
+    "order": "주문",
+    "orderDesc": "주문서 만들고 보여주기",
+    "travelTip": "여행 팁",
+    "quickWater": "물 주세요",
+    "quickCheck": "계산서 주세요",
+    "quickNoSpicy": "매운 거 빼주세요",
+    "quickAllergy": "알레르기가 있어요..."
+  },
+
+  "phrases": {
+    "title": "레스토랑 회화",
+    "subtitle": "휴대폰을 보여주며 소통하세요",
+    "serverMightSay": "직원이 할 수 있는 말:"
+  },
+
+  "tipCulture": {
+    "title": "팁 & 문화 가이드",
+    "basedOnScan": "마지막 스캔 기준: {flag} {country}",
+    "tipping": "팁",
+    "noTip": "팁 없음",
+    "optional": "선택적 {min}-{max}%",
+    "expected": "권장 {min}-{max}%",
+    "restaurantCulture": "식당 문화",
+    "diningEtiquette": "식사 예절",
+    "goodToKnow": "알아두면 좋은 것",
+    "noTipBannerTitle": "여기서는 팁이 필요 없어요!",
+    "noTipBannerDesc": "{country}에서는 팁을 주지 않아도 됩니다. 정확한 금액만 지불하세요.",
+    "dontShowTrip": "이번 여행 동안 숨기기 (7일)",
+    "freeWater": "무료 물",
+    "paidWater": "유료 물",
+    "selfWater": "셀프 서비스",
+    "payTable": "테이블에서 결제",
+    "payCounter": "카운터에서 결제",
+    "payEither": "테이블 또는 카운터에서 결제",
+    "taxIncluded": "세금 포함",
+    "taxExtra": "세금 별도",
+    "freeSides": "반찬 무료"
+  },
+
+  "profile": {
+    "title": "프로필",
+    "tripPassActive": "트립 패스 활성화",
+    "active": "활성",
+    "scansLeft": "남은 스캔 {count}회",
+    "expires": "{date} 만료",
+    "getMoreScans": "스캔 추가 구매",
+    "language": "언어",
+    "iSpeak": "내가 사용하는 언어",
+    "menuLanguage": "메뉴 언어",
+    "allergies": "알레르기",
+    "noAllergens": "선택된 알레르기 없음",
+    "dietaryPrefs": "식이 선호도",
+    "noDietary": "선택된 식이 선호도 없음",
+    "tipGuide": "팁 가이드",
+    "tipGuideDesc": "팁이 필요 없는 국가 방문 시 알림 표시",
+    "apiKey": "API 키",
+    "apiKeyDesc": "내 Anthropic API 키로 무제한 스캔",
+    "apiKeyNote": "기기에만 저장되며 서버로 전송되지 않습니다.",
+    "account": "계정",
+    "notSignedIn": "로그인되지 않음",
+    "signIn": "로그인",
+    "signOut": "로그아웃",
+    "terms": "이용약관",
+    "privacy": "개인정보처리방침"
+  },
+
+  "paywall": {
+    "title": "더 알아보고 싶으세요?",
+    "subtitle": "맛 프로필, 재미있는 사실, 먹는 방법 잠금 해제",
+    "skip": "건너뛰기",
+    "reassurance": "일회성 결제 · 구독 없음 · 즉시 이용",
+    "pass7d": "7일 트립 패스",
+    "pass7dDesc": "일주일 여행에 딱",
+    "pass7dBadge": "여행자 픽",
+    "pass30d": "30일 트립 패스",
+    "pass30dDesc": "장기 여행자를 위한",
+    "credits50": "50 크레딧",
+    "credits50Desc": "쓰는 만큼만 결제",
+    "unlimitedScans": "여행 기간 무제한 스캔"
+  },
+
+  "payment": {
+    "success": "결제가 완료되었습니다! 스캔 횟수가 업데이트되었습니다.",
+    "cancelled": "결제가 취소되었습니다. 청구된 금액은 없습니다."
+  },
+
+  "history": {
+    "title": "스캔 기록",
+    "subtitle": "최근 메뉴 스캔",
+    "noHistory": "아직 스캔 기록이 없습니다",
+    "noHistoryDesc": "메뉴를 스캔하면 여기에 기록이 표시됩니다"
+  },
+
+  "camera": {
+    "takePhoto": "사진 찍기",
+    "chooseFromGallery": "갤러리에서 선택",
+    "cameraNotAvailable": "카메라를 사용할 수 없습니다",
+    "useGallery": "갤러리 사용하기"
+  },
+
+  "disclaimer": {
+    "onboarding": "알레르기 정보는 AI가 생성한 참고용 정보입니다. 의료적 조언이 아닙니다. 실제 재료는 식당마다 다를 수 있으니 주문 전 꼭 직원에게 확인하세요.",
+    "dishCard": "AI 생성 참고 정보입니다. 알레르기는 식당 직원에게 확인하세요.",
+    "present": "이 주문서는 AI(TransTaste)가 생성했습니다. 식당 직원에게 항목을 확인해주세요. 알레르기 정보는 참고용이며 실제 조리 방식과 다를 수 있습니다."
+  },
+
+  "errors": {
+    "noInput": "이미지 또는 텍스트가 없습니다. 다시 시도해주세요.",
+    "timeout": "3분 후 분석이 시간 초과되었습니다. 더 선명한 사진으로 다시 시도해주세요.",
+    "streamEnded": "스트림이 예기치 않게 종료되었습니다. 다시 시도해주세요.",
+    "rateLimited": "요청이 너무 많습니다. {minutes}분 후에 다시 시도해주세요.",
+    "noApiKey": "API 키가 설정되지 않았습니다"
+  }
+}
