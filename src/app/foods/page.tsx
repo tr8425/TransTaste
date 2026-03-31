@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { FOOD_DATABASE } from "@/lib/food-database";
+import { t } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Food Guide — Popular Dishes Explained",
@@ -18,9 +19,9 @@ export default function FoodsIndexPage() {
   return (
     <main className="min-h-screen bg-cream pb-28">
       <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
-        <h1 className="text-2xl font-bold text-brown-dark mb-2">Food Guide</h1>
+        <h1 className="text-2xl font-bold text-brown-dark mb-2">{t("foods.title")}</h1>
         <p className="text-sm text-brown-medium mb-8">
-          Popular dishes explained — translations, allergens, ingredients & cultural context
+          {t("foods.subtitle")}
         </p>
 
         <div className="space-y-3">
@@ -44,13 +45,13 @@ export default function FoodsIndexPage() {
         {/* CTA */}
         <div className="mt-8 text-center">
           <p className="text-sm text-brown-medium mb-3">
-            At a restaurant right now? Scan the menu for instant info.
+            {t("foods.ctaText")}
           </p>
           <Link
             href="/"
             className="inline-block px-6 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors"
           >
-            Scan a Menu
+            {t("common.scanAMenu")}
           </Link>
         </div>
       </div>

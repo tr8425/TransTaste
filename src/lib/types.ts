@@ -207,5 +207,5 @@ export interface CreditState {
 export interface RecentScan {
   original: string;
   english: string;
-  scannedAt: string;
+  scannedAt: string | Date;
 }

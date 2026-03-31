@@ -3,16 +3,36 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { RecentScan } from "@/lib/types";
-import { MOCK_RECENT_SCANS } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 
+function formatRelativeTime(date: string | Date, locale: string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return typeof date === "string" ? date : "";
+  const seconds = Math.round((Date.now() - d.getTime()) / 1000);
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+    ["second", 1],
+  ];
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  for (const [unit, threshold] of units) {
+    if (seconds >= threshold) {
+      return rtf.format(-Math.floor(seconds / threshold), unit);
+    }
+  }
+  return rtf.format(0, "second");
+}
+
 export default function HistoryPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [scans, setScans] = useState<RecentScan[]>([]);
 
   useEffect(() => {
-    // TODO: Replace with Supabase query in Phase 2
-    setScans(MOCK_RECENT_SCANS);
+    try {
+      const raw = localStorage.getItem("transtaste_scan_history");
+      if (raw) setScans(JSON.parse(raw));
+    } catch { /* ignore */ }
   }, []);
 
   return (
@@ -74,7 +94,7 @@ export default function HistoryPage() {
                   <p className="text-xs text-brown-medium">{scan.english}</p>
                 </div>
                 <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
-                  {scan.scannedAt}
+                  {formatRelativeTime(scan.scannedAt, locale)}
                 </span>
               </Link>
             ))}

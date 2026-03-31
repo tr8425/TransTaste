@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FUN_FACTS_LOADING } from "@/lib/constants";
+import { FUN_FACTS_LOADING_COUNT } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
+import { useTranslation } from "@/lib/i18n";
 
 const FOOD_EMOJIS = ["🍜", "🍣", "🥘", "🍛", "🍲", "🥟", "🍝", "🌮"];
 
 export default function LoadingScreen() {
+  const { t } = useTranslation();
   const [factIndex, setFactIndex] = useState(0);
   const [emojiIndex, setEmojiIndex] = useState(0);
 
   useEffect(() => {
-    setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING.length));
+    setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING_COUNT));
   }, []);
 
   useEffect(() => {
@@ -30,10 +32,10 @@ export default function LoadingScreen() {
 
       {/* Status text */}
       <h2 className="text-lg font-semibold text-brown-dark mb-2">
-        Analyzing your menu...
+        {t("loading.analyzing")}
       </h2>
       <p className="text-sm text-brown-medium mb-8">
-        Identifying dishes, flavors & allergens
+        {t("loading.identifying")}
       </p>
 
       {/* Progress bar */}
@@ -43,7 +45,7 @@ export default function LoadingScreen() {
 
       {/* Fun fact */}
       <div className="w-full max-w-sm">
-        <FunFactCard fact={FUN_FACTS_LOADING[factIndex]} />
+        <FunFactCard fact={t(`funFacts.${factIndex}`)} />
       </div>
 
       <style jsx>{`

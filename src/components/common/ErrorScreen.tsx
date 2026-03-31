@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n";
+
 interface ErrorScreenProps {
   type:
     | "not_menu"
@@ -145,9 +147,9 @@ function WarningTriangleIcon() {
 
 interface ErrorConfig {
   icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  primaryLabel: string | null;
+  titleKey: string;
+  subtitleKey: string;
+  primaryLabelKey: string | null;
   primaryAction: "retry" | "gallery";
   showCreditsNote: boolean;
 }
@@ -155,54 +157,49 @@ interface ErrorConfig {
 const ERROR_CONFIG: Record<ErrorScreenProps["type"], ErrorConfig> = {
   not_menu: {
     icon: <CameraXIcon />,
-    title: "That doesn\u2019t look like a menu",
-    subtitle:
-      "Try scanning a food menu \u2014 we\u2019ll analyze every dish for you.",
-    primaryLabel: "Scan Again",
+    titleKey: "errorScreen.notMenuTitle",
+    subtitleKey: "errorScreen.notMenuSubtitle",
+    primaryLabelKey: "errorScreen.scanAgain",
     primaryAction: "retry",
     showCreditsNote: true,
   },
   ocr_failed: {
     icon: <CameraQuestionIcon />,
-    title: "Let\u2019s try a clearer shot",
-    subtitle:
-      "The text was hard to read. Better lighting or a closer shot might help.",
-    primaryLabel: "Try Again",
+    titleKey: "errorScreen.ocrTitle",
+    subtitleKey: "errorScreen.ocrSubtitle",
+    primaryLabelKey: "common.tryAgain",
     primaryAction: "retry",
     showCreditsNote: true,
   },
   no_text: {
     icon: <DocumentXIcon />,
-    title: "No text found",
-    subtitle:
-      "We couldn\u2019t find any text in this image. Try a photo with visible menu text.",
-    primaryLabel: "Scan Again",
+    titleKey: "errorScreen.noTextTitle",
+    subtitleKey: "errorScreen.noTextSubtitle",
+    primaryLabelKey: "errorScreen.scanAgain",
     primaryAction: "retry",
     showCreditsNote: true,
   },
   camera_unavailable: {
     icon: <CameraOffIcon />,
-    title: "Camera not available",
-    subtitle:
-      "We can\u2019t access your camera right now. You can still analyze menus from your gallery.",
-    primaryLabel: "Choose from Gallery",
+    titleKey: "errorScreen.cameraTitle",
+    subtitleKey: "errorScreen.cameraSubtitle",
+    primaryLabelKey: "camera.chooseFromGallery",
     primaryAction: "gallery",
     showCreditsNote: false,
   },
   network_error: {
     icon: <WifiXIcon />,
-    title: "Connection lost",
-    subtitle: "Please check your internet connection and try again.",
-    primaryLabel: "Try Again",
+    titleKey: "errorScreen.networkTitle",
+    subtitleKey: "errorScreen.networkSubtitle",
+    primaryLabelKey: "common.tryAgain",
     primaryAction: "retry",
     showCreditsNote: false,
   },
   low_confidence: {
     icon: <WarningTriangleIcon />,
-    title: "Some items might be off",
-    subtitle:
-      "We did our best, but some dishes were hard to read. Results are shown as a guide.",
-    primaryLabel: null,
+    titleKey: "errorScreen.lowConfTitle",
+    subtitleKey: "errorScreen.lowConfSubtitle",
+    primaryLabelKey: null,
     primaryAction: "retry",
     showCreditsNote: false,
   },
@@ -217,6 +214,7 @@ export default function ErrorScreen({
   onTextInput,
   onBack,
 }: ErrorScreenProps) {
+  const { t } = useTranslation();
   const config = ERROR_CONFIG[type];
 
   /* low_confidence renders as a banner, not full-screen */
@@ -242,9 +240,9 @@ export default function ErrorScreen({
         </span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-brown-dark">
-            {config.title}
+            {t(config.titleKey)}
           </p>
-          <p className="text-xs text-brown-medium mt-0.5">{config.subtitle}</p>
+          <p className="text-xs text-brown-medium mt-0.5">{t(config.subtitleKey)}</p>
         </div>
       </div>
     );
@@ -275,7 +273,7 @@ export default function ErrorScreen({
             >
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            Back
+            {t("common.back")}
           </button>
         )}
 
@@ -286,12 +284,12 @@ export default function ErrorScreen({
 
         {/* Title */}
         <h2 className="text-lg font-semibold text-brown-dark">
-          {config.title}
+          {t(config.titleKey)}
         </h2>
 
         {/* Subtitle */}
         <p className="text-sm text-brown-medium leading-relaxed">
-          {config.subtitle}
+          {t(config.subtitleKey)}
         </p>
 
         {/* No credits used note */}
@@ -309,17 +307,17 @@ export default function ErrorScreen({
             >
               <path d="M20 6L9 17l-5-5" />
             </svg>
-            No credits used
+            {t("errorScreen.noCreditsUsed")}
           </span>
         )}
 
         {/* Primary button */}
-        {config.primaryLabel && primaryHandler && (
+        {config.primaryLabelKey && primaryHandler && (
           <button
             onClick={primaryHandler}
             className="mt-2 w-full rounded-xl bg-coral py-3.5 text-sm font-semibold text-white shadow-sm active:bg-coral-dark transition-colors"
           >
-            {config.primaryLabel}
+            {t(config.primaryLabelKey)}
           </button>
         )}
 
@@ -331,7 +329,7 @@ export default function ErrorScreen({
               onClick={onRetry}
               className="text-sm text-brown-medium hover:text-brown-dark transition-colors underline underline-offset-2"
             >
-              Try camera again
+              {t("camera.tryCameraAgain")}
             </button>
           )}
 
@@ -345,7 +343,7 @@ export default function ErrorScreen({
                   onClick={onGallery}
                   className="text-sm text-brown-medium hover:text-brown-dark transition-colors underline underline-offset-2"
                 >
-                  Choose from Gallery
+                  {t("camera.chooseFromGallery")}
                 </button>
               )}
               {onTextInput && (
@@ -353,7 +351,7 @@ export default function ErrorScreen({
                   onClick={onTextInput}
                   className="text-sm text-brown-medium hover:text-brown-dark transition-colors underline underline-offset-2"
                 >
-                  Type dish names
+                  {t("errorScreen.typeDishNames")}
                 </button>
               )}
             </>
@@ -365,7 +363,7 @@ export default function ErrorScreen({
               href="/results"
               className="text-sm text-brown-medium hover:text-brown-dark transition-colors underline underline-offset-2"
             >
-              View Recent Scans
+              {t("errorScreen.viewRecentScans")}
             </a>
           )}
         </div>

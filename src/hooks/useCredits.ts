@@ -11,6 +11,7 @@ const DEFAULT_STATE: CreditState = {
 
 export function useCredits() {
   const [state, setState] = useState<CreditState>(DEFAULT_STATE);
+  const [freeEvent, setFreeEvent] = useState(false);
 
   useEffect(() => {
     try {
@@ -21,6 +22,10 @@ export function useCredits() {
     } catch {
       // Ignore parse errors
     }
+    fetch("/api/event-status")
+      .then((r) => r.json())
+      .then((d) => { if (d.active) setFreeEvent(true); })
+      .catch(() => {});
   }, []);
 
   const save = (next: CreditState) => {
@@ -58,5 +63,7 @@ export function useCredits() {
     save({ ...state, remaining: state.remaining + amount });
   };
 
-  return { ...state, useCredit, canScan, purchasePass, purchaseCredits };
+  const isPhase2Free = state.hasPass || freeEvent;
+
+  return { ...state, useCredit, canScan, purchasePass, purchaseCredits, freeEvent, isPhase2Free };
 }

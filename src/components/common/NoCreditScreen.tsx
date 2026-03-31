@@ -1,10 +1,13 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n";
+
 interface NoCreditScreenProps {
   onPurchase: () => void;
 }
 
 export default function NoCreditScreen({ onPurchase }: NoCreditScreenProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-[80dvh] flex-col items-center justify-center bg-cream px-6 py-12">
       <div className="mx-auto w-full max-w-md flex flex-col items-center text-center gap-5">
@@ -23,12 +26,12 @@ export default function NoCreditScreen({ onPurchase }: NoCreditScreenProps) {
 
         {/* Title */}
         <h2 className="text-lg font-semibold text-brown-dark">
-          You&apos;re out of credits
+          {t("noCredit.title")}
         </h2>
 
         {/* Subtitle */}
         <p className="text-sm text-brown-medium leading-relaxed">
-          Get a Trip Pass to keep exploring menus
+          {t("noCredit.subtitle")}
         </p>
 
         {/* Primary button */}
@@ -36,7 +39,7 @@ export default function NoCreditScreen({ onPurchase }: NoCreditScreenProps) {
           onClick={onPurchase}
           className="mt-2 w-full rounded-xl bg-coral py-3.5 text-sm font-semibold text-white shadow-sm active:bg-coral-dark transition-colors"
         >
-          Get Trip Pass &mdash; $2.99
+          {t("noCredit.getPass")}
         </button>
 
         {/* Secondary link */}
@@ -44,12 +47,12 @@ export default function NoCreditScreen({ onPurchase }: NoCreditScreenProps) {
           onClick={onPurchase}
           className="text-sm text-brown-medium hover:text-brown-dark transition-colors underline underline-offset-2"
         >
-          Buy 50 Credits &mdash; $1.99
+          {t("noCredit.buyCredits")}
         </button>
 
         {/* Fine print */}
         <p className="text-xs text-brown-light mt-1">
-          7-day pass &middot; One-time payment
+          {t("noCredit.finePrint")}
         </p>
       </div>
     </div>

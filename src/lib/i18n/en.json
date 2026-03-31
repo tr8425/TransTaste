@@ -29,7 +29,13 @@
     "feature2Title": "Know your allergens",
     "feature2Desc": "Set your dietary preferences once, stay safe everywhere",
     "feature3Title": "Talk to servers",
-    "feature3Desc": "Ready-made phrases in the local language"
+    "feature3Desc": "Ready-made phrases in the local language",
+    "whyTitle": "Why TransTaste?",
+    "compareTranslate": "Google Translate",
+    "compareTranslateDesc": "Translation only",
+    "compareApp": "TransTaste",
+    "compareAppDesc": "Translation + Allergy alerts + Alternatives + Talk to servers",
+    "next": "Next"
   },
 
   "home": {
@@ -93,13 +99,23 @@
 
   "order": {
     "yourOrder": "Your Order",
+    "noItemsYet": "No items yet",
+    "scanToStart": "Scan a menu to start ordering",
+    "openCamera": "Open Camera",
     "emptyCart": "Your order is empty",
     "emptyCartDesc": "Add dishes from the results page",
     "browseMenu": "Browse Menu",
+    "allergyAlert": "Allergy Alert",
+    "addFromMenu": "Add from menu",
+    "subtotal": "Subtotal",
     "total": "Total",
-    "showToServer": "Show to Server",
+    "showToServer": "Show to Server →",
+    "orderWithPhrases": "Order with phrases",
     "allergyBanner": "Has allergies",
-    "tipSuggestion": "Tip suggestion"
+    "tipSuggestion": "Tip suggestion",
+    "orderDone": "Done ordering?",
+    "clearCart": "Clear order",
+    "keepOrder": "Keep"
   },
 
   "present": {
@@ -121,13 +137,19 @@
     "quickWater": "Water, please",
     "quickCheck": "Check, please",
     "quickNoSpicy": "No spicy",
-    "quickAllergy": "Allergic to..."
+    "quickAllergy": "Allergic to...",
+    "tipJa": "In Japan, say \"itadakimasu\" before eating — it shows gratitude for the meal.",
+    "tipKo": "In Korea, wait for the eldest person to start eating before you begin.",
+    "tipTh": "In Thailand, use a spoon for rice dishes and a fork to push food onto the spoon.",
+    "tipDefault": "Take a photo of your hotel's address in the local language — it helps taxi drivers get you home."
   },
 
   "phrases": {
     "title": "Restaurant Talk",
     "subtitle": "Show your phone to communicate",
-    "serverMightSay": "Server might say:"
+    "serverMightSay": "Server might say:",
+    "removeBookmark": "Remove bookmark",
+    "bookmarkPhrase": "Bookmark phrase"
   },
 
   "tipCulture": {
@@ -151,7 +173,12 @@
     "payEither": "Pay at table or counter",
     "taxIncluded": "Tax included",
     "taxExtra": "Tax extra",
-    "freeSides": "Free side dishes"
+    "freeSides": "Free side dishes",
+    "billAmount": "Bill amount",
+    "tipLabel": "Tip:",
+    "totalLabel": "Total:",
+    "lunch": "Lunch",
+    "dinner": "Dinner"
   },
 
   "profile": {
@@ -216,7 +243,13 @@
     "takePhoto": "Take Photo",
     "chooseFromGallery": "Choose from Gallery",
     "cameraNotAvailable": "Camera not available",
-    "useGallery": "Use Gallery Instead"
+    "useGallery": "Use Gallery Instead",
+    "placeMenu": "Place the menu within the frame",
+    "noWorries": "No worries! You can pick a menu photo from your gallery instead.",
+    "tryCameraAgain": "Try camera again",
+    "imagesSelected": "{count} menu image selected | {count} menu images selected",
+    "addMore": "+ Add more (up to {max})",
+    "analyzeAll": "Analyze All →"
   },
 
   "disclaimer": {
@@ -296,6 +329,105 @@
     "warning": "Check",
     "check": "Ask staff",
     "safe": "Safe"
+  },
+
+  "errorScreen": {
+    "notMenuTitle": "That doesn\u2019t look like a menu",
+    "notMenuSubtitle": "Try scanning a food menu \u2014 we\u2019ll analyze every dish for you.",
+    "ocrTitle": "Let\u2019s try a clearer shot",
+    "ocrSubtitle": "The text was hard to read. Better lighting or a closer shot might help.",
+    "noTextTitle": "No text found",
+    "noTextSubtitle": "We couldn\u2019t find any text in this image. Try a photo with visible menu text.",
+    "cameraTitle": "Camera not available",
+    "cameraSubtitle": "We can\u2019t access your camera right now. You can still analyze menus from your gallery.",
+    "networkTitle": "Connection lost",
+    "networkSubtitle": "Please check your internet connection and try again.",
+    "lowConfTitle": "Some items might be off",
+    "lowConfSubtitle": "We did our best, but some dishes were hard to read. Results are shown as a guide.",
+    "scanAgain": "Scan Again",
+    "noCreditsUsed": "No credits used",
+    "typeDishNames": "Type dish names",
+    "viewRecentScans": "View Recent Scans"
+  },
+
+  "lowConfidence": {
+    "title": "Some items might be inaccurate",
+    "subtitle": "Use as reference only",
+    "dismiss": "Dismiss"
+  },
+
+  "noCredit": {
+    "title": "You're out of credits",
+    "subtitle": "Get a Trip Pass to keep exploring menus",
+    "getPass": "Get Trip Pass — $2.99",
+    "buyCredits": "Buy 50 Credits — $1.99",
+    "finePrint": "7-day pass · One-time payment"
+  },
+
+  "combo": {
+    "title": "Recommended Combos",
+    "bestValue": "Best Value",
+    "balanced": "Balanced Pick",
+    "unlockCombos": "Unlock Combos — $2.99"
+  },
+
+  "dishCard": {
+    "ingredients": "Ingredients",
+    "funFact": "Fun Fact",
+    "unlockHint": "Unlock to discover the story behind this dish, how to eat it, and more."
+  },
+
+  "foods": {
+    "title": "Food Guide",
+    "subtitle": "Popular dishes explained — translations, allergens, ingredients & cultural context",
+    "ctaText": "At a restaurant right now? Scan the menu for instant info.",
+    "quickFacts": "Quick Facts",
+    "cuisine": "Cuisine",
+    "category": "Category",
+    "keyIngredients": "Key Ingredients",
+    "didYouKnow": "Did You Know?",
+    "howToEat": "How to Eat",
+    "tryFree": "Try TransTaste Free",
+    "scanCta": "Scan a restaurant menu with TransTaste to get instant allergen warnings, flavor profiles, and ordering phrases for {dish} and more.",
+    "infoDisclaimer": "Information on this page is for reference only. Actual ingredients and allergens vary by restaurant and preparation method. Always confirm with restaurant staff.",
+    "noneKnown": "None commonly known",
+    "allergens": "Allergens"
+  },
+
+  "guide": {
+    "title": "Country Dining Guides",
+    "subtitle": "Tipping customs, dining etiquette & restaurant culture for travelers",
+    "restaurantGuide": "{country} Restaurant Guide",
+    "guideSubtitle": "Tipping customs, dining etiquette, and restaurant tips for travelers",
+    "recommended": "Recommended: {min}–{max}%",
+    "water": "Water",
+    "payment": "Payment",
+    "payAt": "Pay at {location}",
+    "tax": "Tax",
+    "taxIncluded": "Included in price",
+    "taxSeparate": "Added separately",
+    "sideDishes": "Side dishes",
+    "freeRefillable": "Free and refillable",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "visitCta": "Visiting {country}? Scan any restaurant menu with TransTaste to get instant translations, allergen warnings, and ordering phrases.",
+    "tip": "tip",
+    "tipRange": "{min}–{max}% tip",
+    "breadcrumb": "Guides"
+  },
+
+  "funFacts": {
+    "0": "Did you know? Sushi originally was a way to preserve fish in fermented rice.",
+    "1": "Thai basil and Italian basil are completely different species!",
+    "2": "Kimchi has over 200 varieties across Korea.",
+    "3": "The word 'ketchup' likely comes from the Chinese word 'ke-tsiap', a fermented fish sauce.",
+    "4": "Japanese ramen was originally a Chinese import that arrived in the 1800s.",
+    "5": "Pad Thai was invented as part of a nation-building campaign in the 1930s.",
+    "6": "The hottest chili pepper in the world changes almost every year.",
+    "7": "Fortune cookies were actually invented in San Francisco, not China.",
+    "8": "Pho is traditionally eaten for breakfast in Vietnam.",
+    "9": "MSG was first extracted from seaweed by a Japanese chemist in 1908.",
+    "about": "About {dish}"
   },
 
   "errors": {

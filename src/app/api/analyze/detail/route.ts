@@ -12,6 +12,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
+function isFreeEventActive(): boolean {
+  const until = process.env.FREE_EVENT_UNTIL;
+  if (!until) return false;
+  const deadline = new Date(until + "T23:59:59");
+  return !isNaN(deadline.getTime()) && new Date() <= deadline;
+}
+
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
@@ -114,8 +121,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Cache and return
+    const freeEvent = isFreeEventActive();
     await setCache(dishKey, result.data as unknown as object);
-    return NextResponse.json(result.data as DishDetail, { headers: corsHeaders });
+    return NextResponse.json(
+      { ...result.data as DishDetail, _freeEvent: freeEvent },
+      { headers: corsHeaders }
+    );
   } catch (err) {
     console.error("Detail API error:", err);
     return NextResponse.json(

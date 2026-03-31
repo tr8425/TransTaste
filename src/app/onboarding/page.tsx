@@ -18,29 +18,29 @@ const LANGUAGES = [
 ] as const;
 
 const ALLERGENS = [
-  { id: "shellfish", label: "Shellfish" },
-  { id: "peanuts", label: "Peanuts" },
-  { id: "tree_nuts", label: "Tree Nuts" },
-  { id: "milk", label: "Milk" },
-  { id: "eggs", label: "Eggs" },
-  { id: "fish", label: "Fish" },
-  { id: "soy", label: "Soy" },
-  { id: "wheat_gluten", label: "Wheat/Gluten" },
-  { id: "sesame", label: "Sesame" },
-  { id: "celery", label: "Celery" },
-  { id: "mustard", label: "Mustard" },
-  { id: "lupin", label: "Lupin" },
-  { id: "molluscs", label: "Molluscs" },
-  { id: "sulphites", label: "Sulphites" },
+  { id: "shellfish" },
+  { id: "peanuts" },
+  { id: "tree_nuts" },
+  { id: "milk" },
+  { id: "eggs" },
+  { id: "fish" },
+  { id: "soy" },
+  { id: "wheat_gluten" },
+  { id: "sesame" },
+  { id: "celery" },
+  { id: "mustard" },
+  { id: "lupin" },
+  { id: "molluscs" },
+  { id: "sulphites" },
 ] as const;
 
 const DIETARY = [
-  { id: "vegan", label: "Vegan" },
-  { id: "vegetarian", label: "Vegetarian" },
-  { id: "halal", label: "Halal" },
-  { id: "kosher", label: "Kosher" },
-  { id: "no_beef", label: "No Beef (Hindu)" },
-  { id: "no_alcohol", label: "No Alcohol" },
+  { id: "vegan" },
+  { id: "vegetarian" },
+  { id: "halal" },
+  { id: "kosher" },
+  { id: "no_beef" },
+  { id: "no_alcohol" },
 ] as const;
 
 /* ── Icons ─────────────────────────────────────────────── */
@@ -125,7 +125,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-cream flex flex-col items-center">
       {/* Step indicator dots */}
       <div className="flex gap-2 pt-12 pb-6">
-        {[0, 1].map((i) => (
+        {[0, 1, 2].map((i) => (
           <span
             key={i}
             className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
@@ -137,12 +137,54 @@ export default function OnboardingPage() {
 
       {/* Steps container */}
       <div className="w-full max-w-md px-6 flex-1 relative overflow-hidden">
-        {/* Step 1: Introduction */}
+        {/* Step 0: Why TransTaste — Positioning */}
         <div
           className={`transition-all duration-500 ease-in-out ${
             step === 0
               ? "opacity-100 translate-x-0"
               : "opacity-0 -translate-x-full absolute inset-0 px-6 pointer-events-none"
+          }`}
+        >
+          <h1 className="text-2xl font-bold text-center text-brown-dark mb-8">
+            {t("onboarding.whyTitle")}
+          </h1>
+
+          <div className="space-y-4 mb-10">
+            {/* Google Translate */}
+            <div className="p-4 bg-cream-dark rounded-2xl border border-brown-light/10">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg">🌐</div>
+                <p className="text-sm font-semibold text-brown-dark">{t("onboarding.compareTranslate")}</p>
+              </div>
+              <p className="text-sm text-brown-medium ml-[52px]">{t("onboarding.compareTranslateDesc")}</p>
+            </div>
+
+            {/* TransTaste */}
+            <div className="p-4 bg-coral/10 rounded-2xl border-2 border-coral/30">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-coral/20 flex items-center justify-center text-lg">🍽️</div>
+                <p className="text-sm font-semibold text-coral">{t("onboarding.compareApp")}</p>
+              </div>
+              <p className="text-sm text-brown-dark font-medium ml-[52px]">{t("onboarding.compareAppDesc")}</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setStep(1)}
+            className="w-full py-3.5 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors active:scale-[0.98]"
+          >
+            {t("onboarding.next")}
+          </button>
+        </div>
+
+        {/* Step 1: Introduction */}
+        <div
+          className={`transition-all duration-500 ease-in-out ${
+            step === 1
+              ? "opacity-100 translate-x-0"
+              : step < 1
+                ? "opacity-0 translate-x-full absolute inset-0 px-6 pointer-events-none"
+                : "opacity-0 -translate-x-full absolute inset-0 px-6 pointer-events-none"
           }`}
         >
           {/* Logo */}
@@ -202,7 +244,7 @@ export default function OnboardingPage() {
 
           {/* Get Started button */}
           <button
-            onClick={() => setStep(1)}
+            onClick={() => setStep(2)}
             className="w-full py-3.5 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors active:scale-[0.98]"
           >
             {t("onboarding.getStarted")}
@@ -212,7 +254,7 @@ export default function OnboardingPage() {
         {/* Step 2: Language + Allergy Setup */}
         <div
           className={`transition-all duration-500 ease-in-out ${
-            step === 1
+            step === 2
               ? "opacity-100 translate-x-0"
               : "opacity-0 translate-x-full absolute inset-0 px-6 pointer-events-none"
           }`}
@@ -262,7 +304,7 @@ export default function OnboardingPage() {
                         : "bg-cream-dark text-brown-medium hover:bg-brown-light/15"
                     }`}
                   >
-                    {item.label}
+                    {t(`allergens.${item.id}`)}
                   </button>
                 );
               })}
@@ -290,7 +332,7 @@ export default function OnboardingPage() {
                         : "bg-cream-dark text-brown-medium hover:bg-brown-light/15"
                     }`}
                   >
-                    {item.label}
+                    {t(`dietary.${item.id}`)}
                   </button>
                 );
               })}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
 import { ALLERGEN_LABELS, TIP_CULTURE } from "@/lib/allergen-i18n";
+import { useTranslation } from "@/lib/i18n";
 
 interface UserSettings {
   allergen_preset?: string[];
@@ -39,19 +40,26 @@ export default function OrderPage() {
     items,
     updateQuantity,
     removeItem,
+    clearCart,
     totalItems,
     totalPrice,
     countryDetected,
   } = useCart();
 
+  const { t } = useTranslation();
   const [allergens, setAllergens] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [showConfirmedBanner, setShowConfirmedBanner] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const settings = loadUserSettings();
     if (settings.allergen_preset) {
       setAllergens(settings.allergen_preset);
+    }
+    if (sessionStorage.getItem("order_confirmed") === "1") {
+      setShowConfirmedBanner(true);
+      sessionStorage.removeItem("order_confirmed");
     }
   }, []);
 
@@ -83,16 +91,16 @@ export default function OrderPage() {
           </svg>
         </div>
         <h2 className="text-lg font-semibold text-brown-dark mb-1">
-          No items yet
+          {t("order.noItemsYet")}
         </h2>
         <p className="text-sm text-brown-medium mb-6 text-center">
-          Scan a menu to start ordering
+          {t("order.scanToStart")}
         </p>
         <Link
           href="/camera"
           className="px-6 py-3 bg-coral text-white rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors active:scale-95"
         >
-          Open Camera
+          {t("order.openCamera")}
         </Link>
       </div>
     );
@@ -103,12 +111,35 @@ export default function OrderPage() {
       {/* Header */}
       <div className="sticky top-0 z-20 bg-cream/95 backdrop-blur-md border-b border-brown-light/10 px-5 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-brown-dark">Your Order</h1>
+          <h1 className="text-xl font-bold text-brown-dark">{t("order.yourOrder")}</h1>
           <span className="bg-coral text-white text-xs font-bold px-2.5 py-1 rounded-full">
             {totalItems}
           </span>
         </div>
       </div>
+
+      {/* Confirmed banner */}
+      {showConfirmedBanner && (
+        <div className="mx-4 mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <p className="text-sm font-semibold text-emerald-800 mb-2">
+            ✅ {t("order.orderDone")}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { clearCart(); setShowConfirmedBanner(false); }}
+              className="flex-1 py-2 bg-coral text-white text-sm font-semibold rounded-lg active:scale-95 transition-transform"
+            >
+              {t("order.clearCart")}
+            </button>
+            <button
+              onClick={() => setShowConfirmedBanner(false)}
+              className="px-4 py-2 bg-brown-light/10 text-brown-dark text-sm font-medium rounded-lg"
+            >
+              {t("order.keepOrder")}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Allergy banner */}
       {allergens.length > 0 && (
@@ -117,7 +148,7 @@ export default function OrderPage() {
             <span className="text-lg leading-none mt-0.5">⚠️</span>
             <div className="flex-1">
               <p className="text-sm font-semibold text-danger mb-1">
-                Allergy Alert
+                {t("order.allergyAlert")}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {allergens.map((a) => (
@@ -241,14 +272,14 @@ export default function OrderPage() {
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          Add from menu
+          {t("order.addFromMenu")}
         </Link>
       </div>
 
       {/* Summary */}
       <div className="mx-4 mt-4 bg-white rounded-xl p-4 shadow-sm border border-brown-light/5">
         <div className="flex justify-between text-sm text-brown-dark mb-2">
-          <span>Subtotal</span>
+          <span>{t("order.subtotal")}</span>
           <span className="font-medium">
             {formatPrice(totalPrice, currency)}
           </span>
@@ -266,7 +297,7 @@ export default function OrderPage() {
         )}
 
         <div className="border-t border-brown-light/10 pt-2 mt-2 flex justify-between text-base font-bold text-brown-dark">
-          <span>Total</span>
+          <span>{t("order.total")}</span>
           <span>{formatPrice(grandTotal, currency)}</span>
         </div>
       </div>
@@ -277,13 +308,13 @@ export default function OrderPage() {
           href="/order/present"
           className="block w-full py-3.5 bg-coral text-white text-center rounded-full font-semibold text-base hover:bg-coral-dark transition-colors active:scale-[0.98]"
         >
-          Show to Server →
+          {t("order.showToServer")}
         </Link>
         <Link
           href="/phrases"
           className="block w-full py-2 text-center text-sm font-medium text-brown-medium hover:text-brown-dark transition-colors"
         >
-          Order with phrases
+          {t("order.orderWithPhrases")}
         </Link>
       </div>
     </div>

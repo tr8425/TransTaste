@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Dish } from "@/lib/types";
-import { FUN_FACTS_LOADING } from "@/lib/constants";
+import { FUN_FACTS_LOADING_COUNT } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
 import { useCredits } from "@/hooks/useCredits";
 import { useTranslation } from "@/lib/i18n";
@@ -31,7 +31,7 @@ export default function LoadingScanPage() {
   const creditUsedRef = useRef(false);
 
   useEffect(() => {
-    setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING.length));
+    setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING_COUNT));
   }, []);
 
   // Cycle emoji
@@ -45,7 +45,7 @@ export default function LoadingScanPage() {
   // Cycle fun facts every 8s
   useEffect(() => {
     const timer = setInterval(() => {
-      setFactIndex((prev) => (prev + 1) % FUN_FACTS_LOADING.length);
+      setFactIndex((prev) => (prev + 1) % FUN_FACTS_LOADING_COUNT);
     }, 8000);
     return () => clearInterval(timer);
   }, []);
@@ -80,7 +80,7 @@ export default function LoadingScanPage() {
     }
 
     if (!input) {
-      sessionStorage.setItem("scanError", "No image or text provided. Please try again.");
+      sessionStorage.setItem("scanError", t("errors.noInput"));
       navigateToResults();
       return;
     }
@@ -127,7 +127,7 @@ export default function LoadingScanPage() {
       abortController.abort();
       sessionStorage.setItem(
         "scanError",
-        "Analysis timed out after 3 minutes. The menu image may be too complex. Please try again with a clearer photo."
+        t("errors.timeout")
       );
       navigateToResults();
     }, TIMEOUT_MS);
@@ -172,7 +172,7 @@ export default function LoadingScanPage() {
               navigateToResults();
               return;
             } else if (eventType === "error") {
-              sessionStorage.setItem("scanError", parsed.reason || "Analysis failed.");
+              sessionStorage.setItem("scanError", parsed.reason || t("results.somethingWrong"));
               navigateToResults();
               return;
             }
@@ -184,7 +184,7 @@ export default function LoadingScanPage() {
 
       // Stream ended without done/error event
       if (!navigatedRef.current) {
-        sessionStorage.setItem("scanError", "Stream ended unexpectedly. Please try again.");
+        sessionStorage.setItem("scanError", t("errors.streamEnded"));
         navigateToResults();
       }
     };
@@ -231,7 +231,7 @@ export default function LoadingScanPage() {
         }
       } catch (err) {
         if (abortController.signal.aborted) return;
-        const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+        const message = err instanceof Error ? err.message : t("errors.unexpected");
         sessionStorage.setItem("scanError", message);
         navigateToResults();
       } finally {
@@ -281,8 +281,8 @@ export default function LoadingScanPage() {
       {dishes.length > 0 && (
         <div className="w-full max-w-sm mb-6 flex-shrink-0">
           <p className="text-xs text-brown-medium mb-2 px-1">
-            {dishes.length} {dishes.length === 1 ? "dish" : "dishes"} found
-            {menuMeta?.items_found ? ` of ~${menuMeta.items_found}` : ""}
+            {t("loading.found", { count: dishes.length })}
+            {menuMeta?.items_found ? ` / ~${menuMeta.items_found}` : ""}
           </p>
           <div className="space-y-1.5">
             {dishes.map((dish, i) => (
@@ -314,7 +314,7 @@ export default function LoadingScanPage() {
 
       {/* Fun fact */}
       <div className="w-full max-w-sm pb-8">
-        <FunFactCard fact={FUN_FACTS_LOADING[factIndex]} />
+        <FunFactCard fact={t(`funFacts.${factIndex}`)} />
       </div>
 
       <style jsx>{`

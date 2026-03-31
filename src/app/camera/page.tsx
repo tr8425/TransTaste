@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import CameraView from "@/components/camera/CameraView";
+import { useTranslation } from "@/lib/i18n";
 
 const MAX_IMAGES = 10;
 
@@ -16,6 +17,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export default function CameraPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null!);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -94,7 +96,7 @@ export default function CameraPage() {
 
   return (
     <>
-      <CameraView onCapture={handleCapture} onGallery={handleGallery} />
+      <CameraView onCapture={handleCapture} onGallery={handleGallery} onBack={() => router.back()} />
       <input
         ref={fileInputRef}
         type="file"
@@ -110,7 +112,7 @@ export default function CameraPage() {
           <div className="w-full rounded-t-2xl bg-cream px-5 pb-8 pt-6 animate-in slide-in-from-bottom">
             {/* Header */}
             <p className="mb-4 text-center text-lg font-semibold text-charcoal">
-              {selectedFiles.length} menu image{selectedFiles.length !== 1 ? "s" : ""} selected
+              {t("camera.imagesSelected", { count: selectedFiles.length })}
             </p>
 
             {/* Thumbnail grid */}
@@ -138,7 +140,7 @@ export default function CameraPage() {
                 onClick={handleAddMore}
                 className="mb-3 w-full rounded-xl border-2 border-dashed border-coral/40 py-3 text-sm font-medium text-coral transition-colors hover:border-coral"
               >
-                + Add more (up to {MAX_IMAGES})
+                {t("camera.addMore", { max: MAX_IMAGES })}
               </button>
             )}
 
@@ -147,7 +149,7 @@ export default function CameraPage() {
               onClick={handleAnalyzeAll}
               className="mb-3 w-full rounded-xl bg-coral py-4 text-base font-semibold text-white shadow-md transition-transform active:scale-[0.98]"
             >
-              Analyze All →
+              {t("camera.analyzeAll")}
             </button>
 
             {/* Cancel button */}
@@ -155,7 +157,7 @@ export default function CameraPage() {
               onClick={handleCancel}
               className="w-full py-2 text-sm font-medium text-charcoal/60 transition-colors hover:text-charcoal"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         </div>

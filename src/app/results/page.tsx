@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { MOCK_MENU_RESULT } from "@/lib/mock-data";
 import { CATEGORY_FILTERS } from "@/lib/constants";
 import { DishLite, MenuAnalysisResult } from "@/lib/types";
 import DishRow from "@/components/dish/DishRow";
@@ -11,6 +10,7 @@ import LockedBlock from "@/components/common/LockedBlock";
 import ComboRecommendation from "@/components/paywall/ComboRecommendation";
 import TripPassPaywall from "@/components/paywall/TripPassPaywall";
 import { useCart } from "@/hooks/useCart";
+import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useTranslation } from "@/lib/i18n";
 
@@ -20,6 +20,7 @@ export default function ResultsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [showPaywall, setShowPaywall] = useState(false);
   const [showCombo, setShowCombo] = useState(false);
+  const { isPhase2Free } = useCredits();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
   const [scanError, setScanError] = useState<string | null>(null);
@@ -38,7 +39,7 @@ export default function ResultsPage() {
     cart.items.some((item) => item.dish_hash === dish.original);
 
   // Use MenuAnalysisResult for both lite and full results (shape-compatible)
-  const [data, setData] = useState<MenuAnalysisResult>(MOCK_MENU_RESULT);
+  const [data, setData] = useState<MenuAnalysisResult | null>(null);
 
   // Phase 2: detail for selected dish
   const { detail, isLoading: isDetailLoading, error: detailError, retry: retryDetail } =
@@ -67,16 +68,33 @@ export default function ResultsPage() {
       try {
         const parsed = JSON.parse(resultStr) as MenuAnalysisResult;
         setData(parsed);
+
+        // Save to scan history
+        const newEntries = parsed.dishes.slice(0, 3).map((d) => ({
+          original: d.original,
+          english: d.translation?.english || d.original,
+          scannedAt: new Date().toISOString(),
+        }));
+        try {
+          const prev = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
+          const merged = [...newEntries, ...prev].slice(0, 20);
+          localStorage.setItem("transtaste_scan_history", JSON.stringify(merged));
+        } catch { /* ignore */ }
       } catch {
         setScanError("Failed to parse scan results.");
       }
     }
   }, []);
 
-  const filteredDishes =
-    activeFilter === "all"
+  const filteredDishes = !data
+    ? []
+    : activeFilter === "all"
       ? data.dishes
       : data.dishes.filter((d) => d.category === activeFilter);
+
+  useEffect(() => {
+    if (isPhase2Free) setIsUnlocked(true);
+  }, [isPhase2Free]);
 
   const handleUnlock = () => setShowPaywall(true);
 
@@ -190,6 +208,31 @@ export default function ResultsPage() {
     );
   }
 
+  // No data yet — prompt to scan
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
+        <div className="text-center max-w-[320px]">
+          <div className="w-20 h-20 rounded-full bg-cream-dark flex items-center justify-center mx-auto mb-5">
+            <span className="text-3xl">📷</span>
+          </div>
+          <h2 className="text-lg font-bold text-brown-dark mb-2">
+            {t("results.menuResults")}
+          </h2>
+          <p className="text-sm text-brown-medium mb-6">
+            {t("home.heroDesc")}
+          </p>
+          <Link
+            href="/camera"
+            className="inline-block w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors text-center"
+          >
+            {t("common.scanAMenu")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
@@ -276,7 +319,7 @@ export default function ResultsPage() {
                 onClick={handleUnlock}
                 className="w-full mt-3 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors"
               >
-                Unlock Combos — $2.99
+                {t("combo.unlockCombos")}
               </button>
             </div>
           )}

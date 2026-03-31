@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
 
-const HIDDEN_ROUTES = ["/camera", "/loading-scan", "/order/present"];
+const HIDDEN_ROUTES = ["/camera", "/loading-scan", "/order/present", "/onboarding"];
 
 interface Tab {
   href: string;

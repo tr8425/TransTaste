@@ -6,7 +6,7 @@ import Link from "next/link";
 import CreditBadge from "@/components/common/CreditBadge";
 import RecentHistory from "@/components/common/RecentHistory";
 import { useCredits } from "@/hooks/useCredits";
-import { MOCK_RECENT_SCANS } from "@/lib/mock-data";
+import { RecentScan } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -27,6 +27,7 @@ export default function HomePage() {
   const [showTextModal, setShowTextModal] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [textInput, setTextInput] = useState("");
+  const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
 
   // Auto-redirect to onboarding on first launch
   useEffect(() => {
@@ -35,6 +36,10 @@ export default function HomePage() {
     if (!hasOnboarded && !skippedOnboarding) {
       router.push("/onboarding");
     }
+    try {
+      const raw = localStorage.getItem("transtaste_scan_history");
+      if (raw) setRecentScans(JSON.parse(raw));
+    } catch { /* ignore */ }
   }, [router]);
 
   const handleGallery = () => {
@@ -189,7 +194,7 @@ export default function HomePage() {
 
       {/* Recent scans */}
       <div className="px-5 pt-2 pb-2">
-        <RecentHistory items={MOCK_RECENT_SCANS} />
+        <RecentHistory items={recentScans} />
       </div>
 
       {/* Quick access — Travel Tools */}
@@ -225,9 +230,14 @@ export default function HomePage() {
             { emoji: "🥘", name: "Tom Yum", origin: "Thai" },
             { emoji: "🥟", name: "Xiao Long Bao", origin: "Chinese" },
           ].map((dish) => (
-            <div
+            <button
               key={dish.name}
-              className="bg-cream-dark rounded-xl p-3 flex items-center gap-2.5 hover:bg-brown-light/10 transition-colors cursor-pointer"
+              onClick={() => {
+                sessionStorage.setItem("scanText", dish.name);
+                sessionStorage.setItem("scanInputType", "text");
+                router.push("/loading-scan");
+              }}
+              className="bg-cream-dark rounded-xl p-3 flex items-center gap-2.5 hover:bg-brown-light/10 transition-colors cursor-pointer text-left"
             >
               <span className="text-2xl">{dish.emoji}</span>
               <div>
@@ -236,7 +246,7 @@ export default function HomePage() {
                 </p>
                 <p className="text-[11px] text-brown-medium">{dish.origin}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

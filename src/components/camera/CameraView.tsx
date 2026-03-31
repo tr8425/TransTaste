@@ -2,13 +2,16 @@
 
 import { useEffect } from "react";
 import { useCamera } from "@/hooks/useCamera";
+import { useTranslation } from "@/lib/i18n";
 
 interface CameraViewProps {
   onCapture: (blob?: Blob | null) => void | Promise<void>;
   onGallery: () => void;
+  onBack?: () => void;
 }
 
-export default function CameraView({ onCapture, onGallery }: CameraViewProps) {
+export default function CameraView({ onCapture, onGallery, onBack }: CameraViewProps) {
+  const { t } = useTranslation();
   const { videoRef, isReady, error, start, capture, toggleFlash, isFlashOn } =
     useCamera();
 
@@ -27,6 +30,19 @@ export default function CameraView({ onCapture, onGallery }: CameraViewProps) {
     <div className="fixed inset-0 bg-black flex flex-col">
       {/* Viewfinder */}
       <div className="flex-1 relative overflow-hidden">
+        {/* Back button */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="absolute top-12 left-4 z-10 w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
+
         <video
           ref={videoRef}
           autoPlay
@@ -52,7 +68,7 @@ export default function CameraView({ onCapture, onGallery }: CameraViewProps) {
         {/* Guide text */}
         <div className="absolute bottom-8 left-0 right-0 text-center pointer-events-none">
           <span className="text-white/70 text-sm bg-black/30 px-4 py-1.5 rounded-full">
-            Place the menu within the frame
+            {t("camera.placeMenu")}
           </span>
         </div>
 
@@ -62,22 +78,22 @@ export default function CameraView({ onCapture, onGallery }: CameraViewProps) {
             <div className="text-center px-8 max-w-[300px]">
               <div className="text-5xl mb-4">📷</div>
               <h3 className="text-white text-lg font-semibold mb-2">
-                Camera not available
+                {t("camera.cameraNotAvailable")}
               </h3>
               <p className="text-white/60 text-sm mb-6 leading-relaxed">
-                No worries! You can pick a menu photo from your gallery instead.
+                {t("camera.noWorries")}
               </p>
               <button
                 onClick={onGallery}
                 className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors mb-3"
               >
-                Choose from Gallery
+                {t("camera.chooseFromGallery")}
               </button>
               <button
                 onClick={start}
                 className="text-white/50 text-sm font-medium hover:text-white/80 transition-colors"
               >
-                Try camera again
+                {t("camera.tryCameraAgain")}
               </button>
             </div>
           </div>

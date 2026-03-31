@@ -29,7 +29,13 @@
     "feature2Title": "알레르기 확인",
     "feature2Desc": "한 번 설정하면 어디서든 안심",
     "feature3Title": "직원과 대화",
-    "feature3Desc": "현지어로 된 레스토랑 회화"
+    "feature3Desc": "현지어로 된 레스토랑 회화",
+    "whyTitle": "왜 TransTaste인가요?",
+    "compareTranslate": "Google 번역",
+    "compareTranslateDesc": "번역만 가능",
+    "compareApp": "TransTaste",
+    "compareAppDesc": "번역 + 알레르기 경고 + 대안 추천 + 직원과 대화",
+    "next": "다음"
   },
 
   "home": {
@@ -93,13 +99,23 @@
 
   "order": {
     "yourOrder": "내 주문",
+    "noItemsYet": "아직 항목이 없어요",
+    "scanToStart": "메뉴를 스캔해서 주문을 시작하세요",
+    "openCamera": "카메라 열기",
     "emptyCart": "주문이 비어있습니다",
     "emptyCartDesc": "결과 화면에서 요리를 추가하세요",
     "browseMenu": "메뉴 보기",
+    "allergyAlert": "알레르기 주의",
+    "addFromMenu": "메뉴에서 추가",
+    "subtotal": "소계",
     "total": "합계",
-    "showToServer": "직원에게 보여주기",
+    "showToServer": "직원에게 보여주기 →",
+    "orderWithPhrases": "문구로 주문하기",
     "allergyBanner": "알레르기 있음",
-    "tipSuggestion": "팁 추천"
+    "tipSuggestion": "팁 추천",
+    "orderDone": "주문을 마치셨나요?",
+    "clearCart": "주문 비우기",
+    "keepOrder": "유지"
   },
 
   "present": {
@@ -121,13 +137,19 @@
     "quickWater": "물 주세요",
     "quickCheck": "계산서 주세요",
     "quickNoSpicy": "매운 거 빼주세요",
-    "quickAllergy": "알레르기가 있어요..."
+    "quickAllergy": "알레르기가 있어요...",
+    "tipJa": "일본에서는 식사 전에 \"이타다키마스\"라고 말하세요 — 음식에 대한 감사를 표현하는 것입니다.",
+    "tipKo": "한국에서는 어른이 먼저 수저를 드신 후에 식사를 시작하세요.",
+    "tipTh": "태국에서는 밥 요리를 먹을 때 숟가락을 사용하고, 포크로 음식을 숟가락 위에 올리세요.",
+    "tipDefault": "호텔 주소를 현지 언어로 사진 찍어두세요 — 택시 기사에게 보여주면 쉽게 돌아갈 수 있어요."
   },
 
   "phrases": {
     "title": "레스토랑 회화",
     "subtitle": "휴대폰을 보여주며 소통하세요",
-    "serverMightSay": "직원이 할 수 있는 말:"
+    "serverMightSay": "직원이 할 수 있는 말:",
+    "removeBookmark": "북마크 제거",
+    "bookmarkPhrase": "문구 북마크"
   },
 
   "tipCulture": {
@@ -151,7 +173,12 @@
     "payEither": "테이블 또는 카운터에서 결제",
     "taxIncluded": "세금 포함",
     "taxExtra": "세금 별도",
-    "freeSides": "반찬 무료"
+    "freeSides": "반찬 무료",
+    "billAmount": "금액 입력",
+    "tipLabel": "팁:",
+    "totalLabel": "합계:",
+    "lunch": "점심",
+    "dinner": "저녁"
   },
 
   "profile": {
@@ -216,7 +243,13 @@
     "takePhoto": "사진 찍기",
     "chooseFromGallery": "갤러리에서 선택",
     "cameraNotAvailable": "카메라를 사용할 수 없습니다",
-    "useGallery": "갤러리 사용하기"
+    "useGallery": "갤러리 사용하기",
+    "placeMenu": "프레임 안에 메뉴를 놓아주세요",
+    "noWorries": "걱정 마세요! 갤러리에서 메뉴 사진을 선택할 수 있습니다.",
+    "tryCameraAgain": "카메라 다시 시도",
+    "imagesSelected": "메뉴 이미지 {count}장 선택됨",
+    "addMore": "+ 더 추가 (최대 {max}장)",
+    "analyzeAll": "전체 분석 →"
   },
 
   "disclaimer": {
@@ -296,6 +329,105 @@
     "warning": "확인 필요",
     "check": "직원 문의",
     "safe": "안전"
+  },
+
+  "errorScreen": {
+    "notMenuTitle": "메뉴판이 아닌 것 같아요",
+    "notMenuSubtitle": "음식 메뉴판을 스캔해보세요 — 모든 요리를 분석해드릴게요.",
+    "ocrTitle": "좀 더 선명하게 찍어볼까요",
+    "ocrSubtitle": "글자가 잘 안 읽혀요. 밝은 곳에서 가까이 찍어보세요.",
+    "noTextTitle": "텍스트를 찾지 못했어요",
+    "noTextSubtitle": "이미지에서 텍스트를 찾을 수 없었어요. 메뉴 글자가 보이는 사진을 사용해주세요.",
+    "cameraTitle": "카메라를 사용할 수 없어요",
+    "cameraSubtitle": "지금 카메라에 접근할 수 없어요. 갤러리에서 메뉴를 분석할 수 있습니다.",
+    "networkTitle": "연결이 끊겼어요",
+    "networkSubtitle": "인터넷 연결을 확인하고 다시 시도해주세요.",
+    "lowConfTitle": "일부 항목이 부정확할 수 있어요",
+    "lowConfSubtitle": "최선을 다했지만 일부 요리를 읽기 어려웠어요. 참고용으로 사용해주세요.",
+    "scanAgain": "다시 스캔",
+    "noCreditsUsed": "크레딧 차감 없음",
+    "typeDishNames": "요리명 직접 입력",
+    "viewRecentScans": "최근 스캔 보기"
+  },
+
+  "lowConfidence": {
+    "title": "일부 항목이 부정확할 수 있어요",
+    "subtitle": "참고용으로만 사용하세요",
+    "dismiss": "닫기"
+  },
+
+  "noCredit": {
+    "title": "크레딧이 모두 소진되었어요",
+    "subtitle": "트립 패스로 계속 메뉴를 탐색하세요",
+    "getPass": "트립 패스 구매 — $2.99",
+    "buyCredits": "50 크레딧 구매 — $1.99",
+    "finePrint": "7일 패스 · 일회성 결제"
+  },
+
+  "combo": {
+    "title": "추천 콤보",
+    "bestValue": "가성비 최고",
+    "balanced": "균형 잡힌 선택",
+    "unlockCombos": "콤보 잠금 해제 — $2.99"
+  },
+
+  "dishCard": {
+    "ingredients": "재료",
+    "funFact": "재미있는 사실",
+    "unlockHint": "이 요리의 이야기, 먹는 방법 등을 알아보세요."
+  },
+
+  "foods": {
+    "title": "음식 가이드",
+    "subtitle": "인기 요리 해설 — 번역, 알레르기, 재료 & 문화적 맥락",
+    "ctaText": "지금 식당에 계신가요? 메뉴를 스캔해서 즉시 정보를 확인하세요.",
+    "quickFacts": "간단 정보",
+    "cuisine": "요리 분류",
+    "category": "카테고리",
+    "keyIngredients": "주요 재료",
+    "didYouKnow": "알고 계셨나요?",
+    "howToEat": "먹는 방법",
+    "tryFree": "TransTaste 무료 체험",
+    "scanCta": "TransTaste로 레스토랑 메뉴를 스캔하면 {dish}를 포함한 모든 요리의 알레르기 경고, 맛 프로필, 주문 문구를 바로 확인할 수 있습니다.",
+    "infoDisclaimer": "이 페이지의 정보는 참고용입니다. 실제 재료와 알레르기 유발 물질은 식당과 조리법에 따라 다릅니다. 항상 식당 직원에게 확인하세요.",
+    "noneKnown": "알려진 것 없음",
+    "allergens": "알레르기 유발 물질"
+  },
+
+  "guide": {
+    "title": "국가별 식사 가이드",
+    "subtitle": "팁 문화, 식사 예절 & 여행자를 위한 식당 문화",
+    "restaurantGuide": "{country} 레스토랑 가이드",
+    "guideSubtitle": "여행자를 위한 팁 문화, 식사 예절, 식당 팁",
+    "recommended": "권장: {min}–{max}%",
+    "water": "물",
+    "payment": "결제",
+    "payAt": "{location}에서 결제",
+    "tax": "세금",
+    "taxIncluded": "가격에 포함",
+    "taxSeparate": "별도 추가",
+    "sideDishes": "반찬",
+    "freeRefillable": "무료 리필 가능",
+    "lunch": "점심",
+    "dinner": "저녁",
+    "visitCta": "{country} 방문 예정이세요? TransTaste로 레스토랑 메뉴를 스캔하면 즉시 번역, 알레르기 경고, 주문 문구를 확인할 수 있습니다.",
+    "tip": "팁",
+    "tipRange": "{min}–{max}% 팁",
+    "breadcrumb": "가이드"
+  },
+
+  "funFacts": {
+    "0": "알고 계셨나요? 스시는 원래 발효된 쌀로 생선을 보존하는 방법이었어요.",
+    "1": "태국 바질과 이탈리아 바질은 완전히 다른 종이에요!",
+    "2": "김치는 한국 전역에 200가지가 넘는 종류가 있어요.",
+    "3": "'케첩'이라는 단어는 중국어 '케치압(ke-tsiap)', 즉 발효 생선 소스에서 유래했을 가능성이 높아요.",
+    "4": "일본 라멘은 원래 1800년대에 전해진 중국 음식이었어요.",
+    "5": "팟타이는 1930년대 국가 건설 캠페인의 일환으로 만들어졌어요.",
+    "6": "세계에서 가장 매운 고추는 거의 매년 바뀌어요.",
+    "7": "포춘 쿠키는 사실 중국이 아니라 샌프란시스코에서 발명되었어요.",
+    "8": "베트남에서 쌀국수(포)는 전통적으로 아침 식사로 먹어요.",
+    "9": "MSG는 1908년 일본 화학자가 해조류에서 처음 추출했어요.",
+    "about": "{dish} 정보"
   },
 
   "errors": {

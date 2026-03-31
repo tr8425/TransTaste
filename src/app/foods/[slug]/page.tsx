@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FOOD_DATABASE, type FoodEntry } from "@/lib/food-database";
+import { t } from "@/lib/i18n/server";
 
 interface Props {
   params: { slug: string };
@@ -34,9 +35,9 @@ export default function FoodPage({ params }: Props) {
       <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
         {/* Breadcrumb */}
         <nav className="text-xs text-brown-medium mb-6">
-          <Link href="/" className="hover:text-coral">Home</Link>
+          <Link href="/" className="hover:text-coral">{t("nav.home")}</Link>
           <span className="mx-1">/</span>
-          <Link href="/foods" className="hover:text-coral">Foods</Link>
+          <Link href="/foods" className="hover:text-coral">{t("foods.title")}</Link>
           <span className="mx-1">/</span>
           <span className="text-brown-dark">{food.english}</span>
         </nav>
@@ -52,23 +53,23 @@ export default function FoodPage({ params }: Props) {
 
         {/* Quick facts */}
         <section className="bg-cream-dark rounded-xl p-4 mb-6">
-          <h2 className="text-sm font-semibold text-brown-dark mb-3">Quick Facts</h2>
+          <h2 className="text-sm font-semibold text-brown-dark mb-3">{t("foods.quickFacts")}</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex gap-2">
-              <dt className="text-brown-medium font-medium min-w-[100px]">Cuisine</dt>
+              <dt className="text-brown-medium font-medium min-w-[100px]">{t("foods.cuisine")}</dt>
               <dd className="text-brown-dark">{food.cuisine}</dd>
             </div>
             <div className="flex gap-2">
-              <dt className="text-brown-medium font-medium min-w-[100px]">Category</dt>
+              <dt className="text-brown-medium font-medium min-w-[100px]">{t("foods.category")}</dt>
               <dd className="text-brown-dark capitalize">{food.category}</dd>
             </div>
             <div className="flex gap-2">
-              <dt className="text-brown-medium font-medium min-w-[100px]">Key Ingredients</dt>
+              <dt className="text-brown-medium font-medium min-w-[100px]">{t("foods.keyIngredients")}</dt>
               <dd className="text-brown-dark">{food.ingredients.join(", ")}</dd>
             </div>
             <div className="flex gap-2">
-              <dt className="text-brown-medium font-medium min-w-[100px]">Allergens</dt>
-              <dd className="text-brown-dark">{food.allergens.length > 0 ? food.allergens.join(", ") : "None commonly known"}</dd>
+              <dt className="text-brown-medium font-medium min-w-[100px]">{t("foods.allergens")}</dt>
+              <dd className="text-brown-dark">{food.allergens.length > 0 ? food.allergens.join(", ") : t("foods.noneKnown")}</dd>
             </div>
           </dl>
         </section>
@@ -76,7 +77,7 @@ export default function FoodPage({ params }: Props) {
         {/* Fun fact */}
         {food.fun_fact && (
           <section className="bg-amber-brand/10 rounded-xl p-4 mb-6 border border-amber-brand/20">
-            <h2 className="text-xs font-semibold text-amber-brand mb-1">Did You Know?</h2>
+            <h2 className="text-xs font-semibold text-amber-brand mb-1">{t("foods.didYouKnow")}</h2>
             <p className="text-sm text-brown-dark leading-relaxed">{food.fun_fact}</p>
           </section>
         )}
@@ -84,7 +85,7 @@ export default function FoodPage({ params }: Props) {
         {/* How to eat */}
         {food.how_to_eat && (
           <section className="mb-6">
-            <h2 className="text-sm font-semibold text-brown-dark mb-2">How to Eat</h2>
+            <h2 className="text-sm font-semibold text-brown-dark mb-2">{t("foods.howToEat")}</h2>
             <p className="text-sm text-brown-medium leading-relaxed">{food.how_to_eat}</p>
           </section>
         )}
@@ -92,21 +93,19 @@ export default function FoodPage({ params }: Props) {
         {/* CTA */}
         <section className="bg-coral/5 rounded-xl p-4 border border-coral/20 text-center">
           <p className="text-sm text-brown-dark mb-3">
-            Scan a restaurant menu with TransTaste to get instant allergen warnings,
-            flavor profiles, and ordering phrases for {food.english} and more.
+            {t("foods.scanCta", { dish: food.english })}
           </p>
           <Link
             href="/"
             className="inline-block px-6 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors"
           >
-            Try TransTaste Free
+            {t("foods.tryFree")}
           </Link>
         </section>
 
         {/* Disclaimer */}
         <p className="mt-6 text-[10px] text-brown-medium/40 leading-relaxed">
-          Information on this page is for reference only. Actual ingredients and allergens
-          vary by restaurant and preparation method. Always confirm with restaurant staff.
+          {t("foods.infoDisclaimer")}
         </p>
       </div>
     </main>

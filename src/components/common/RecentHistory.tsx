@@ -4,12 +4,31 @@ import Link from "next/link";
 import { RecentScan } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
 
+function formatRelativeTime(date: string | Date, locale: string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return typeof date === "string" ? date : "";
+  const seconds = Math.round((Date.now() - d.getTime()) / 1000);
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+    ["second", 1],
+  ];
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  for (const [unit, threshold] of units) {
+    if (seconds >= threshold) {
+      return rtf.format(-Math.floor(seconds / threshold), unit);
+    }
+  }
+  return rtf.format(0, "second");
+}
+
 interface RecentHistoryProps {
   items: RecentScan[];
 }
 
 export default function RecentHistory({ items }: RecentHistoryProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   if (items.length === 0) return null;
 
   return (
@@ -28,7 +47,7 @@ export default function RecentHistory({ items }: RecentHistoryProps) {
               {item.original}
             </span>
             <span className="text-xs text-brown-medium whitespace-nowrap">
-              {item.scannedAt}
+              {formatRelativeTime(item.scannedAt, locale)}
             </span>
           </Link>
         ))}

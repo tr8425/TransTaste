@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 interface FunFactCardProps {
   fact: string | null;
@@ -10,6 +11,7 @@ interface FunFactCardProps {
 }
 
 export default function FunFactCard({ fact, dishName, detail, warning }: FunFactCardProps) {
+  const { t } = useTranslation();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Nothing to render if no fact and no warning
@@ -22,7 +24,7 @@ export default function FunFactCard({ fact, dishName, detail, warning }: FunFact
         <div className="rounded-xl border border-brown-light/20 border-l-4 border-l-amber-brand bg-cream-dark p-4">
           {dishName && (
             <p className="mb-1 text-xs font-medium text-brown-medium">
-              About {dishName}
+              {t("funFacts.about", { dish: dishName })}
             </p>
           )}
           <p className="text-sm leading-relaxed text-brown-dark">

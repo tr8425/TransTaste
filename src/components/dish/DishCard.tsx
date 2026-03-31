@@ -329,7 +329,7 @@ export default function DishCard({
                 </div>
                 <div>
                   <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
-                    Ingredients
+                    {t("dishCard.ingredients")}
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {["Main ingredient", "Seasoning", "Spice"].map((name) => (
@@ -339,10 +339,10 @@ export default function DishCard({
                 </div>
                 <div className="bg-cream-dark rounded-xl p-4">
                   <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
-                    Fun Fact
+                    {t("dishCard.funFact")}
                   </h4>
                   <p className="text-sm text-brown-dark leading-relaxed">
-                    Unlock to discover the story behind this dish, how to eat it, and more.
+                    {t("dishCard.unlockHint")}
                   </p>
                 </div>
               </div>

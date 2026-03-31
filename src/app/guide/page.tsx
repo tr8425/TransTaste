@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { COUNTRIES } from "@/lib/tip-culture-data";
+import { t } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Country Dining Guides — Tipping & Etiquette",
@@ -16,9 +17,9 @@ export default function GuideIndexPage() {
   return (
     <main className="min-h-screen bg-cream pb-28">
       <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
-        <h1 className="text-2xl font-bold text-brown-dark mb-2">Country Dining Guides</h1>
+        <h1 className="text-2xl font-bold text-brown-dark mb-2">{t("guide.title")}</h1>
         <p className="text-sm text-brown-medium mb-8">
-          Tipping customs, dining etiquette & restaurant culture for travelers
+          {t("guide.subtitle")}
         </p>
 
         <div className="grid grid-cols-2 gap-3">
@@ -32,8 +33,8 @@ export default function GuideIndexPage() {
               <p className="text-sm font-semibold text-brown-dark">{country.name}</p>
               <p className="text-[10px] text-brown-medium mt-0.5">
                 {country.tip.type === "none"
-                  ? "No tip"
-                  : `${country.tip.range_min}–${country.tip.range_max}% tip`}
+                  ? t("tipCulture.noTip")
+                  : t("guide.tipRange", { min: country.tip.range_min, max: country.tip.range_max })}
               </p>
             </Link>
           ))}

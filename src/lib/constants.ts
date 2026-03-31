@@ -86,15 +86,4 @@ export const CATEGORY_FILTERS = [
   "dessert",
 ] as const;
 
-export const FUN_FACTS_LOADING = [
-  "Did you know? Sushi originally was a way to preserve fish in fermented rice.",
-  "Thai basil and Italian basil are completely different species!",
-  "Kimchi has over 200 varieties across Korea.",
-  "The word 'ketchup' likely comes from the Chinese word 'ke-tsiap', a fermented fish sauce.",
-  "Japanese ramen was originally a Chinese import that arrived in the 1800s.",
-  "Pad Thai was invented as part of a nation-building campaign in the 1930s.",
-  "The hottest chili pepper in the world changes almost every year.",
-  "Fortune cookies were actually invented in San Francisco, not China.",
-  "Pho is traditionally eaten for breakfast in Vietnam.",
-  "MSG was first extracted from seaweed by a Japanese chemist in 1908.",
-];
+export const FUN_FACTS_LOADING_COUNT = 10;

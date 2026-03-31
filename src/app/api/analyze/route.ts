@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_MENU_RESULT } from "@/lib/mock-data";
 import { selectProvider } from "@/lib/ai/provider";
 import { MenuInput } from "@/lib/ai/provider";
 import { createMenuAnalysisStream } from "@/lib/ai/claude";
@@ -35,10 +34,12 @@ export async function POST(request: NextRequest) {
     const userApiKey = request.headers.get("x-api-key");
     const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
 
-    // If no API key at all, return mock data
+    // If no API key at all, return error
     if (!apiKey) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      return NextResponse.json(MOCK_MENU_RESULT, { headers: corsHeaders });
+      return NextResponse.json(
+        { error: "no_api_key", reason: "No API key configured. Add ANTHROPIC_API_KEY to use real analysis." },
+        { status: 422, headers: corsHeaders }
+      );
     }
 
     // Parse request body

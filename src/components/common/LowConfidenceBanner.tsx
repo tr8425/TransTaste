@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 interface LowConfidenceBannerProps {
   onDismiss?: () => void;
@@ -9,6 +10,7 @@ interface LowConfidenceBannerProps {
 export default function LowConfidenceBanner({
   onDismiss,
 }: LowConfidenceBannerProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(true);
 
   if (!visible) return null;
@@ -43,10 +45,10 @@ export default function LowConfidenceBanner({
         {/* Text */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-brown-dark">
-            Some items might be inaccurate
+            {t("lowConfidence.title")}
           </p>
           <p className="text-xs text-brown-medium mt-0.5">
-            Use as reference only
+            {t("lowConfidence.subtitle")}
           </p>
         </div>
 
@@ -54,7 +56,7 @@ export default function LowConfidenceBanner({
         <button
           onClick={handleDismiss}
           className="shrink-0 mt-0.5 rounded p-0.5 text-brown-medium hover:text-brown-dark transition-colors"
-          aria-label="Dismiss"
+          aria-label={t("lowConfidence.dismiss")}
         >
           <svg
             width="16"
