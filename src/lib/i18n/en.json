@@ -149,7 +149,18 @@
     "subtitle": "Show your phone to communicate",
     "serverMightSay": "Server might say:",
     "removeBookmark": "Remove bookmark",
-    "bookmarkPhrase": "Bookmark phrase"
+    "bookmarkPhrase": "Bookmark phrase",
+    "langJa": "Japanese",
+    "langZh": "Chinese",
+    "langTh": "Thai",
+    "langVi": "Vietnamese",
+    "langEn": "English",
+    "catBasic": "Basics",
+    "catOrder": "Ordering",
+    "catPayment": "Payment",
+    "catIssues": "Issues",
+    "catGreeting": "Greetings",
+    "catOther": "Other"
   },
 
   "tipCulture": {
@@ -209,7 +220,15 @@
     "dislikedIngredients": "Disliked Ingredients",
     "dislikedDesc": "Ingredients you prefer to avoid (not allergies)",
     "dislikedPlaceholder": "Type and press Enter (e.g. cilantro, cucumber)",
-    "noDisliked": "No disliked ingredients set"
+    "noDisliked": "No disliked ingredients set",
+    "menuLangAuto": "Auto-detect",
+    "menuLangKo": "Korean",
+    "menuLangJa": "Japanese",
+    "menuLangZh": "Chinese",
+    "menuLangTh": "Thai",
+    "menuLangVi": "Vietnamese",
+    "menuLangEs": "Spanish",
+    "menuLangFr": "French"
   },
 
   "paywall": {

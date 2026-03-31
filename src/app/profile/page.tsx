@@ -23,14 +23,14 @@ const OUTPUT_LANGUAGES = [
 ];
 
 const MENU_LANGUAGES = [
-  { value: "auto", label: "Auto-detect" },
-  { value: "ko", label: "Korean" },
-  { value: "ja", label: "Japanese" },
-  { value: "zh", label: "Chinese" },
-  { value: "th", label: "Thai" },
-  { value: "vi", label: "Vietnamese" },
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
+  { value: "auto", labelKey: "profile.menuLangAuto" },
+  { value: "ko", labelKey: "profile.menuLangKo" },
+  { value: "ja", labelKey: "profile.menuLangJa" },
+  { value: "zh", labelKey: "profile.menuLangZh" },
+  { value: "th", labelKey: "profile.menuLangTh" },
+  { value: "vi", labelKey: "profile.menuLangVi" },
+  { value: "es", labelKey: "profile.menuLangEs" },
+  { value: "fr", labelKey: "profile.menuLangFr" },
 ];
 
 const ALL_ALLERGENS: { value: string; label: string; emoji: string }[] = [
@@ -313,7 +313,7 @@ function ProfileContent() {
             >
               {MENU_LANGUAGES.map((l) => (
                 <option key={l.value} value={l.value}>
-                  {l.label}
+                  {t(l.labelKey)}
                 </option>
               ))}
             </select>
@@ -565,7 +565,7 @@ function ProfileContent() {
         {/* ── About ── */}
         <div className="text-center pt-4 pb-4">
           <p className="text-xs text-brown-medium/50 mb-1">
-            TransTaste v0.2.0
+            {t("common.version")}
           </p>
           <div className="flex items-center justify-center gap-3 text-xs text-brown-medium/50">
             <Link href="/terms" className="hover:text-brown-medium transition-colors underline">

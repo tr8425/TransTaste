@@ -5,11 +5,11 @@ import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases-data";
 import { useTranslation } from "@/lib/i18n";
 
 const LANGUAGES = [
-  { code: "ja", label: "Japanese" },
-  { code: "zh", label: "Chinese" },
-  { code: "th", label: "Thai" },
-  { code: "vi", label: "Vietnamese" },
-  { code: "en", label: "English" },
+  { code: "ja", labelKey: "phrases.langJa" },
+  { code: "zh", labelKey: "phrases.langZh" },
+  { code: "th", labelKey: "phrases.langTh" },
+  { code: "vi", labelKey: "phrases.langVi" },
+  { code: "en", labelKey: "phrases.langEn" },
 ] as const;
 
 type CategoryId = (typeof PHRASE_CATEGORIES)[number]["id"];
@@ -80,7 +80,7 @@ function PhraseCard({
         <button
           onClick={() => setBookmarked(!bookmarked)}
           className="text-brown-light hover:text-coral transition-colors"
-          aria-label={bookmarked ? "Remove bookmark" : "Bookmark phrase"}
+          aria-label={bookmarked ? t("phrases.removeBookmark") : t("phrases.bookmarkPhrase")}
         >
           <svg
             width="20"
@@ -148,7 +148,7 @@ export default function PhrasesPage() {
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >
-              {lang.label}
+              {t(lang.labelKey)}
             </button>
           ))}
         </div>
@@ -168,7 +168,7 @@ export default function PhrasesPage() {
               }`}
             >
               <span>{cat.emoji}</span>
-              <span>{cat.label}</span>
+              <span>{t(cat.labelKey)}</span>
             </button>
           ))}
         </div>

@@ -7,12 +7,12 @@ export interface Phrase {
 }
 
 export const PHRASE_CATEGORIES = [
-  { id: 'basic', label: 'Basics', emoji: '💧' },
-  { id: 'order', label: 'Ordering', emoji: '📋' },
-  { id: 'payment', label: 'Payment', emoji: '💳' },
-  { id: 'complaint', label: 'Issues', emoji: '⚠️' },
-  { id: 'greeting', label: 'Greetings', emoji: '👋' },
-  { id: 'other', label: 'Other', emoji: '💬' },
+  { id: 'basic', labelKey: 'phrases.catBasic', emoji: '💧' },
+  { id: 'order', labelKey: 'phrases.catOrder', emoji: '📋' },
+  { id: 'payment', labelKey: 'phrases.catPayment', emoji: '💳' },
+  { id: 'complaint', labelKey: 'phrases.catIssues', emoji: '⚠️' },
+  { id: 'greeting', labelKey: 'phrases.catGreeting', emoji: '👋' },
+  { id: 'other', labelKey: 'phrases.catOther', emoji: '💬' },
 ] as const;
 
 export const PHRASES: Phrase[] = [

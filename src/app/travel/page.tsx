@@ -114,12 +114,12 @@ export default function TravelPage() {
               <p className="text-xs font-semibold text-amber-brand mb-1">{t("travel.travelTip")}</p>
               <p className="text-xs text-brown-medium leading-relaxed">
                 {lastCountry === "ja"
-                  ? "In Japan, say \"itadakimasu\" before eating — it shows gratitude for the meal."
+                  ? t("travel.tipJa")
                   : lastCountry === "ko"
-                  ? "In Korea, wait for the eldest person to start eating before you begin."
+                  ? t("travel.tipKo")
                   : lastCountry === "th"
-                  ? "In Thailand, use a spoon for rice dishes and a fork to push food onto the spoon."
-                  : "Take a photo of your hotel's address in the local language — it helps taxi drivers get you home."}
+                  ? t("travel.tipTh")
+                  : t("travel.tipDefault")}
               </p>
             </div>
           </div>

@@ -149,7 +149,18 @@
     "subtitle": "휴대폰을 보여주며 소통하세요",
     "serverMightSay": "직원이 할 수 있는 말:",
     "removeBookmark": "북마크 제거",
-    "bookmarkPhrase": "문구 북마크"
+    "bookmarkPhrase": "문구 북마크",
+    "langJa": "일본어",
+    "langZh": "중국어",
+    "langTh": "태국어",
+    "langVi": "베트남어",
+    "langEn": "영어",
+    "catBasic": "기본",
+    "catOrder": "주문",
+    "catPayment": "결제",
+    "catIssues": "문제",
+    "catGreeting": "인사",
+    "catOther": "기타"
   },
 
   "tipCulture": {
@@ -209,7 +220,15 @@
     "dislikedIngredients": "불호 식품",
     "dislikedDesc": "알레르기가 아닌 개인적으로 피하고 싶은 재료",
     "dislikedPlaceholder": "입력 후 Enter (예: 고수, 오이)",
-    "noDisliked": "설정된 불호 식품 없음"
+    "noDisliked": "설정된 불호 식품 없음",
+    "menuLangAuto": "자동 감지",
+    "menuLangKo": "한국어",
+    "menuLangJa": "일본어",
+    "menuLangZh": "중국어",
+    "menuLangTh": "태국어",
+    "menuLangVi": "베트남어",
+    "menuLangEs": "스페인어",
+    "menuLangFr": "프랑스어"
   },
 
   "paywall": {
