@@ -261,6 +261,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary):
       },
       "allergens": ["string — from: shellfish, pork, gluten, dairy, nuts, egg, soy, fish, sesame, celery, mustard, sulfites"],
       "allergen_risk": "'danger' | 'warning' | 'check' | 'safe'",
+      "alternative_dishes": ["string — safer alternatives from the same menu when allergen_risk is danger/warning, empty otherwise"],
       "price_tier": "'budget' | 'mid' | 'premium'",
       "image_search_query": "string — English query to find a photo of this dish"
     }

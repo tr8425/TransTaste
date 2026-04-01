@@ -49,7 +49,10 @@ export default function TripPassPaywall({
         {/* Plan cards */}
         <div className="space-y-3 mb-6">
           {PASS_OPTIONS.map((plan) => {
-            const keyId = plan.id === "7d" ? "7d" : plan.id === "30d" ? "30d" : "credits50";
+            const isPass = plan.id === "7d" || plan.id === "30d";
+            const titleKey = isPass ? `paywall.pass${plan.id}` : "paywall.credits50";
+            const descKey = isPass ? `paywall.pass${plan.id}Desc` : "paywall.credits50Desc";
+            const badgeKey = isPass ? `paywall.pass${plan.id}Badge` : "";
             return (
             <button
               key={plan.id}
@@ -62,9 +65,9 @@ export default function TripPassPaywall({
             >
               <div className="flex items-start justify-between">
                 <div>
-                  {plan.badge && (
+                  {plan.badge && badgeKey && (
                     <span className="inline-block text-[10px] font-bold text-coral bg-coral/10 px-2 py-0.5 rounded-full uppercase tracking-wider mb-1.5">
-                      {t(`paywall.pass${keyId}Badge`)}
+                      {t(badgeKey)}
                     </span>
                   )}
                   <h3
@@ -72,10 +75,10 @@ export default function TripPassPaywall({
                       plan.featured ? "text-brown-dark text-base" : "text-brown-dark text-sm"
                     }`}
                   >
-                    {t(`paywall.pass${keyId}`)}
+                    {t(titleKey)}
                   </h3>
                   <p className="text-xs text-brown-medium mt-0.5">
-                    {t(`paywall.pass${keyId}Desc`)}
+                    {t(descKey)}
                   </p>
                 </div>
                 <span

@@ -1,6 +1,15 @@
-# TransTaste — currently in development, disallow all crawling
+# TransTaste — allow crawling for SEO and AI discovery
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /api/
 
-# Sitemap will be enabled after public launch
-# Sitemap: https://transtaste.app/sitemap.xml
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://transtaste.app/sitemap.xml

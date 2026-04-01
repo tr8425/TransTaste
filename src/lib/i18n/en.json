@@ -78,7 +78,8 @@
     "added": "Added \u2713",
     "noScans": "No scans remaining",
     "noScansDesc": "You've used all your free scans. Pick an option to keep exploring:",
-    "somethingWrong": "Something went wrong"
+    "somethingWrong": "Something went wrong",
+    "demoBanner": "Showing example data — no API key configured. Set your API key in Profile to use real menu analysis."
   },
 
   "dish": {
@@ -92,6 +93,7 @@
     "allergenDanger": "Contains your allergen. Consider an alternative dish.",
     "allergenWarning": "May contain allergens. Ask staff if it can be prepared without.",
     "allergenCheck": "Possible allergen presence. Ask staff to confirm ingredients.",
+    "saferAlternatives": "Safer alternatives from this menu",
     "couldNotLoad": "Could not load details",
     "tapToRetry": "Tap to retry",
     "dislikedWarning": "Contains ingredients you dislike: {items}."

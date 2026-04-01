@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases-data";
+import { ALLERGEN_INGREDIENT_NAMES } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
+import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
 const LANGUAGES = [
   { code: "ja", labelKey: "phrases.langJa" },
@@ -105,25 +107,53 @@ export default function PhrasesPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>("ja");
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("basic");
   const [userLang, setUserLang] = useState("en");
+  const [allergenPreset, setAllergenPreset] = useState<string[]>([]);
 
-  // Read user output language from localStorage
+  // Read user settings from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("transtaste_user_settings");
       if (raw) {
         const settings = JSON.parse(raw);
-        if (settings.output_language) {
-          setUserLang(settings.output_language);
-        }
+        if (settings.output_language) setUserLang(settings.output_language);
+        if (settings.allergen_preset) setAllergenPreset(settings.allergen_preset);
       }
     } catch {
       // ignore
     }
   }, []);
 
-  const filteredPhrases = PHRASES.filter(
-    (p) => p.category === selectedCategory
-  );
+  // Expand no_ingredient template with user's allergen presets
+  const filteredPhrases = useMemo(() => {
+    const base = PHRASES.filter((p) => p.category === selectedCategory);
+    const expanded: Phrase[] = [];
+    for (const phrase of base) {
+      if (phrase.key === "no_ingredient" && allergenPreset.length > 0) {
+        for (const allergen of allergenPreset) {
+          const names = ALLERGEN_INGREDIENT_NAMES[allergen];
+          if (!names) continue;
+          const fill = (tmpl: string, lang: string) =>
+            tmpl.replace(/___/g, names[lang] || names.en || allergen);
+          expanded.push({
+            ...phrase,
+            key: `no_ingredient_${allergen}`,
+            ko: fill(phrase.ko, "ko"),
+            translations: Object.fromEntries(
+              Object.entries(phrase.translations).map(([lang, t]) => [
+                lang,
+                { text: fill(t.text, lang), pronunciation: fill(t.pronunciation, lang) },
+              ])
+            ),
+          });
+        }
+        // Also keep original template at the end
+        expanded.push(phrase);
+      } else {
+        expanded.push(phrase);
+      }
+    }
+    return expanded;
+  }, [selectedCategory, allergenPreset]);
 
   return (
     <main className="min-h-screen bg-cream pb-28">
@@ -156,12 +186,12 @@ export default function PhrasesPage() {
 
       {/* Category tabs */}
       <div className="px-5 mb-4">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        <HorizontalScroll>
           {PHRASE_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 snap-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === cat.id
                   ? "bg-brown-dark text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
@@ -171,7 +201,7 @@ export default function PhrasesPage() {
               <span>{t(cat.labelKey)}</span>
             </button>
           ))}
-        </div>
+        </HorizontalScroll>
       </div>
 
       {/* Phrase cards */}

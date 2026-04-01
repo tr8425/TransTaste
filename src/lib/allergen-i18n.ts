@@ -149,6 +149,27 @@ export const ALLERGEN_LABELS: Record<string, Record<string, string>> = {
   },
 };
 
+/** Ingredient names for phrase templates (not allergy labels) */
+export const ALLERGEN_INGREDIENT_NAMES: Record<string, Record<string, string>> = {
+  shellfish: { ja: "エビ・カニ", zh: "虾蟹", th: "กุ้ง ปู", vi: "tôm cua", en: "shellfish", ko: "새우/게" },
+  peanuts: { ja: "ピーナッツ", zh: "花生", th: "ถั่วลิสง", vi: "đậu phộng", en: "peanuts", ko: "땅콩" },
+  tree_nuts: { ja: "ナッツ", zh: "坚果", th: "ถั่วเปลือกแข็ง", vi: "hạt cây", en: "nuts", ko: "견과류" },
+  milk: { ja: "乳製品", zh: "牛奶", th: "นม", vi: "sữa", en: "dairy", ko: "유제품" },
+  eggs: { ja: "卵", zh: "鸡蛋", th: "ไข่", vi: "trứng", en: "eggs", ko: "계란" },
+  egg: { ja: "卵", zh: "鸡蛋", th: "ไข่", vi: "trứng", en: "eggs", ko: "계란" },
+  gluten: { ja: "小麦", zh: "面粉", th: "แป้งสาลี", vi: "gluten", en: "wheat/gluten", ko: "밀가루" },
+  fish: { ja: "魚", zh: "鱼", th: "ปลา", vi: "cá", en: "fish", ko: "생선" },
+  soy: { ja: "大豆", zh: "大豆", th: "ถั่วเหลือง", vi: "đậu nành", en: "soy", ko: "대두" },
+  sesame: { ja: "ゴマ", zh: "芝麻", th: "งา", vi: "mè", en: "sesame", ko: "참깨" },
+  celery: { ja: "セロリ", zh: "芹菜", th: "ขึ้นฉ่าย", vi: "cần tây", en: "celery", ko: "셀러리" },
+  mustard: { ja: "からし", zh: "芥末", th: "มัสตาร์ด", vi: "mù tạt", en: "mustard", ko: "겨자" },
+  sulfites: { ja: "亜硫酸塩", zh: "亚硫酸盐", th: "ซัลไฟต์", vi: "sulfit", en: "sulfites", ko: "아황산염" },
+  dairy: { ja: "乳製品", zh: "牛奶", th: "นม", vi: "sữa", en: "dairy", ko: "유제품" },
+  pork: { ja: "豚肉", zh: "猪肉", th: "หมู", vi: "thịt heo", en: "pork", ko: "돼지고기" },
+  beef: { ja: "牛肉", zh: "牛肉", th: "เนื้อวัว", vi: "thịt bò", en: "beef", ko: "소고기" },
+  alcohol: { ja: "お酒", zh: "酒", th: "แอลกอฮอล์", vi: "rượu", en: "alcohol", ko: "술" },
+};
+
 export const CONFIRM_LABELS: Record<string, string> = {
   ja: "確認しました",
   zh: "已确认",

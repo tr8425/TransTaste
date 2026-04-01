@@ -89,6 +89,16 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart }: DishRo
           </div>
         )}
 
+        {/* Alternative dishes hint */}
+        {dish.alternative_dishes && dish.alternative_dishes.length > 0 &&
+          (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") && (
+          <div className="flex items-center gap-1 mt-1">
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-green-100 text-green-800">
+              ✅ {t("dish.saferAlternatives")}: {dish.alternative_dishes.slice(0, 2).join(", ")}
+            </span>
+          </div>
+        )}
+
         {/* Disliked ingredients badge */}
         {dish.disliked_ingredients && dish.disliked_ingredients.length > 0 && (
           <div className="flex items-center gap-1 mt-1">

@@ -788,4 +788,408 @@ export const PHRASES: Phrase[] = [
       ],
     },
   },
+
+  // ── NEW: basic (additional) ──
+  {
+    key: 'see_menu',
+    category: 'basic',
+    ko: '메뉴판 볼 수 있을까요?',
+    translations: {
+      ja: { text: 'メニューを見せてください', pronunciation: 'Menyuu o misete kudasai' },
+      zh: { text: '请给我看菜单', pronunciation: 'Qing gei wo kan caidan' },
+      th: { text: 'ขอดูเมนูหน่อยครับ/ค่ะ', pronunciation: 'Khor duu menu noi khrap/kha' },
+      vi: { text: 'Cho tôi xem thực đơn', pronunciation: 'Cho toy sem tuc don' },
+      en: { text: 'Can I see the menu, please?', pronunciation: 'Can I see the menu, please?' },
+    },
+  },
+  {
+    key: 'english_menu',
+    category: 'basic',
+    ko: '영어 메뉴 있나요?',
+    translations: {
+      ja: { text: '英語のメニューはありますか？', pronunciation: 'Eigo no menyuu wa arimasu ka?' },
+      zh: { text: '有英文菜单吗？', pronunciation: 'You yingwen caidan ma?' },
+      th: { text: 'มีเมนูภาษาอังกฤษไหมครับ/ค่ะ', pronunciation: 'Mii menu phasa angkrit mai khrap/kha' },
+      vi: { text: 'Có thực đơn tiếng Anh không?', pronunciation: 'Co tuc don tieng Anh khong?' },
+      en: { text: 'Do you have an English menu?', pronunciation: 'Do you have an English menu?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: 'はい、こちらです', meaning: 'Yes, here it is' },
+        { text: '申し訳ありません、日本語のみです', meaning: 'Sorry, only Japanese' },
+      ],
+      zh: [
+        { text: '有的，请稍等', meaning: 'Yes, one moment' },
+        { text: '对不起，只有中文的', meaning: 'Sorry, only Chinese' },
+      ],
+      th: [
+        { text: 'มีครับ/ค่ะ เดี๋ยวเอามาให้', meaning: 'Yes, I will bring it' },
+        { text: 'ไม่มีครับ/ค่ะ', meaning: 'No, we don\'t' },
+      ],
+      vi: [
+        { text: 'Có ạ, đây ạ', meaning: 'Yes, here it is' },
+        { text: 'Xin lỗi, chỉ có tiếng Việt', meaning: 'Sorry, only Vietnamese' },
+      ],
+      en: [
+        { text: 'Yes, here you go', meaning: 'Yes, here you go' },
+        { text: 'Sorry, we only have the local menu', meaning: 'Sorry, we only have the local menu' },
+      ],
+    },
+  },
+  {
+    key: 'napkins_please',
+    category: 'basic',
+    ko: '냅킨 좀 주세요',
+    translations: {
+      ja: { text: 'ナプキンをください', pronunciation: 'Napukin o kudasai' },
+      zh: { text: '请给我纸巾', pronunciation: 'Qing gei wo zhijin' },
+      th: { text: 'ขอทิชชู่หน่อยครับ/ค่ะ', pronunciation: 'Khor tissue noi khrap/kha' },
+      vi: { text: 'Cho tôi khăn giấy', pronunciation: 'Cho toy khan giay' },
+      en: { text: 'Napkins, please', pronunciation: 'Napkins, please' },
+    },
+  },
+  {
+    key: 'utensils_please',
+    category: 'basic',
+    ko: '포크/숟가락 주세요',
+    translations: {
+      ja: { text: 'フォーク/スプーンをください', pronunciation: 'Fooku/supuun o kudasai' },
+      zh: { text: '请给我叉子/勺子', pronunciation: 'Qing gei wo chazi/shaozi' },
+      th: { text: 'ขอช้อนส้อมหน่อยครับ/ค่ะ', pronunciation: 'Khor chon som noi khrap/kha' },
+      vi: { text: 'Cho tôi nĩa/muỗng', pronunciation: 'Cho toy nia/muong' },
+      en: { text: 'Fork/spoon, please', pronunciation: 'Fork/spoon, please' },
+    },
+  },
+
+  // ── NEW: order (additional) ──
+  {
+    key: 'is_halal',
+    category: 'order',
+    ko: '이 음식 할랄인가요?',
+    translations: {
+      ja: { text: 'この料理はハラールですか？', pronunciation: 'Kono ryouri wa haraaru desu ka?' },
+      zh: { text: '这道菜是清真的吗？', pronunciation: 'Zhe dao cai shi qingzhen de ma?' },
+      th: { text: 'อาหารนี้ฮาลาลไหมครับ/ค่ะ', pronunciation: 'Aahaan nii halal mai khrap/kha' },
+      vi: { text: 'Món này có halal không?', pronunciation: 'Mon nay co halal khong?' },
+      en: { text: 'Is this dish halal?', pronunciation: 'Is this dish halal?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: 'はい、ハラールです', meaning: 'Yes, it is halal' },
+        { text: '豚肉が入っています', meaning: 'It contains pork' },
+      ],
+      zh: [
+        { text: '是的，这是清真的', meaning: 'Yes, it is halal' },
+        { text: '含有猪肉', meaning: 'It contains pork' },
+      ],
+      th: [
+        { text: 'ใช่ครับ/ค่ะ เป็นฮาลาล', meaning: 'Yes, it is halal' },
+        { text: 'มีหมูครับ/ค่ะ', meaning: 'It contains pork' },
+      ],
+      vi: [
+        { text: 'Vâng, món này halal', meaning: 'Yes, it is halal' },
+        { text: 'Có thịt heo ạ', meaning: 'It contains pork' },
+      ],
+      en: [
+        { text: 'Yes, it\'s halal', meaning: 'Yes, it is halal' },
+        { text: 'No, it contains pork', meaning: 'No, it contains pork' },
+      ],
+    },
+  },
+  {
+    key: 'is_vegetarian',
+    category: 'order',
+    ko: '채식 메뉴 있나요?',
+    translations: {
+      ja: { text: 'ベジタリアンメニューはありますか？', pronunciation: 'Bejitarian menyuu wa arimasu ka?' },
+      zh: { text: '有素食菜吗？', pronunciation: 'You sushi cai ma?' },
+      th: { text: 'มีอาหารมังสวิรัติไหมครับ/ค่ะ', pronunciation: 'Mii aahaan mangsawirat mai khrap/kha' },
+      vi: { text: 'Có món chay không?', pronunciation: 'Co mon chay khong?' },
+      en: { text: 'Do you have vegetarian options?', pronunciation: 'Do you have vegetarian options?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: 'はい、こちらがベジタリアンメニューです', meaning: 'Yes, here is the vegetarian menu' },
+        { text: '申し訳ありません、ベジタリアンメニューはありません', meaning: 'Sorry, no vegetarian menu' },
+      ],
+      zh: [
+        { text: '有的，这些是素菜', meaning: 'Yes, these are vegetarian dishes' },
+        { text: '对不起，没有素食选项', meaning: 'Sorry, no vegetarian options' },
+      ],
+      th: [
+        { text: 'มีครับ/ค่ะ', meaning: 'Yes, we do' },
+        { text: 'ไม่มีครับ/ค่ะ', meaning: 'No, we don\'t' },
+      ],
+      vi: [
+        { text: 'Có ạ', meaning: 'Yes, we do' },
+        { text: 'Xin lỗi, không có ạ', meaning: 'Sorry, we don\'t' },
+      ],
+      en: [
+        { text: 'Yes, I can show you', meaning: 'Yes, I can show you' },
+        { text: 'Sorry, we don\'t have vegetarian options', meaning: 'Sorry, we don\'t have vegetarian options' },
+      ],
+    },
+  },
+  {
+    key: 'how_long',
+    category: 'order',
+    ko: '얼마나 걸리나요?',
+    translations: {
+      ja: { text: 'どのくらい時間がかかりますか？', pronunciation: 'Dono kurai jikan ga kakarimasu ka?' },
+      zh: { text: '要等多久？', pronunciation: 'Yao deng duo jiu?' },
+      th: { text: 'ใช้เวลานานแค่ไหนครับ/ค่ะ', pronunciation: 'Chai wela naan khae nai khrap/kha' },
+      vi: { text: 'Mất bao lâu ạ?', pronunciation: 'Mat bao lau a?' },
+      en: { text: 'How long will it take?', pronunciation: 'How long will it take?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: '10分くらいです', meaning: 'About 10 minutes' },
+        { text: '少々お待ちください', meaning: 'Please wait a moment' },
+      ],
+      zh: [
+        { text: '大概10分钟', meaning: 'About 10 minutes' },
+        { text: '马上就好', meaning: 'It will be ready soon' },
+      ],
+      th: [
+        { text: 'ประมาณ 10 นาทีครับ/ค่ะ', meaning: 'About 10 minutes' },
+        { text: 'อีกสักครู่ครับ/ค่ะ', meaning: 'Just a moment' },
+      ],
+      vi: [
+        { text: 'Khoảng 10 phút ạ', meaning: 'About 10 minutes' },
+        { text: 'Một chút nữa ạ', meaning: 'Just a moment' },
+      ],
+      en: [
+        { text: 'About 10 minutes', meaning: 'About 10 minutes' },
+        { text: 'It\'ll be right out', meaning: 'It\'ll be right out' },
+      ],
+    },
+  },
+  {
+    key: 'same_as_that',
+    category: 'order',
+    ko: '저 테이블이랑 같은 거 주세요',
+    translations: {
+      ja: { text: 'あのテーブルと同じものをください', pronunciation: 'Ano teeburu to onaji mono o kudasai' },
+      zh: { text: '我要和那桌一样的', pronunciation: 'Wo yao he na zhuo yiyang de' },
+      th: { text: 'ขอเหมือนโต๊ะนั้นครับ/ค่ะ', pronunciation: 'Khor muean to nan khrap/kha' },
+      vi: { text: 'Cho tôi giống bàn kia', pronunciation: 'Cho toy giong ban kia' },
+      en: { text: 'I\'ll have what that table is having', pronunciation: 'I\'ll have what that table is having' },
+    },
+  },
+
+  // ── NEW: payment (additional) ──
+  {
+    key: 'tip_included',
+    category: 'payment',
+    ko: '팁이 포함되어 있나요?',
+    translations: {
+      ja: { text: 'サービス料は含まれていますか？', pronunciation: 'Saabisu ryou wa fukumarete imasu ka?' },
+      zh: { text: '包含小费吗？', pronunciation: 'Baohan xiaofei ma?' },
+      th: { text: 'รวมทิปแล้วหรือยังครับ/ค่ะ', pronunciation: 'Ruam tip laew ru yang khrap/kha' },
+      vi: { text: 'Đã bao gồm tiền tip chưa?', pronunciation: 'Da bao gom tien tip chua?' },
+      en: { text: 'Is the tip included?', pronunciation: 'Is the tip included?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: 'はい、サービス料込みです', meaning: 'Yes, service charge is included' },
+        { text: 'いいえ、含まれていません', meaning: 'No, it is not included' },
+      ],
+      zh: [
+        { text: '是的，已经包含了', meaning: 'Yes, it is included' },
+        { text: '没有包含', meaning: 'No, it is not included' },
+      ],
+      th: [
+        { text: 'รวมแล้วครับ/ค่ะ', meaning: 'Yes, included' },
+        { text: 'ยังไม่รวมครับ/ค่ะ', meaning: 'Not yet included' },
+      ],
+      vi: [
+        { text: 'Rồi ạ', meaning: 'Yes, included' },
+        { text: 'Chưa ạ', meaning: 'Not yet' },
+      ],
+      en: [
+        { text: 'Yes, service charge is included', meaning: 'Yes, service charge is included' },
+        { text: 'No, tip is separate', meaning: 'No, tip is separate' },
+      ],
+    },
+  },
+  {
+    key: 'receipt_please',
+    category: 'payment',
+    ko: '영수증 주세요',
+    translations: {
+      ja: { text: '領収書をください', pronunciation: 'Ryoushuusho o kudasai' },
+      zh: { text: '请给我发票', pronunciation: 'Qing gei wo fapiao' },
+      th: { text: 'ขอใบเสร็จหน่อยครับ/ค่ะ', pronunciation: 'Khor bai set noi khrap/kha' },
+      vi: { text: 'Cho tôi hóa đơn', pronunciation: 'Cho toy hoa don' },
+      en: { text: 'Receipt, please', pronunciation: 'Receipt, please' },
+    },
+  },
+
+  // ── NEW: complaint (additional) ──
+  {
+    key: 'too_salty',
+    category: 'complaint',
+    ko: '너무 짜요',
+    translations: {
+      ja: { text: 'ちょっとしょっぱいです', pronunciation: 'Chotto shoppai desu' },
+      zh: { text: '太咸了', pronunciation: 'Tai xian le' },
+      th: { text: 'เค็มไปครับ/ค่ะ', pronunciation: 'Khem pai khrap/kha' },
+      vi: { text: 'Mặn quá', pronunciation: 'Man qua' },
+      en: { text: 'This is too salty', pronunciation: 'This is too salty' },
+    },
+  },
+  {
+    key: 'not_what_ordered',
+    category: 'complaint',
+    ko: '주문한 것과 달라요',
+    translations: {
+      ja: { text: '注文したものと違います', pronunciation: 'Chuumon shita mono to chigaimasu' },
+      zh: { text: '这不是我点的', pronunciation: 'Zhe bu shi wo dian de' },
+      th: { text: 'ไม่ใช่ที่สั่งครับ/ค่ะ', pronunciation: 'Mai chai thi sang khrap/kha' },
+      vi: { text: 'Đây không phải món tôi gọi', pronunciation: 'Day khong phai mon toy goi' },
+      en: { text: 'This is not what I ordered', pronunciation: 'This is not what I ordered' },
+    },
+  },
+
+  // ── NEW: greeting (additional) ──
+  {
+    key: 'hello',
+    category: 'greeting',
+    ko: '안녕하세요',
+    translations: {
+      ja: { text: 'こんにちは', pronunciation: 'Konnichiwa' },
+      zh: { text: '你好', pronunciation: 'Ni hao' },
+      th: { text: 'สวัสดีครับ/ค่ะ', pronunciation: 'Sawasdee khrap/kha' },
+      vi: { text: 'Xin chào', pronunciation: 'Sin chao' },
+      en: { text: 'Hello', pronunciation: 'Hello' },
+    },
+  },
+  {
+    key: 'goodbye',
+    category: 'greeting',
+    ko: '잘 먹었습니다, 안녕히 계세요',
+    translations: {
+      ja: { text: 'ごちそうさまでした', pronunciation: 'Gochisousama deshita' },
+      zh: { text: '吃好了，谢谢', pronunciation: 'Chi hao le, xiexie' },
+      th: { text: 'อิ่มแล้วครับ/ค่ะ ขอบคุณครับ/ค่ะ', pronunciation: 'Im laew khrap/kha, khop khun khrap/kha' },
+      vi: { text: 'Ăn ngon lắm, cảm ơn', pronunciation: 'An ngon lam, cam on' },
+      en: { text: 'That was great, thank you', pronunciation: 'That was great, thank you' },
+    },
+  },
+
+  // ── NEW: other (additional) ──
+  {
+    key: 'can_take_photo',
+    category: 'other',
+    ko: '사진 찍어도 될까요?',
+    translations: {
+      ja: { text: '写真を撮ってもいいですか？', pronunciation: 'Shashin o totte mo ii desu ka?' },
+      zh: { text: '可以拍照吗？', pronunciation: 'Keyi paizhao ma?' },
+      th: { text: 'ถ่ายรูปได้ไหมครับ/ค่ะ', pronunciation: 'Thai ruup dai mai khrap/kha' },
+      vi: { text: 'Tôi có thể chụp ảnh không?', pronunciation: 'Toy co the chup anh khong?' },
+      en: { text: 'Can I take a photo?', pronunciation: 'Can I take a photo?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: 'はい、どうぞ', meaning: 'Yes, go ahead' },
+        { text: '申し訳ありません、撮影はご遠慮ください', meaning: 'Sorry, no photos please' },
+      ],
+      zh: [
+        { text: '可以的', meaning: 'Yes, you can' },
+        { text: '对不起，不可以拍照', meaning: 'Sorry, no photos' },
+      ],
+      th: [
+        { text: 'ได้ครับ/ค่ะ', meaning: 'Yes, you can' },
+        { text: 'ขอโทษ ถ่ายไม่ได้ครับ/ค่ะ', meaning: 'Sorry, no photos' },
+      ],
+      vi: [
+        { text: 'Được ạ', meaning: 'Yes, you can' },
+        { text: 'Xin lỗi, không được chụp ạ', meaning: 'Sorry, no photos' },
+      ],
+      en: [
+        { text: 'Sure, go ahead', meaning: 'Sure, go ahead' },
+        { text: 'Sorry, we prefer no photos', meaning: 'Sorry, we prefer no photos' },
+      ],
+    },
+  },
+  {
+    key: 'speak_english',
+    category: 'other',
+    ko: '영어 하시나요?',
+    translations: {
+      ja: { text: '英語は話せますか？', pronunciation: 'Eigo wa hanasemasu ka?' },
+      zh: { text: '你会说英语吗？', pronunciation: 'Ni hui shuo yingyu ma?' },
+      th: { text: 'พูดภาษาอังกฤษได้ไหมครับ/ค่ะ', pronunciation: 'Phuut phasa angkrit dai mai khrap/kha' },
+      vi: { text: 'Bạn nói tiếng Anh được không?', pronunciation: 'Ban noy tieng Anh duoc khong?' },
+      en: { text: 'Do you speak English?', pronunciation: 'Do you speak English?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: '少しだけ', meaning: 'Just a little' },
+        { text: '英語のスタッフを呼びます', meaning: 'I will call an English-speaking staff' },
+      ],
+      zh: [
+        { text: '会一点点', meaning: 'Just a little' },
+        { text: '我叫会说英语的人来', meaning: 'I will get someone who speaks English' },
+      ],
+      th: [
+        { text: 'นิดหน่อยครับ/ค่ะ', meaning: 'A little bit' },
+        { text: 'เดี๋ยวเรียกคนพูดอังกฤษมาให้', meaning: 'I will get someone who speaks English' },
+      ],
+      vi: [
+        { text: 'Một chút thôi', meaning: 'Just a little' },
+        { text: 'Để tôi gọi người nói tiếng Anh', meaning: 'Let me get someone who speaks English' },
+      ],
+      en: [
+        { text: 'Yes, I do', meaning: 'Yes, I do' },
+        { text: 'A little', meaning: 'A little' },
+      ],
+    },
+  },
+  {
+    key: 'wifi_password',
+    category: 'other',
+    ko: '와이파이 비밀번호가 뭔가요?',
+    translations: {
+      ja: { text: 'Wi-Fiのパスワードは何ですか？', pronunciation: 'Waifai no pasuwaado wa nan desu ka?' },
+      zh: { text: 'WiFi密码是多少？', pronunciation: 'WiFi mima shi duoshao?' },
+      th: { text: 'รหัส WiFi คืออะไรครับ/ค่ะ', pronunciation: 'Rahat WiFi kue arai khrap/kha' },
+      vi: { text: 'Mật khẩu WiFi là gì?', pronunciation: 'Mat khau WiFi la gi?' },
+      en: { text: 'What\'s the WiFi password?', pronunciation: 'What\'s the WiFi password?' },
+    },
+  },
+  {
+    key: 'how_to_eat_this',
+    category: 'other',
+    ko: '이거 어떻게 먹나요?',
+    translations: {
+      ja: { text: 'これはどうやって食べますか？', pronunciation: 'Kore wa dou yatte tabemasu ka?' },
+      zh: { text: '这个怎么吃？', pronunciation: 'Zhege zenme chi?' },
+      th: { text: 'อันนี้กินยังไงครับ/ค่ะ', pronunciation: 'An nii kin yang ngai khrap/kha' },
+      vi: { text: 'Món này ăn như thế nào?', pronunciation: 'Mon nay an nhu the nao?' },
+      en: { text: 'How do I eat this?', pronunciation: 'How do I eat this?' },
+    },
+    expectedResponses: {
+      ja: [
+        { text: '手で食べてください', meaning: 'Eat with your hands' },
+        { text: 'お箸で食べてください', meaning: 'Use chopsticks' },
+      ],
+      zh: [
+        { text: '用手吃就好', meaning: 'Just eat with your hands' },
+        { text: '用筷子夹着吃', meaning: 'Use chopsticks' },
+      ],
+      th: [
+        { text: 'ใช้มือได้เลยครับ/ค่ะ', meaning: 'Use your hands' },
+        { text: 'ใช้ช้อนส้อมครับ/ค่ะ', meaning: 'Use spoon and fork' },
+      ],
+      vi: [
+        { text: 'Dùng tay ăn được ạ', meaning: 'Use your hands' },
+        { text: 'Dùng đũa ạ', meaning: 'Use chopsticks' },
+      ],
+      en: [
+        { text: 'With your hands is fine', meaning: 'With your hands is fine' },
+        { text: 'Use the chopsticks like this', meaning: 'Use the chopsticks like this' },
+      ],
+    },
+  },
 ];

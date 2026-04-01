@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "@/lib/i18n";
+import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
 const TOOLS = [
   {
@@ -59,18 +60,18 @@ export default function TravelPage() {
 
       {/* Quick phrase chips */}
       <div className="px-5 py-3">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        <HorizontalScroll>
           {QUICK_PHRASES.map((p) => (
             <Link
               key={p.key}
               href="/phrases"
-              className="flex-shrink-0 flex items-center gap-1.5 bg-coral/10 text-coral px-3.5 py-2 rounded-full text-xs font-semibold hover:bg-coral/20 transition-colors"
+              className="flex-shrink-0 snap-start flex items-center gap-1.5 bg-coral/10 text-coral px-3.5 py-2 rounded-full text-xs font-semibold hover:bg-coral/20 transition-colors"
             >
               <span>{p.emoji}</span>
               {t(p.key)}
             </Link>
           ))}
-        </div>
+        </HorizontalScroll>
       </div>
 
       {/* Tool cards */}

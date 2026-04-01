@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { COUNTRIES, LANGUAGE_TO_COUNTRY, type CountryInfo } from "@/lib/tip-culture-data";
 import { useTranslation } from "@/lib/i18n";
+import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
 function TipBadge({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, params?: Record<string, string | number>) => string }) {
   if (tip.type === "none") {
@@ -184,12 +185,12 @@ export default function TipCulturePage() {
 
       {/* Country selector */}
       <div className="px-5 pb-4">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+        <HorizontalScroll>
           {COUNTRIES.map((country) => (
             <button
               key={country.code}
               onClick={() => setSelectedCode(country.code)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
+              className={`flex-shrink-0 snap-start flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 selectedCode === country.code
                   ? "bg-coral text-white"
                   : "bg-cream-dark text-brown-dark hover:bg-brown-light/15"
@@ -199,7 +200,7 @@ export default function TipCulturePage() {
               {country.name}
             </button>
           ))}
-        </div>
+        </HorizontalScroll>
       </div>
 
       {/* Selected country content */}

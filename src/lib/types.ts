@@ -87,6 +87,7 @@ export interface DishLite {
   };
   allergens: string[]; // flattened from ingredients.allergens
   allergen_risk: 'danger' | 'warning' | 'check' | 'safe';
+  alternative_dishes?: string[];
   disliked_ingredients?: string[];
   price_tier: "budget" | "mid" | "premium";
   image_search_query: string;
@@ -120,6 +121,7 @@ export interface MenuAnalysisResultLite {
   menu_language?: string;
   restaurant_type?: string;
   items_found?: number;
+  demo?: boolean;
   dishes: DishLite[];
   recommended_combo: {
     budget: { items: string[]; reason: string };
@@ -184,6 +186,8 @@ export interface MenuAnalysisResult {
     budget: { items: string[]; reason: string };
     balanced: { items: string[]; reason: string };
   };
+  /** True when response is mock/demo data (no API key configured) */
+  demo?: boolean;
 }
 
 export type AllergenType =
@@ -208,4 +212,6 @@ export interface RecentScan {
   original: string;
   english: string;
   scannedAt: string | Date;
+  /** Key to look up cached MenuAnalysisResult in localStorage */
+  resultKey?: string;
 }

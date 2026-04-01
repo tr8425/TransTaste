@@ -8,6 +8,104 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const VALID_INPUT_TYPES: InputType[] = ['image', 'url', 'text'];
 
+const MOCK_RESULT: MenuAnalysisResult = {
+  menu_meta: {
+    language: "Japanese",
+    restaurant_type: "Izakaya",
+    country_detected: "Japan",
+    items_found: 5,
+  },
+  menu_language: "Japanese",
+  restaurant_type: "Izakaya",
+  items_found: 5,
+  dishes: [
+    {
+      original: "唐揚げ",
+      price: "780",
+      currency: "JPY",
+      price_display: "¥780",
+      language_detected: "ja",
+      translation: { literal: "deep-fried chicken", meaning: "Japanese fried chicken", english: "Karaage" },
+      confidence: "high",
+      category: "main",
+      dietary: { halal: null, vegan: false, vegetarian: false, gluten_free: false },
+      allergens: ["gluten", "soy"],
+      allergen_risk: "check",
+      alternative_dishes: [],
+      price_tier: "budget",
+      image_search_query: "karaage japanese fried chicken",
+    },
+    {
+      original: "海老フライ",
+      price: "980",
+      currency: "JPY",
+      price_display: "¥980",
+      language_detected: "ja",
+      translation: { literal: "shrimp fry", meaning: "Deep-fried breaded shrimp", english: "Ebi Fry" },
+      confidence: "high",
+      category: "main",
+      dietary: { halal: null, vegan: false, vegetarian: false, gluten_free: false },
+      allergens: ["shellfish", "gluten", "egg"],
+      allergen_risk: "danger",
+      alternative_dishes: ["唐揚げ", "豚の角煮"],
+      price_tier: "mid",
+      image_search_query: "ebi fry japanese shrimp tempura",
+    },
+    {
+      original: "麻婆豆腐",
+      price: "850",
+      currency: "JPY",
+      price_display: "¥850",
+      language_detected: "ja",
+      translation: { literal: "numbing spicy tofu", meaning: "Spicy tofu with minced pork", english: "Mapo Tofu" },
+      confidence: "high",
+      category: "main",
+      dietary: { halal: false, vegan: false, vegetarian: false, gluten_free: false },
+      allergens: ["pork", "soy"],
+      allergen_risk: "warning",
+      alternative_dishes: ["揚げ出し豆腐"],
+      price_tier: "budget",
+      image_search_query: "mapo tofu japanese style",
+    },
+    {
+      original: "揚げ出し豆腐",
+      price: "580",
+      currency: "JPY",
+      price_display: "¥580",
+      language_detected: "ja",
+      translation: { literal: "deep-fried tofu in broth", meaning: "Lightly fried tofu in dashi broth", english: "Agedashi Tofu" },
+      confidence: "high",
+      category: "side",
+      dietary: { halal: null, vegan: false, vegetarian: true, gluten_free: false },
+      allergens: ["soy", "gluten"],
+      allergen_risk: "check",
+      alternative_dishes: [],
+      price_tier: "budget",
+      image_search_query: "agedashi tofu japanese",
+    },
+    {
+      original: "豚の角煮",
+      price: "1080",
+      currency: "JPY",
+      price_display: "¥1,080",
+      language_detected: "ja",
+      translation: { literal: "pork square simmered", meaning: "Braised pork belly in soy sauce", english: "Buta no Kakuni" },
+      confidence: "high",
+      category: "main",
+      dietary: { halal: false, vegan: false, vegetarian: false, gluten_free: false },
+      allergens: ["pork", "soy"],
+      allergen_risk: "warning",
+      alternative_dishes: ["唐揚げ", "揚げ出し豆腐"],
+      price_tier: "mid",
+      image_search_query: "buta no kakuni braised pork belly",
+    },
+  ],
+  recommended_combo: {
+    budget: { items: ["唐揚げ", "揚げ出し豆腐"], reason: "Classic izakaya pairing: crispy chicken + light tofu. Total ≈ ¥1,360" },
+    balanced: { items: ["海老フライ", "麻婆豆腐", "揚げ出し豆腐"], reason: "Mix of seafood, spice, and mild — covers all flavors. Total ≈ ¥2,410" },
+  },
+} as unknown as MenuAnalysisResult;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -34,12 +132,9 @@ export async function POST(request: NextRequest) {
     const userApiKey = request.headers.get("x-api-key");
     const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
 
-    // If no API key at all, return error
+    // If no API key at all, return mock data for development
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "no_api_key", reason: "No API key configured. Add ANTHROPIC_API_KEY to use real analysis." },
-        { status: 422, headers: corsHeaders }
-      );
+      return NextResponse.json({ ...MOCK_RESULT, demo: true }, { headers: corsHeaders });
     }
 
     // Parse request body

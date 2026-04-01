@@ -13,6 +13,7 @@ import { useCart } from "@/hooks/useCart";
 import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useTranslation } from "@/lib/i18n";
+import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
 export default function ResultsPage() {
   const { t } = useTranslation();
@@ -47,7 +48,21 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const errorStr = sessionStorage.getItem("scanError");
-    const resultStr = sessionStorage.getItem("scanResult");
+    let resultStr = sessionStorage.getItem("scanResult");
+
+    // If no fresh result, try loading from cache via resultKey
+    if (!errorStr && !resultStr) {
+      const cachedKey = sessionStorage.getItem("scanResultKey");
+      if (cachedKey) {
+        try {
+          const cache = JSON.parse(localStorage.getItem("transtaste_cached_results") || "{}");
+          if (cache[cachedKey]) {
+            resultStr = JSON.stringify(cache[cachedKey]);
+          }
+        } catch { /* ignore */ }
+        sessionStorage.removeItem("scanResultKey");
+      }
+    }
 
     // Preserve menu input for Phase 2 detail requests
     const savedInput = sessionStorage.getItem("menuInputForDetail");
@@ -69,13 +84,31 @@ export default function ResultsPage() {
         const parsed = JSON.parse(resultStr) as MenuAnalysisResult;
         setData(parsed);
 
-        // Save to scan history
+        // Connect scan metadata to cart context
+        const lang = parsed.menu_language || parsed.menu_meta?.language || "";
+        if (lang) cart.setMenuLanguage(lang);
+        const country = parsed.menu_meta?.country_detected || "";
+        if (country) cart.setCountryDetected(country);
+
+        // Cache full result and save to scan history
+        const resultKey = `scan_${Date.now()}`;
         const newEntries = parsed.dishes.slice(0, 3).map((d) => ({
           original: d.original,
           english: d.translation?.english || d.original,
           scannedAt: new Date().toISOString(),
+          resultKey,
         }));
         try {
+          // Cache full result (keep max 10)
+          const cachedResults = JSON.parse(localStorage.getItem("transtaste_cached_results") || "{}");
+          cachedResults[resultKey] = parsed;
+          const keys = Object.keys(cachedResults).sort().reverse();
+          if (keys.length > 10) {
+            for (const old of keys.slice(10)) delete cachedResults[old];
+          }
+          localStorage.setItem("transtaste_cached_results", JSON.stringify(cachedResults));
+
+          // Save history entries
           const prev = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
           const merged = [...newEntries, ...prev].slice(0, 20);
           localStorage.setItem("transtaste_scan_history", JSON.stringify(merged));
@@ -266,14 +299,24 @@ export default function ResultsPage() {
         </p>
       </div>
 
+      {/* Demo mode banner */}
+      {data.demo && (
+        <div className="mx-5 mb-3 px-4 py-2.5 bg-amber-500/15 border border-amber-500/30 rounded-xl flex items-start gap-2">
+          <span className="text-sm flex-shrink-0">💡</span>
+          <p className="text-xs text-amber-700 leading-relaxed">
+            {t("results.demoBanner")}
+          </p>
+        </div>
+      )}
+
       {/* Category filters */}
-      <div className="relative px-5 pb-3">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pr-6">
+      <div className="px-5 pb-3">
+        <HorizontalScroll>
           {CATEGORY_FILTERS.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`flex-shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 activeFilter === cat
                   ? "bg-coral text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
@@ -282,8 +325,7 @@ export default function ResultsPage() {
               {t(`categories.${cat}`)}
             </button>
           ))}
-        </div>
-        <div className="absolute right-5 top-0 bottom-3 w-8 bg-gradient-to-l from-cream to-transparent pointer-events-none" />
+        </HorizontalScroll>
       </div>
 
       {/* Dish list */}

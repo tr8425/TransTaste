@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { RecentScan } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
@@ -26,7 +27,15 @@ function formatRelativeTime(date: string | Date, locale: string): string {
 
 export default function HistoryPage() {
   const { t, locale } = useTranslation();
+  const router = useRouter();
   const [scans, setScans] = useState<RecentScan[]>([]);
+
+  const handleClick = (scan: RecentScan) => {
+    if (scan.resultKey) {
+      sessionStorage.setItem("scanResultKey", scan.resultKey);
+    }
+    router.push("/results");
+  };
 
   useEffect(() => {
     try {
@@ -79,10 +88,10 @@ export default function HistoryPage() {
         ) : (
           <div className="space-y-2">
             {scans.map((scan, i) => (
-              <Link
+              <button
                 key={i}
-                href="/results"
-                className="flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors"
+                onClick={() => handleClick(scan)}
+                className="w-full flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors text-left"
               >
                 <div className="w-10 h-10 rounded-lg bg-coral/10 flex items-center justify-center flex-shrink-0">
                   <span className="text-lg">🍽️</span>
@@ -96,7 +105,7 @@ export default function HistoryPage() {
                 <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
                   {formatRelativeTime(scan.scannedAt, locale)}
                 </span>
-              </Link>
+              </button>
             ))}
           </div>
         )}

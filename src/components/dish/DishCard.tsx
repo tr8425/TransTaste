@@ -272,6 +272,26 @@ export default function DishCard({
           )}
         </div>
 
+        {/* Alternative dishes — shown free when allergen risk is danger/warning */}
+        {dish.alternative_dishes && dish.alternative_dishes.length > 0 &&
+          (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") && (
+          <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+            <h4 className="text-xs font-medium text-success uppercase tracking-wider mb-2 flex items-center gap-1">
+              <span>✅</span> {t("dish.saferAlternatives")}
+            </h4>
+            <div className="flex flex-wrap gap-1.5">
+              {dish.alternative_dishes.map((alt) => (
+                <span
+                  key={alt}
+                  className="inline-block text-xs font-medium text-green-800 bg-green-100 px-2.5 py-1 rounded-full"
+                >
+                  {alt}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Disliked ingredients warning */}
         {dish.disliked_ingredients && dish.disliked_ingredients.length > 0 && (
           <div className="flex items-start gap-2 mt-2.5 p-2.5 bg-brown-medium/10 rounded-lg">

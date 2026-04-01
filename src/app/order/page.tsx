@@ -44,9 +44,14 @@ export default function OrderPage() {
     totalItems,
     totalPrice,
     countryDetected,
+    menuLanguage,
   } = useCart();
 
   const { t } = useTranslation();
+  const langCode = (() => {
+    const code = menuLanguage.slice(0, 2).toLowerCase();
+    return ["ja", "zh", "th", "vi", "ko", "en"].includes(code) ? code : "en";
+  })();
   const [allergens, setAllergens] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const [showConfirmedBanner, setShowConfirmedBanner] = useState(false);
@@ -156,7 +161,7 @@ export default function OrderPage() {
                     key={a}
                     className="text-xs bg-danger/10 text-danger px-2 py-0.5 rounded-full font-medium"
                   >
-                    {ALLERGEN_LABELS[a]?.en ?? a}
+                    {ALLERGEN_LABELS[a]?.[langCode] ?? ALLERGEN_LABELS[a]?.en ?? a}
                   </span>
                 ))}
               </div>

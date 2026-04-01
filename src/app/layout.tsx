@@ -27,8 +27,8 @@ export const metadata: Metadata = {
       "Scan any foreign restaurant menu and instantly understand every dish.",
   },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
   appleWebApp: {
     capable: true,
