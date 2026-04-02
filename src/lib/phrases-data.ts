@@ -52,6 +52,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Sure, just a moment', meaning: 'Sure, just a moment' },
         { text: 'Still or sparkling?', meaning: 'Still or sparkling?' },
       ],
+      es: [
+        { text: 'Claro, un momento', meaning: 'Sure, one moment' },
+        { text: '¿Con gas o sin gas?', meaning: 'Sparkling or still?' },
+      ],
+      fr: [
+        { text: 'Bien sûr, un instant', meaning: 'Of course, one moment' },
+        { text: 'Plate ou gazeuse ?', meaning: 'Still or sparkling?' },
+      ],
+      it: [
+        { text: 'Certo, un momento', meaning: 'Sure, one moment' },
+        { text: 'Naturale o frizzante?', meaning: 'Still or sparkling?' },
+      ],
     },
   },
   {
@@ -87,6 +99,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Sure, which ones?', meaning: 'Sure, which ones?' },
         { text: 'Coming right up', meaning: 'Coming right up' },
       ],
+      es: [
+        { text: 'Claro, ¿cuáles quiere?', meaning: 'Sure, which ones do you want?' },
+        { text: 'Enseguida se los traigo', meaning: 'I will bring them right away' },
+      ],
+      fr: [
+        { text: 'Bien sûr, lesquels ?', meaning: 'Sure, which ones?' },
+        { text: 'Tout de suite', meaning: 'Right away' },
+      ],
+      it: [
+        { text: 'Certo, quali desidera?', meaning: 'Sure, which ones would you like?' },
+        { text: 'Arrivo subito', meaning: 'Coming right away' },
+      ],
     },
   },
   {
@@ -118,6 +142,15 @@ export const PHRASES: Phrase[] = [
       ],
       en: [
         { text: 'Of course, one moment', meaning: 'Of course, one moment' },
+      ],
+      es: [
+        { text: 'Claro, ahora mismo', meaning: 'Sure, right away' },
+      ],
+      fr: [
+        { text: 'Bien sûr, tout de suite', meaning: 'Of course, right away' },
+      ],
+      it: [
+        { text: 'Certo, subito', meaning: 'Sure, right away' },
       ],
     },
   },
@@ -152,6 +185,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'For here or to go?', meaning: 'For here or to go?' },
         { text: 'I will pack that up for you', meaning: 'I will pack that up for you' },
+      ],
+      es: [
+        { text: '¿Para aquí o para llevar?', meaning: 'For here or to go?' },
+        { text: 'Se lo preparo enseguida', meaning: 'I will prepare it right away' },
+      ],
+      fr: [
+        { text: 'Sur place ou à emporter ?', meaning: 'For here or to go?' },
+        { text: 'Je vous prépare ça', meaning: 'I will prepare that for you' },
+      ],
+      it: [
+        { text: 'Da mangiare qui o da asporto?', meaning: 'For here or to go?' },
+        { text: 'Glielo preparo subito', meaning: 'I will prepare it right away' },
       ],
     },
   },
@@ -189,6 +234,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Our specialty is...', meaning: 'Our specialty is...' },
         { text: 'The most popular dish is...', meaning: 'The most popular dish is...' },
+      ],
+      es: [
+        { text: 'Le recomiendo esto', meaning: 'I recommend this' },
+        { text: 'Nuestro plato estrella es...', meaning: 'Our star dish is...' },
+      ],
+      fr: [
+        { text: 'Je vous conseille ceci', meaning: 'I recommend this' },
+        { text: 'Notre spécialité, c\'est...', meaning: 'Our specialty is...' },
+      ],
+      it: [
+        { text: 'Le consiglio questo', meaning: 'I recommend this' },
+        { text: 'Il nostro piatto forte è...', meaning: 'Our star dish is...' },
       ],
     },
   },
@@ -230,6 +287,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Not spicy at all', meaning: 'Not spicy at all' },
         { text: 'We can make it mild', meaning: 'We can make it mild' },
       ],
+      es: [
+        { text: 'Sí, pica bastante', meaning: 'Yes, it is quite spicy' },
+        { text: 'No pica nada', meaning: 'Not spicy at all' },
+      ],
+      fr: [
+        { text: 'Oui, c\'est assez épicé', meaning: 'Yes, it is quite spicy' },
+        { text: 'Non, pas du tout', meaning: 'No, not at all' },
+      ],
+      it: [
+        { text: 'Sì, è abbastanza piccante', meaning: 'Yes, it is quite spicy' },
+        { text: 'No, per niente', meaning: 'No, not at all' },
+      ],
     },
   },
   {
@@ -264,6 +333,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'What allergies do you have?', meaning: 'What allergies do you have?' },
         { text: 'It contains nuts/dairy/gluten', meaning: 'It contains nuts/dairy/gluten' },
+      ],
+      es: [
+        { text: '¿A qué es alérgico?', meaning: 'What are you allergic to?' },
+        { text: 'Contiene frutos secos/lácteos/gluten', meaning: 'It contains nuts/dairy/gluten' },
+      ],
+      fr: [
+        { text: 'Vous êtes allergique à quoi ?', meaning: 'What are you allergic to?' },
+        { text: 'Ça contient des noix/produits laitiers/gluten', meaning: 'It contains nuts/dairy/gluten' },
+      ],
+      it: [
+        { text: 'A cosa è allergico?', meaning: 'What are you allergic to?' },
+        { text: 'Contiene frutta secca/latticini/glutine', meaning: 'It contains nuts/dairy/gluten' },
       ],
     },
   },
@@ -302,6 +383,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Sure, no problem', meaning: 'Sure, no problem' },
         { text: 'Sorry, that is part of the dish', meaning: 'Sorry, that is part of the dish' },
       ],
+      es: [
+        { text: 'Claro, sin problema', meaning: 'Sure, no problem' },
+        { text: 'Lo siento, es parte del plato', meaning: 'Sorry, that is part of the dish' },
+      ],
+      fr: [
+        { text: 'Bien sûr, pas de souci', meaning: 'Sure, no problem' },
+        { text: 'Désolé, ça fait partie du plat', meaning: 'Sorry, that is part of the dish' },
+      ],
+      it: [
+        { text: 'Certo, nessun problema', meaning: 'Sure, no problem' },
+        { text: 'Mi dispiace, fa parte del piatto', meaning: 'Sorry, that is part of the dish' },
+      ],
     },
   },
 
@@ -338,6 +431,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Your total is...', meaning: 'Your total is...' },
         { text: 'I will bring that right over', meaning: 'I will bring that right over' },
+      ],
+      es: [
+        { text: 'Son ___ euros en total', meaning: 'That is ___ euros total' },
+        { text: 'Ahora se la traigo', meaning: 'I will bring it right over' },
+      ],
+      fr: [
+        { text: 'Ça fait ___ euros', meaning: 'That is ___ euros' },
+        { text: 'Je vous apporte ça', meaning: 'I will bring that over' },
+      ],
+      it: [
+        { text: 'Sono ___ euro in tutto', meaning: 'That is ___ euros total' },
+        { text: 'Glielo porto subito', meaning: 'I will bring it right away' },
       ],
     },
   },
@@ -376,6 +481,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Yes, we accept all major cards', meaning: 'Yes, we accept all major cards' },
         { text: 'Sorry, cash only', meaning: 'Sorry, cash only' },
       ],
+      es: [
+        { text: 'Sí, aceptamos tarjeta', meaning: 'Yes, we accept cards' },
+        { text: 'Lo siento, solo efectivo', meaning: 'Sorry, cash only' },
+      ],
+      fr: [
+        { text: 'Oui, on prend la carte', meaning: 'Yes, we take cards' },
+        { text: 'Désolé, uniquement en espèces', meaning: 'Sorry, cash only' },
+      ],
+      it: [
+        { text: 'Sì, accettiamo carte', meaning: 'Yes, we accept cards' },
+        { text: 'Mi dispiace, solo contanti', meaning: 'Sorry, cash only' },
+      ],
     },
   },
   {
@@ -410,6 +527,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Sure, no problem', meaning: 'Sure, no problem' },
         { text: 'Sorry, we can only do one check', meaning: 'Sorry, we can only do one check' },
+      ],
+      es: [
+        { text: 'Claro, sin problema', meaning: 'Sure, no problem' },
+        { text: 'Lo siento, solo podemos hacer una cuenta', meaning: 'Sorry, we can only do one check' },
+      ],
+      fr: [
+        { text: 'Bien sûr, pas de souci', meaning: 'Sure, no problem' },
+        { text: 'Désolé, on ne peut pas séparer', meaning: 'Sorry, we cannot split' },
+      ],
+      it: [
+        { text: 'Certo, nessun problema', meaning: 'Sure, no problem' },
+        { text: 'Mi dispiace, facciamo solo un conto unico', meaning: 'Sorry, we only do one bill' },
       ],
     },
   },
@@ -448,6 +577,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Yes, all prices include tax', meaning: 'Yes, all prices include tax' },
         { text: 'No, tax will be added', meaning: 'No, tax will be added' },
       ],
+      es: [
+        { text: 'Sí, los precios incluyen impuestos', meaning: 'Yes, prices include tax' },
+        { text: 'No, el impuesto se añade aparte', meaning: 'No, tax is added separately' },
+      ],
+      fr: [
+        { text: 'Oui, c\'est TTC', meaning: 'Yes, tax is included' },
+        { text: 'Non, la taxe est en sus', meaning: 'No, tax is extra' },
+      ],
+      it: [
+        { text: 'Sì, i prezzi sono tasse incluse', meaning: 'Yes, prices include tax' },
+        { text: 'No, le tasse vanno aggiunte', meaning: 'No, taxes will be added' },
+      ],
     },
   },
 
@@ -482,6 +623,15 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'I am so sorry, let me replace that', meaning: 'I am so sorry, let me replace that' },
       ],
+      es: [
+        { text: 'Lo siento mucho, se lo cambio ahora mismo', meaning: 'So sorry, I will replace it right now' },
+      ],
+      fr: [
+        { text: 'Je suis vraiment désolé, je vous change ça tout de suite', meaning: 'I am really sorry, I will replace it right away' },
+      ],
+      it: [
+        { text: 'Mi scusi tanto, glielo cambio subito', meaning: 'So sorry, I will replace it right away' },
+      ],
     },
   },
   {
@@ -515,6 +665,15 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'I apologize, let me check your order', meaning: 'I apologize, let me check your order' },
       ],
+      es: [
+        { text: 'Perdone, déjeme revisar su pedido', meaning: 'Sorry, let me check your order' },
+      ],
+      fr: [
+        { text: 'Pardon, laissez-moi vérifier votre commande', meaning: 'Sorry, let me check your order' },
+      ],
+      it: [
+        { text: 'Mi scusi, controllo il suo ordine', meaning: 'Sorry, let me check your order' },
+      ],
     },
   },
   {
@@ -546,6 +705,15 @@ export const PHRASES: Phrase[] = [
       ],
       en: [
         { text: 'Sorry about that, I will have it cooked more', meaning: 'Sorry about that, I will have it cooked more' },
+      ],
+      es: [
+        { text: 'Perdone, lo volvemos a cocinar', meaning: 'Sorry, we will cook it again' },
+      ],
+      fr: [
+        { text: 'Désolé, on va le recuire', meaning: 'Sorry, we will cook it more' },
+      ],
+      it: [
+        { text: 'Mi scusi, lo facciamo cuocere di più', meaning: 'Sorry, we will cook it more' },
       ],
     },
   },
@@ -584,6 +752,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Sure, what would you like instead?', meaning: 'Sure, what would you like instead?' },
         { text: 'Sorry, it is already being prepared', meaning: 'Sorry, it is already being prepared' },
       ],
+      es: [
+        { text: 'Claro, ¿qué prefiere?', meaning: 'Sure, what would you prefer?' },
+        { text: 'Lo siento, ya se está preparando', meaning: 'Sorry, it is already being prepared' },
+      ],
+      fr: [
+        { text: 'Bien sûr, que souhaitez-vous à la place ?', meaning: 'Sure, what would you like instead?' },
+        { text: 'Désolé, c\'est déjà en préparation', meaning: 'Sorry, it is already being prepared' },
+      ],
+      it: [
+        { text: 'Certo, cosa preferisce?', meaning: 'Sure, what would you prefer?' },
+        { text: 'Mi dispiace, è già in preparazione', meaning: 'Sorry, it is already being prepared' },
+      ],
     },
   },
 
@@ -618,6 +798,15 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Enjoy your meal!', meaning: 'Enjoy your meal!' },
       ],
+      es: [
+        { text: '¡Que aproveche!', meaning: 'Enjoy your meal!' },
+      ],
+      fr: [
+        { text: 'Bon appétit !', meaning: 'Enjoy your meal!' },
+      ],
+      it: [
+        { text: 'Buon appetito!', meaning: 'Enjoy your meal!' },
+      ],
     },
   },
   {
@@ -649,6 +838,15 @@ export const PHRASES: Phrase[] = [
       ],
       en: [
         { text: 'Thank you, glad you like it!', meaning: 'Thank you, glad you like it!' },
+      ],
+      es: [
+        { text: '¡Gracias! Me alegro de que le guste', meaning: 'Thanks! Glad you like it' },
+      ],
+      fr: [
+        { text: 'Merci, ça fait plaisir !', meaning: 'Thanks, that makes us happy!' },
+      ],
+      it: [
+        { text: 'Grazie, mi fa piacere!', meaning: 'Thanks, I am glad!' },
       ],
     },
   },
@@ -682,6 +880,15 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'I will let the chef know, thank you!', meaning: 'I will let the chef know, thank you!' },
       ],
+      es: [
+        { text: '¡Se lo diré al chef, gracias!', meaning: 'I will tell the chef, thanks!' },
+      ],
+      fr: [
+        { text: 'Je transmettrai au chef, merci !', meaning: 'I will pass it on to the chef, thanks!' },
+      ],
+      it: [
+        { text: 'Lo dirò allo chef, grazie!', meaning: 'I will tell the chef, thanks!' },
+      ],
     },
   },
   {
@@ -713,6 +920,15 @@ export const PHRASES: Phrase[] = [
       ],
       en: [
         { text: 'Thank you, please come again!', meaning: 'Thank you, please come again!' },
+      ],
+      es: [
+        { text: '¡Gracias, vuelva pronto!', meaning: 'Thanks, come back soon!' },
+      ],
+      fr: [
+        { text: 'Merci, à bientôt !', meaning: 'Thanks, see you soon!' },
+      ],
+      it: [
+        { text: 'Grazie, torni presto!', meaning: 'Thanks, come back soon!' },
       ],
     },
   },
@@ -753,6 +969,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Right this way', meaning: 'Right this way' },
         { text: 'It will be about a ___ minute wait', meaning: 'It will be about a ___ minute wait' },
       ],
+      es: [
+        { text: 'Por aquí, por favor', meaning: 'This way, please' },
+        { text: 'Hay unos ___ minutos de espera', meaning: 'There is about a ___ minute wait' },
+      ],
+      fr: [
+        { text: 'Par ici, s\'il vous plaît', meaning: 'This way, please' },
+        { text: 'Il y a environ ___ minutes d\'attente', meaning: 'There is about a ___ minute wait' },
+      ],
+      it: [
+        { text: 'Da questa parte, prego', meaning: 'This way, please' },
+        { text: 'C\'è un\'attesa di circa ___ minuti', meaning: 'There is about a ___ minute wait' },
+      ],
     },
   },
   {
@@ -784,6 +1012,15 @@ export const PHRASES: Phrase[] = [
       ],
       en: [
         { text: 'Under what name?', meaning: 'Under what name?' },
+      ],
+      es: [
+        { text: '¿A nombre de quién?', meaning: 'Under what name?' },
+      ],
+      fr: [
+        { text: 'À quel nom ?', meaning: 'Under what name?' },
+      ],
+      it: [
+        { text: 'A che nome?', meaning: 'Under what name?' },
       ],
     },
   },
@@ -821,6 +1058,15 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Down the hall on your right', meaning: 'Down the hall on your right' },
       ],
+      es: [
+        { text: 'Al fondo a la derecha', meaning: 'At the back on the right' },
+      ],
+      fr: [
+        { text: 'Au fond à droite', meaning: 'At the back on the right' },
+      ],
+      it: [
+        { text: 'In fondo a destra', meaning: 'At the back on the right' },
+      ],
     },
   },
   {
@@ -857,6 +1103,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Sure, follow me', meaning: 'Sure, follow me' },
         { text: 'Sorry, outside seating is full', meaning: 'Sorry, outside seating is full' },
+      ],
+      es: [
+        { text: 'Claro, sígame', meaning: 'Sure, follow me' },
+        { text: 'Lo siento, la terraza está llena', meaning: 'Sorry, the terrace is full' },
+      ],
+      fr: [
+        { text: 'Bien sûr, suivez-moi', meaning: 'Sure, follow me' },
+        { text: 'Désolé, la terrasse est pleine', meaning: 'Sorry, the terrace is full' },
+      ],
+      it: [
+        { text: 'Certo, mi segua', meaning: 'Sure, follow me' },
+        { text: 'Mi dispiace, fuori è tutto pieno', meaning: 'Sorry, outside is all full' },
       ],
     },
   },
@@ -911,6 +1169,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Yes, here you go', meaning: 'Yes, here you go' },
         { text: 'Sorry, we only have the local menu', meaning: 'Sorry, we only have the local menu' },
+      ],
+      es: [
+        { text: 'Sí, aquí tiene', meaning: 'Yes, here you go' },
+        { text: 'Lo siento, solo tenemos el menú en el idioma local', meaning: 'Sorry, we only have the local language menu' },
+      ],
+      fr: [
+        { text: 'Oui, voilà', meaning: 'Yes, here you go' },
+        { text: 'Désolé, on n\'a que le menu en français', meaning: 'Sorry, we only have the French menu' },
+      ],
+      it: [
+        { text: 'Sì, ecco a lei', meaning: 'Yes, here you go' },
+        { text: 'Mi dispiace, abbiamo solo il menu in italiano', meaning: 'Sorry, we only have the Italian menu' },
       ],
     },
   },
@@ -981,6 +1251,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Yes, it\'s halal', meaning: 'Yes, it is halal' },
         { text: 'No, it contains pork', meaning: 'No, it contains pork' },
       ],
+      es: [
+        { text: 'Sí, es halal', meaning: 'Yes, it is halal' },
+        { text: 'No, lleva cerdo', meaning: 'No, it contains pork' },
+      ],
+      fr: [
+        { text: 'Oui, c\'est halal', meaning: 'Yes, it is halal' },
+        { text: 'Non, il y a du porc', meaning: 'No, there is pork' },
+      ],
+      it: [
+        { text: 'Sì, è halal', meaning: 'Yes, it is halal' },
+        { text: 'No, contiene maiale', meaning: 'No, it contains pork' },
+      ],
     },
   },
   {
@@ -1018,6 +1300,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Yes, I can show you', meaning: 'Yes, I can show you' },
         { text: 'Sorry, we don\'t have vegetarian options', meaning: 'Sorry, we don\'t have vegetarian options' },
       ],
+      es: [
+        { text: 'Sí, le enseño', meaning: 'Yes, let me show you' },
+        { text: 'Lo siento, no tenemos opciones vegetarianas', meaning: 'Sorry, we don\'t have vegetarian options' },
+      ],
+      fr: [
+        { text: 'Oui, je vous montre', meaning: 'Yes, let me show you' },
+        { text: 'Désolé, on n\'a pas d\'options végétariennes', meaning: 'Sorry, we don\'t have vegetarian options' },
+      ],
+      it: [
+        { text: 'Sì, le faccio vedere', meaning: 'Yes, let me show you' },
+        { text: 'Mi dispiace, non abbiamo opzioni vegetariane', meaning: 'Sorry, we don\'t have vegetarian options' },
+      ],
     },
   },
   {
@@ -1054,6 +1348,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'About 10 minutes', meaning: 'About 10 minutes' },
         { text: 'It\'ll be right out', meaning: 'It\'ll be right out' },
+      ],
+      es: [
+        { text: 'Unos 10 minutos', meaning: 'About 10 minutes' },
+        { text: 'Sale enseguida', meaning: 'It will be right out' },
+      ],
+      fr: [
+        { text: 'Environ 10 minutes', meaning: 'About 10 minutes' },
+        { text: 'Ça arrive tout de suite', meaning: 'It is coming right away' },
+      ],
+      it: [
+        { text: 'Circa 10 minuti', meaning: 'About 10 minutes' },
+        { text: 'Arriva subito', meaning: 'It is coming right away' },
       ],
     },
   },
@@ -1108,6 +1414,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Yes, service charge is included', meaning: 'Yes, service charge is included' },
         { text: 'No, tip is separate', meaning: 'No, tip is separate' },
+      ],
+      es: [
+        { text: 'Sí, el servicio está incluido', meaning: 'Yes, service is included' },
+        { text: 'No, la propina es aparte', meaning: 'No, the tip is separate' },
+      ],
+      fr: [
+        { text: 'Oui, le service est compris', meaning: 'Yes, service is included' },
+        { text: 'Non, le pourboire est en plus', meaning: 'No, the tip is extra' },
+      ],
+      it: [
+        { text: 'Sì, il servizio è incluso', meaning: 'Yes, service is included' },
+        { text: 'No, la mancia è a parte', meaning: 'No, the tip is separate' },
       ],
     },
   },
@@ -1227,6 +1545,18 @@ export const PHRASES: Phrase[] = [
         { text: 'Sure, go ahead', meaning: 'Sure, go ahead' },
         { text: 'Sorry, we prefer no photos', meaning: 'Sorry, we prefer no photos' },
       ],
+      es: [
+        { text: 'Claro, adelante', meaning: 'Sure, go ahead' },
+        { text: 'Lo siento, preferimos que no se tomen fotos', meaning: 'Sorry, we prefer no photos' },
+      ],
+      fr: [
+        { text: 'Bien sûr, allez-y', meaning: 'Sure, go ahead' },
+        { text: 'Désolé, les photos ne sont pas autorisées', meaning: 'Sorry, photos are not allowed' },
+      ],
+      it: [
+        { text: 'Certo, faccia pure', meaning: 'Sure, go ahead' },
+        { text: 'Mi dispiace, preferiamo niente foto', meaning: 'Sorry, we prefer no photos' },
+      ],
     },
   },
   {
@@ -1263,6 +1593,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'Yes, I do', meaning: 'Yes, I do' },
         { text: 'A little', meaning: 'A little' },
+      ],
+      es: [
+        { text: 'Un poquito', meaning: 'A little bit' },
+        { text: 'Voy a llamar a alguien que hable inglés', meaning: 'I will call someone who speaks English' },
+      ],
+      fr: [
+        { text: 'Un petit peu', meaning: 'A little bit' },
+        { text: 'Je vais chercher quelqu\'un qui parle anglais', meaning: 'I will get someone who speaks English' },
+      ],
+      it: [
+        { text: 'Un pochino', meaning: 'A little bit' },
+        { text: 'Chiamo qualcuno che parla inglese', meaning: 'I will call someone who speaks English' },
       ],
     },
   },
@@ -1315,6 +1657,18 @@ export const PHRASES: Phrase[] = [
       en: [
         { text: 'With your hands is fine', meaning: 'With your hands is fine' },
         { text: 'Use the chopsticks like this', meaning: 'Use the chopsticks like this' },
+      ],
+      es: [
+        { text: 'Con las manos, sin problema', meaning: 'With your hands, no problem' },
+        { text: 'Se come así, mire', meaning: 'You eat it like this, look' },
+      ],
+      fr: [
+        { text: 'Avec les mains, c\'est très bien', meaning: 'With your hands is fine' },
+        { text: 'Comme ça, regardez', meaning: 'Like this, look' },
+      ],
+      it: [
+        { text: 'Con le mani va benissimo', meaning: 'With your hands is perfectly fine' },
+        { text: 'Si mangia così, guardi', meaning: 'You eat it like this, look' },
       ],
     },
   },

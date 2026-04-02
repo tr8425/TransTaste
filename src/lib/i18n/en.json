@@ -35,7 +35,9 @@
     "compareTranslateDesc": "Translation only",
     "compareApp": "TransTaste",
     "compareAppDesc": "Translation + Allergy alerts + Alternatives + Talk to servers",
-    "next": "Next"
+    "next": "Next",
+    "homeCurrency": "My home currency",
+    "homeCurrencyHint": "We'll convert menu prices for you"
   },
 
   "home": {
@@ -235,7 +237,10 @@
     "menuLangTh": "Thai",
     "menuLangVi": "Vietnamese",
     "menuLangEs": "Spanish",
-    "menuLangFr": "French"
+    "menuLangFr": "French",
+    "homeCurrency": "Home Currency",
+    "homeCurrencyDesc": "For price conversion on results",
+    "noCurrency": "Not set"
   },
 
   "paywall": {

@@ -43,6 +43,21 @@ const DIETARY = [
   { id: "no_alcohol" },
 ] as const;
 
+const CURRENCIES = [
+  { code: "KRW", symbol: "₩", label: "KRW (₩)" },
+  { code: "USD", symbol: "$", label: "USD ($)" },
+  { code: "EUR", symbol: "€", label: "EUR (€)" },
+  { code: "GBP", symbol: "£", label: "GBP (£)" },
+  { code: "JPY", symbol: "¥", label: "JPY (¥)" },
+  { code: "CNY", symbol: "¥", label: "CNY (¥)" },
+  { code: "THB", symbol: "฿", label: "THB (฿)" },
+  { code: "VND", symbol: "₫", label: "VND (₫)" },
+  { code: "TWD", symbol: "NT$", label: "TWD (NT$)" },
+  { code: "SGD", symbol: "S$", label: "SGD (S$)" },
+  { code: "AUD", symbol: "A$", label: "AUD (A$)" },
+  { code: "CAD", symbol: "C$", label: "CAD (C$)" },
+] as const;
+
 /* ── Icons ─────────────────────────────────────────────── */
 
 function CameraIcon() {
@@ -93,6 +108,7 @@ export default function OnboardingPage() {
     setLanguage(code);
     setLocale(code);
   };
+  const [currency, setCurrency] = useState("KRW");
   const [allergens, setAllergens] = useState<string[]>([]);
   const [dietary, setDietary] = useState<string[]>([]);
 
@@ -109,6 +125,7 @@ export default function OnboardingPage() {
   const handleSave = () => {
     const settings = {
       output_language: language,
+      home_currency: currency,
       allergen_preset: allergens,
       dietary_beliefs: dietary,
     };
@@ -278,6 +295,35 @@ export default function OnboardingPage() {
                     {lang.label}
                     {selected && (
                       <CheckIcon className="absolute right-2.5 text-coral" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Home Currency */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-brown-dark mb-1">{t("onboarding.homeCurrency")}</h2>
+            <p className="text-sm text-brown-medium mb-3">
+              {t("onboarding.homeCurrencyHint")}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {CURRENCIES.map((c) => {
+                const selected = currency === c.code;
+                return (
+                  <button
+                    key={c.code}
+                    onClick={() => setCurrency(c.code)}
+                    className={`relative flex items-center justify-center py-2.5 px-2 rounded-xl text-sm font-medium transition-all ${
+                      selected
+                        ? "border-2 border-coral bg-coral/10 text-brown-dark"
+                        : "border-2 border-transparent bg-cream-dark text-brown-medium hover:bg-brown-light/15"
+                    }`}
+                  >
+                    {c.label}
+                    {selected && (
+                      <CheckIcon className="absolute right-1.5 text-coral" />
                     )}
                   </button>
                 );

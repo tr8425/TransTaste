@@ -104,7 +104,7 @@ const MOCK_RESULT: MenuAnalysisResult = {
     budget: { items: ["唐揚げ", "揚げ出し豆腐"], reason: "Classic izakaya pairing: crispy chicken + light tofu. Total ≈ ¥1,360" },
     balanced: { items: ["海老フライ", "麻婆豆腐", "揚げ出し豆腐"], reason: "Mix of seafood, spice, and mild — covers all flavors. Total ≈ ¥2,410" },
   },
-} as unknown as MenuAnalysisResult;
+} satisfies MenuAnalysisResult;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

@@ -61,9 +61,26 @@ const ALL_DIETARY: { value: string; label: string }[] = [
 
 /* ─── Settings Shape ─── */
 
+const HOME_CURRENCIES = [
+  { value: "", label: "—" },
+  { value: "KRW", label: "₩ KRW" },
+  { value: "USD", label: "$ USD" },
+  { value: "EUR", label: "€ EUR" },
+  { value: "GBP", label: "£ GBP" },
+  { value: "JPY", label: "¥ JPY" },
+  { value: "CNY", label: "¥ CNY" },
+  { value: "THB", label: "฿ THB" },
+  { value: "VND", label: "₫ VND" },
+  { value: "TWD", label: "NT$ TWD" },
+  { value: "SGD", label: "S$ SGD" },
+  { value: "AUD", label: "A$ AUD" },
+  { value: "CAD", label: "C$ CAD" },
+];
+
 interface UserSettings {
   output_language: string;
   menu_language: string;
+  home_currency: string;
   allergen_preset: string[];
   dietary_beliefs: string[];
   disliked_ingredients: string[];
@@ -73,6 +90,7 @@ interface UserSettings {
 const DEFAULT_SETTINGS: UserSettings = {
   output_language: "en",
   menu_language: "auto",
+  home_currency: "",
   allergen_preset: [],
   dietary_beliefs: [],
   disliked_ingredients: [],
@@ -300,7 +318,7 @@ function ProfileContent() {
           </label>
 
           {/* Menu language */}
-          <label className="block">
+          <label className="block mb-3">
             <span className="text-xs text-brown-medium mb-1 block">
               {t("profile.menuLanguage")}
             </span>
@@ -317,6 +335,29 @@ function ProfileContent() {
                 </option>
               ))}
             </select>
+          </label>
+
+          {/* Home currency */}
+          <label className="block">
+            <span className="text-xs text-brown-medium mb-1 block">
+              {t("profile.homeCurrency")}
+            </span>
+            <select
+              value={settings.home_currency}
+              onChange={(e) =>
+                save({ ...settings, home_currency: e.target.value })
+              }
+              className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark appearance-none focus:outline-none focus:ring-2 focus:ring-coral/30"
+            >
+              {HOME_CURRENCIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.value ? c.label : t("profile.noCurrency")}
+                </option>
+              ))}
+            </select>
+            <p className="text-[10px] text-brown-medium/50 mt-1">
+              {t("profile.homeCurrencyDesc")}
+            </p>
           </label>
         </div>
 

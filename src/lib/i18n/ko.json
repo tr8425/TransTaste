@@ -35,7 +35,9 @@
     "compareTranslateDesc": "번역만 가능",
     "compareApp": "TransTaste",
     "compareAppDesc": "번역 + 알레르기 경고 + 대안 추천 + 직원과 대화",
-    "next": "다음"
+    "next": "다음",
+    "homeCurrency": "내 통화",
+    "homeCurrencyHint": "메뉴 가격을 내 통화로 변환해 드려요"
   },
 
   "home": {
@@ -235,7 +237,10 @@
     "menuLangTh": "태국어",
     "menuLangVi": "베트남어",
     "menuLangEs": "스페인어",
-    "menuLangFr": "프랑스어"
+    "menuLangFr": "프랑스어",
+    "homeCurrency": "홈 통화",
+    "homeCurrencyDesc": "결과 화면에서 가격 변환에 사용",
+    "noCurrency": "설정 안 됨"
   },
 
   "paywall": {

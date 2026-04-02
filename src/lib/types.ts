@@ -62,7 +62,7 @@ export interface AnalysisError {
   reason: string;
 }
 
-export type AnalysisResponse = MenuAnalysisResult | MenuAnalysisResultLite | AnalysisError;
+export type AnalysisResponse = MenuAnalysisResult | AnalysisError;
 
 export function isAnalysisError(res: AnalysisResponse): res is AnalysisError {
   return 'error' in res;
@@ -116,59 +116,6 @@ export interface DishDetail {
   allergen_summary?: AllergenSummary;
 }
 
-// Phase 1 result shape
-export interface MenuAnalysisResultLite {
-  menu_meta?: MenuMeta;
-  menu_language?: string;
-  restaurant_type?: string;
-  items_found?: number;
-  demo?: boolean;
-  dishes: DishLite[];
-  recommended_combo: {
-    budget: { items: string[]; reason: string };
-    balanced: { items: string[]; reason: string };
-  };
-}
-
-// === Legacy full dish (kept for backwards compat) ===
-export interface Dish {
-  original: string;
-  price: string | null;
-  currency?: string | null;
-  price_display?: string | null;
-  language_detected: string;
-  translation: Translation;
-  confidence: "high" | "medium" | "low";
-  category: string;
-  flavor_profile: FlavorProfile;
-  ingredients: {
-    core: string[];
-    common_additions?: string[];
-    allergens: string[];
-  };
-  dietary: {
-    halal: boolean | null;
-    vegan: boolean;
-    vegetarian: boolean;
-    gluten_free?: boolean;
-  };
-  price_tier: "budget" | "mid" | "premium";
-  fun_fact: string | null;
-  how_to_eat: string | null;
-  image_search_query: string;
-  // v2 optional fields
-  has_brand_name?: boolean;
-  brand_part?: string;
-  brand_note?: string;
-  food_part?: string;
-  fun_fact_detail?: FunFactDetail | null;
-  warning?: DishWarning | null;
-  disclosure?: Disclosure | null;
-  has_customization?: boolean;
-  options?: MenuOption[];
-  allergen_summary?: AllergenSummary;
-}
-
 export interface MenuMeta {
   language: string;
   restaurant_type: string;
@@ -182,7 +129,7 @@ export interface MenuAnalysisResult {
   menu_language?: string;
   restaurant_type?: string;
   items_found?: number;
-  dishes: Dish[];
+  dishes: DishLite[];
   recommended_combo: {
     budget: { items: string[]; reason: string };
     balanced: { items: string[]; reason: string };

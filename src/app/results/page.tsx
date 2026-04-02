@@ -381,7 +381,7 @@ function ResultsContent() {
           </div>
         ) : (
           filteredDishes.map((dish, i) => {
-            const d = dish as unknown as DishLite;
+            const d = dish;
             const price = d.price ? parseFloat(d.price) : null;
             const converted = price && d.currency ? exchange.convert(price, d.currency) : null;
             return (
