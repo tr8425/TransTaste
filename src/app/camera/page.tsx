@@ -32,6 +32,12 @@ export default function CameraPage() {
     router.push("/loading-scan");
   };
 
+  const handleQrDetected = (url: string) => {
+    sessionStorage.setItem("scanImage", url);
+    sessionStorage.setItem("scanInputType", "url");
+    router.push("/loading-scan");
+  };
+
   const handleGallery = () => {
     fileInputRef.current?.click();
   };
@@ -96,7 +102,7 @@ export default function CameraPage() {
 
   return (
     <>
-      <CameraView onCapture={handleCapture} onGallery={handleGallery} onBack={() => router.back()} />
+      <CameraView onCapture={handleCapture} onGallery={handleGallery} onBack={() => router.back()} onQrDetected={handleQrDetected} />
       <input
         ref={fileInputRef}
         type="file"

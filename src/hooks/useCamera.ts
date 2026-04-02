@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import jsQR from "jsqr";
 
 interface UseCameraReturn {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -12,6 +13,8 @@ interface UseCameraReturn {
   capture: () => Promise<Blob | null>;
   toggleFlash: () => Promise<void>;
   isFlashOn: boolean;
+  qrData: string | null;
+  clearQr: () => void;
 }
 
 export function useCamera(): UseCameraReturn {
@@ -21,6 +24,11 @@ export function useCamera(): UseCameraReturn {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFlashOn, setIsFlashOn] = useState(false);
+  const [qrData, setQrData] = useState<string | null>(null);
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const qrIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearQr = useCallback(() => setQrData(null), []);
 
   const start = useCallback(async () => {
     try {
@@ -102,11 +110,46 @@ export function useCamera(): UseCameraReturn {
     }
   }, [stream, isFlashOn]);
 
+  // QR code scanning every 500ms while camera is active
+  useEffect(() => {
+    if (!isReady || !stream) return;
+
+    if (!qrCanvasRef.current) {
+      qrCanvasRef.current = document.createElement("canvas");
+    }
+
+    qrIntervalRef.current = setInterval(() => {
+      const video = videoRef.current;
+      if (!video || video.videoWidth === 0) return;
+
+      const canvas = qrCanvasRef.current!;
+      const scale = Math.min(480 / video.videoWidth, 480 / video.videoHeight, 1);
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
+
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+      if (code?.data) {
+        setQrData(code.data);
+      }
+    }, 500);
+
+    return () => {
+      if (qrIntervalRef.current) clearInterval(qrIntervalRef.current);
+    };
+  }, [isReady, stream]);
+
   useEffect(() => {
     return () => {
       stream?.getTracks().forEach((track) => track.stop());
+      if (qrIntervalRef.current) clearInterval(qrIntervalRef.current);
     };
   }, [stream]);
 
-  return { videoRef, stream, isReady, error, start, stop, capture, toggleFlash, isFlashOn };
+  return { videoRef, stream, isReady, error, start, stop, capture, toggleFlash, isFlashOn, qrData, clearQr };
 }

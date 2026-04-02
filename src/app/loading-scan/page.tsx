@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Dish } from "@/lib/types";
+import { DishLite } from "@/lib/types";
 import { FUN_FACTS_LOADING_COUNT } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
 import { useCredits } from "@/hooks/useCredits";
@@ -21,7 +21,7 @@ export default function LoadingScanPage() {
   const router = useRouter();
   const credits = useCredits();
   const { t } = useTranslation();
-  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [dishes, setDishes] = useState<DishLite[]>([]);
   const [menuMeta, setMenuMeta] = useState<MenuMeta | null>(null);
   const [factIndex, setFactIndex] = useState(0);
   const [emojiIndex, setEmojiIndex] = useState(0);
@@ -105,8 +105,7 @@ export default function LoadingScanPage() {
         navigateToResults();
         return;
       }
-      credits.useCredit();
-      creditUsedRef.current = true;
+      // Credit deduction deferred until valid response is confirmed
     }
 
     // Preserve menu input for Phase 2 detail requests
@@ -168,6 +167,11 @@ export default function LoadingScanPage() {
             } else if (eventType === "dish") {
               setDishes((prev) => [...prev, parsed]);
             } else if (eventType === "done") {
+              // Deduct credit only on successful analysis
+              if (!creditUsedRef.current) {
+                credits.useCredit();
+                creditUsedRef.current = true;
+              }
               sessionStorage.setItem("scanResult", JSON.stringify(parsed));
               navigateToResults();
               return;
@@ -226,6 +230,11 @@ export default function LoadingScanPage() {
             throw new Error(errBody || `Server error: ${res.status}`);
           }
           const result = await res.json();
+          // Deduct credit only on successful analysis
+          if (!creditUsedRef.current) {
+            credits.useCredit();
+            creditUsedRef.current = true;
+          }
           sessionStorage.setItem("scanResult", JSON.stringify(result));
           navigateToResults();
         }
@@ -299,12 +308,28 @@ export default function LoadingScanPage() {
                     <p className="text-xs text-brown-medium truncate">
                       {dish.original}
                     </p>
+                    {dish.translation?.pronunciation && (
+                      <p className="text-[10px] text-brown-medium/60 italic truncate">
+                        {dish.translation.pronunciation}
+                      </p>
+                    )}
                   </div>
-                  {dish.price && (
-                    <span className="text-xs text-brown-medium ml-2 flex-shrink-0">
-                      {dish.price}
-                    </span>
-                  )}
+                  <div className="flex flex-col items-end gap-0.5 ml-2 flex-shrink-0">
+                    {dish.price_display || dish.price ? (
+                      <span className="text-xs text-brown-medium">
+                        {dish.price_display || dish.price}
+                      </span>
+                    ) : null}
+                    {dish.allergen_risk && dish.allergen_risk !== "safe" && (
+                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                        dish.allergen_risk === "danger" ? "bg-danger text-white" :
+                        dish.allergen_risk === "warning" ? "bg-amber-500 text-white" :
+                        "bg-amber-500/20 text-amber-700"
+                      }`}>
+                        {dish.allergen_risk}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

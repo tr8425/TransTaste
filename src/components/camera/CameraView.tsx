@@ -8,16 +8,30 @@ interface CameraViewProps {
   onCapture: (blob?: Blob | null) => void | Promise<void>;
   onGallery: () => void;
   onBack?: () => void;
+  onQrDetected?: (url: string) => void;
 }
 
-export default function CameraView({ onCapture, onGallery, onBack }: CameraViewProps) {
+export default function CameraView({ onCapture, onGallery, onBack, onQrDetected }: CameraViewProps) {
   const { t } = useTranslation();
-  const { videoRef, isReady, error, start, capture, toggleFlash, isFlashOn } =
+  const { videoRef, isReady, error, start, capture, toggleFlash, isFlashOn, qrData, clearQr } =
     useCamera();
 
   useEffect(() => {
     start();
   }, [start]);
+
+  // Handle QR code detection
+  useEffect(() => {
+    if (qrData && onQrDetected) {
+      try {
+        new URL(qrData); // Validate it's a URL
+        onQrDetected(qrData);
+        clearQr();
+      } catch {
+        clearQr(); // Not a URL, ignore
+      }
+    }
+  }, [qrData, onQrDetected, clearQr]);
 
   const handleCapture = async () => {
     const blob = await capture();

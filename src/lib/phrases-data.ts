@@ -27,6 +27,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอน้ำหน่อยครับ/ค่ะ', pronunciation: 'Khor nam noi khrap/kha' },
       vi: { text: 'Cho tôi nước, xin', pronunciation: 'Cho toy nuoc, sin' },
       en: { text: 'Water, please', pronunciation: 'Water, please' },
+      es: { text: 'Agua, por favor', pronunciation: 'Ah-gwa, por fah-vor' },
+      fr: { text: 'De l\'eau, s\'il vous plaît', pronunciation: 'Duh lo, seel voo pleh' },
+      it: { text: 'Acqua, per favore', pronunciation: 'Ah-kwa, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -61,6 +64,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอเครื่องเคียงเพิ่มหน่อยครับ/ค่ะ', pronunciation: 'Khor khrueang khiang phoem noi khrap/kha' },
       vi: { text: 'Cho thêm đồ ăn kèm', pronunciation: 'Cho them doh an kem' },
       en: { text: 'More side dishes, please', pronunciation: 'More side dishes, please' },
+      es: { text: 'Más guarniciones, por favor', pronunciation: 'Mahs gwar-nee-see-oh-nehs, por fah-vor' },
+      fr: { text: 'Plus d\'accompagnements, s\'il vous plaît', pronunciation: 'Plew dah-kom-pahn-yuh-mahn, seel voo pleh' },
+      it: { text: 'Altri contorni, per favore', pronunciation: 'Ahl-tree kon-tor-nee, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -93,6 +99,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอเปลี่ยนจานหน่อยครับ/ค่ะ', pronunciation: 'Khor plian jaan noi khrap/kha' },
       vi: { text: 'Đổi đĩa giúp tôi', pronunciation: 'Doi dia giup toy' },
       en: { text: 'Could I get a clean plate?', pronunciation: 'Could I get a clean plate?' },
+      es: { text: '¿Puede cambiar el plato?', pronunciation: 'Pweh-deh kahm-bee-ahr el plah-toh?' },
+      fr: { text: 'Pouvez-vous changer l\'assiette ?', pronunciation: 'Poo-vay voo shahn-zhay lah-see-et?' },
+      it: { text: 'Può cambiare il piatto?', pronunciation: 'Pwo kahm-bee-ah-reh eel pee-ah-toh?' },
     },
     expectedResponses: {
       ja: [
@@ -122,6 +131,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอห่อกลับบ้านครับ/ค่ะ', pronunciation: 'Khor hor klap baan khrap/kha' },
       vi: { text: 'Cho tôi mang về', pronunciation: 'Cho toy mang veh' },
       en: { text: 'I would like to take out, please', pronunciation: 'I would like to take out, please' },
+      es: { text: 'Para llevar, por favor', pronunciation: 'Pah-rah yeh-var, por fah-vor' },
+      fr: { text: 'À emporter, s\'il vous plaît', pronunciation: 'Ah ahm-por-tay, seel voo pleh' },
+      it: { text: 'Da asporto, per favore', pronunciation: 'Dah ah-spor-toh, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -155,6 +167,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'มีอะไรแนะนำบ้างครับ/ค่ะ', pronunciation: 'Mee arai nae-nam bang khrap/kha' },
       vi: { text: 'Bạn gợi ý món gì?', pronunciation: 'Ban goy y mon gi?' },
       en: { text: 'What do you recommend?', pronunciation: 'What do you recommend?' },
+      es: { text: '¿Qué recomienda?', pronunciation: 'Keh reh-koh-mee-en-dah?' },
+      fr: { text: 'Que recommandez-vous ?', pronunciation: 'Kuh reh-koh-mahn-day voo?' },
+      it: { text: 'Cosa consiglia?', pronunciation: 'Koh-zah kon-see-lyah?' },
     },
     expectedResponses: {
       ja: [
@@ -187,6 +202,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'อันนี้เผ็ดไหมครับ/ค่ะ', pronunciation: 'An nee phet mai khrap/kha' },
       vi: { text: 'Mon nay co cay khong?', pronunciation: 'Mon nay co cay khong?' },
       en: { text: 'Is this spicy?', pronunciation: 'Is this spicy?' },
+      es: { text: '¿Es picante?', pronunciation: 'Es pee-kahn-teh?' },
+      fr: { text: 'C\'est épicé ?', pronunciation: 'Seh ay-pee-say?' },
+      it: { text: 'È piccante?', pronunciation: 'Eh peek-kahn-teh?' },
     },
     expectedResponses: {
       ja: [
@@ -224,6 +242,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'มีส่วนผสมที่ก่อภูมิแพ้ไหมครับ/ค่ะ', pronunciation: 'Mee suan pasom tee kor phoom phae mai khrap/kha' },
       vi: { text: 'Mon nay co thanh phan gay di ung khong?', pronunciation: 'Mon nay co thanh fan gay zee ung khong?' },
       en: { text: 'Does this contain any allergens?', pronunciation: 'Does this contain any allergens?' },
+      es: { text: '¿Contiene alérgenos?', pronunciation: 'Kon-tee-eh-neh ah-lehr-heh-nohs?' },
+      fr: { text: 'Contient-il des allergènes ?', pronunciation: 'Kon-tee-ahn-teel day zah-lehr-zhen?' },
+      it: { text: 'Contiene allergeni?', pronunciation: 'Kon-tee-eh-neh ah-lehr-jeh-nee?' },
     },
     expectedResponses: {
       ja: [
@@ -256,6 +277,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ไม่ใส่___ครับ/ค่ะ', pronunciation: 'Mai sai ___ khrap/kha' },
       vi: { text: 'Khong bo ___ vao', pronunciation: 'Khong bo ___ vao' },
       en: { text: 'No ___, please', pronunciation: 'No ___, please' },
+      es: { text: 'Sin ___, por favor', pronunciation: 'Seen ___, por fah-vor' },
+      fr: { text: 'Sans ___, s\'il vous plaît', pronunciation: 'Sahn ___, seel voo pleh' },
+      it: { text: 'Senza ___, per favore', pronunciation: 'Sen-tsah ___, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -292,6 +316,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'เช็คบิลครับ/ค่ะ', pronunciation: 'Check bin khrap/kha' },
       vi: { text: 'Tinh tien giup toi', pronunciation: 'Tinh tien giup toy' },
       en: { text: 'Check, please', pronunciation: 'Check, please' },
+      es: { text: 'La cuenta, por favor', pronunciation: 'Lah kwen-tah, por fah-vor' },
+      fr: { text: 'L\'addition, s\'il vous plaît', pronunciation: 'Lah-dee-see-ohn, seel voo pleh' },
+      it: { text: 'Il conto, per favore', pronunciation: 'Eel kon-toh, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -324,6 +351,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'รับบัตรเครดิตไหมครับ/ค่ะ', pronunciation: 'Rap bat credit mai khrap/kha' },
       vi: { text: 'Co the thanh toan bang the khong?', pronunciation: 'Co teh thanh toan bang teh khong?' },
       en: { text: 'Do you take card?', pronunciation: 'Do you take card?' },
+      es: { text: '¿Aceptan tarjeta?', pronunciation: 'Ah-sep-tahn tar-heh-tah?' },
+      fr: { text: 'Acceptez-vous la carte ?', pronunciation: 'Ak-sep-tay voo lah kart?' },
+      it: { text: 'Accettate la carta?', pronunciation: 'Ah-chet-tah-teh lah kar-tah?' },
     },
     expectedResponses: {
       ja: [
@@ -358,6 +388,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'แยกบิลครับ/ค่ะ', pronunciation: 'Yaek bin khrap/kha' },
       vi: { text: 'Tinh tien rieng giup toi', pronunciation: 'Tinh tien rieng giup toy' },
       en: { text: 'Separate checks, please', pronunciation: 'Separate checks, please' },
+      es: { text: 'Cuentas separadas, por favor', pronunciation: 'Kwen-tahs seh-pah-rah-dahs, por fah-vor' },
+      fr: { text: 'Additions séparées, s\'il vous plaît', pronunciation: 'Ah-dee-see-ohn say-pah-ray, seel voo pleh' },
+      it: { text: 'Conti separati, per favore', pronunciation: 'Kon-tee seh-pah-rah-tee, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -390,6 +423,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'รวมภาษีแล้วหรือยังครับ/ค่ะ', pronunciation: 'Ruam phasee laew reu yang khrap/kha' },
       vi: { text: 'Da bao gom thue chua?', pronunciation: 'Da bao gom thueh chua?' },
       en: { text: 'Is tax included?', pronunciation: 'Is tax included?' },
+      es: { text: '¿Incluye impuestos?', pronunciation: 'Een-kloo-yeh eem-pwes-tohs?' },
+      fr: { text: 'La taxe est incluse ?', pronunciation: 'Lah tax eh an-klooz?' },
+      it: { text: 'Le tasse sono incluse?', pronunciation: 'Leh tah-seh soh-noh een-kloo-zeh?' },
     },
     expectedResponses: {
       ja: [
@@ -426,6 +462,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'มีสิ่งแปลกปลอมในอาหารครับ/ค่ะ', pronunciation: 'Mee sing plaek plom nai ahaan khrap/kha' },
       vi: { text: 'Co vat la trong mon an', pronunciation: 'Co vat la trong mon an' },
       en: { text: 'There is something in my food', pronunciation: 'There is something in my food' },
+      es: { text: 'Hay algo en mi comida', pronunciation: 'Ay ahl-goh en mee koh-mee-dah' },
+      fr: { text: 'Il y a quelque chose dans mon plat', pronunciation: 'Eel ee ah kel-kuh shoz dahn mon plah' },
+      it: { text: 'C\'è qualcosa nel mio piatto', pronunciation: 'Cheh kwal-koh-zah nel mee-oh pee-ah-toh' },
     },
     expectedResponses: {
       ja: [
@@ -455,6 +494,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ไม่ใช่ที่สั่งครับ/ค่ะ', pronunciation: 'Mai chai tee sang khrap/kha' },
       vi: { text: 'Day khong phai mon toi dat', pronunciation: 'Day khong fai mon toy dat' },
       en: { text: 'This is not what I ordered', pronunciation: 'This is not what I ordered' },
+      es: { text: 'Esto no es lo que pedí', pronunciation: 'Es-toh noh es loh keh peh-dee' },
+      fr: { text: 'Ce n\'est pas ce que j\'ai commandé', pronunciation: 'Suh neh pah suh kuh zhay koh-mahn-day' },
+      it: { text: 'Non è quello che ho ordinato', pronunciation: 'Non eh kwel-loh keh oh or-dee-nah-toh' },
     },
     expectedResponses: {
       ja: [
@@ -485,6 +527,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ดูเหมือนยังไม่สุกครับ/ค่ะ', pronunciation: 'Doo meuuan yang mai suk khrap/kha' },
       vi: { text: 'Hinh nhu mon nay chua chin', pronunciation: 'Hinh nhu mon nay chua chin' },
       en: { text: 'It seems undercooked', pronunciation: 'It seems undercooked' },
+      es: { text: 'Parece poco hecho', pronunciation: 'Pah-reh-seh poh-koh eh-choh' },
+      fr: { text: 'Ça semble pas assez cuit', pronunciation: 'Sah sahm-bluh pah ah-say kwee' },
+      it: { text: 'Sembra poco cotto', pronunciation: 'Sem-brah poh-koh kot-toh' },
     },
     expectedResponses: {
       ja: [
@@ -514,6 +559,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'เปลี่ยนออเดอร์ได้ไหมครับ/ค่ะ', pronunciation: 'Plian order dai mai khrap/kha' },
       vi: { text: 'Toi co the doi mon khong?', pronunciation: 'Toy co teh doi mon khong?' },
       en: { text: 'Can I change my order?', pronunciation: 'Can I change my order?' },
+      es: { text: '¿Puedo cambiar mi pedido?', pronunciation: 'Pweh-doh kahm-bee-ahr mee peh-dee-doh?' },
+      fr: { text: 'Puis-je changer ma commande ?', pronunciation: 'Pwee-zhuh shahn-zhay mah koh-mahnd?' },
+      it: { text: 'Posso cambiare il mio ordine?', pronunciation: 'Pos-soh kahm-bee-ah-reh eel mee-oh or-dee-neh?' },
     },
     expectedResponses: {
       ja: [
@@ -550,6 +598,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอบคุณสำหรับอาหารครับ/ค่ะ', pronunciation: 'Khob khun samrap ahaan khrap/kha' },
       vi: { text: 'Toi xin phep dung bua', pronunciation: 'Toy sin fep dung bua' },
       en: { text: 'Bon appetit / Time to eat!', pronunciation: 'Bon appetit' },
+      es: { text: '¡Buen provecho!', pronunciation: 'Bwen proh-veh-choh!' },
+      fr: { text: 'Bon appétit !', pronunciation: 'Bon ah-pay-tee!' },
+      it: { text: 'Buon appetito!', pronunciation: 'Bwon ah-peh-tee-toh!' },
     },
     expectedResponses: {
       ja: [
@@ -579,6 +630,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'อร่อยมากครับ/ค่ะ', pronunciation: 'Aroi mak khrap/kha' },
       vi: { text: 'Ngon lam!', pronunciation: 'Ngon lam!' },
       en: { text: 'Delicious!', pronunciation: 'Delicious!' },
+      es: { text: '¡Delicioso!', pronunciation: 'Deh-lee-see-oh-soh!' },
+      fr: { text: 'Délicieux !', pronunciation: 'Day-lee-see-uh!' },
+      it: { text: 'Delizioso!', pronunciation: 'Deh-lee-tsee-oh-zoh!' },
     },
     expectedResponses: {
       ja: [
@@ -608,6 +662,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ทำอาหารอร่อยมากครับ/ค่ะ', pronunciation: 'Tham ahaan aroi mak khrap/kha' },
       vi: { text: 'Nau an ngon qua!', pronunciation: 'Nau an ngon qua!' },
       en: { text: 'The chef is amazing!', pronunciation: 'The chef is amazing!' },
+      es: { text: '¡El chef es increíble!', pronunciation: 'El chef es een-kreh-ee-bleh!' },
+      fr: { text: 'Le chef est incroyable !', pronunciation: 'Luh shef eh an-krwah-yah-bluh!' },
+      it: { text: 'Lo chef è fantastico!', pronunciation: 'Loh shef eh fan-tah-stee-koh!' },
     },
     expectedResponses: {
       ja: [
@@ -637,6 +694,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอบคุณสำหรับอาหารครับ/ค่ะ อร่อยมาก', pronunciation: 'Khob khun samrap ahaan khrap/kha aroi mak' },
       vi: { text: 'Cam on bua an rat ngon', pronunciation: 'Cam on bua an rat ngon' },
       en: { text: 'Thank you for the meal', pronunciation: 'Thank you for the meal' },
+      es: { text: 'Gracias por la comida', pronunciation: 'Grah-see-ahs por lah koh-mee-dah' },
+      fr: { text: 'Merci pour le repas', pronunciation: 'Mehr-see poor luh ruh-pah' },
+      it: { text: 'Grazie per il pasto', pronunciation: 'Grah-tsee-eh per eel pah-stoh' },
     },
     expectedResponses: {
       ja: [
@@ -668,6 +728,9 @@ export const PHRASES: Phrase[] = [
       th: { text: '___ที่ครับ/ค่ะ', pronunciation: '___tee khrap/kha' },
       vi: { text: '___nguoi', pronunciation: '___nguoi' },
       en: { text: 'Table for ___, please', pronunciation: 'Table for ___, please' },
+      es: { text: 'Mesa para ___, por favor', pronunciation: 'Meh-sah pah-rah ___, por fah-vor' },
+      fr: { text: 'Table pour ___, s\'il vous plaît', pronunciation: 'Tah-bluh poor ___, seel voo pleh' },
+      it: { text: 'Tavolo per ___, per favore', pronunciation: 'Tah-voh-loh per ___, per fah-voh-reh' },
     },
     expectedResponses: {
       ja: [
@@ -702,6 +765,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'จองโต๊ะไว้แล้วครับ/ค่ะ', pronunciation: 'Jong to wai laew khrap/kha' },
       vi: { text: 'Toi da dat truoc', pronunciation: 'Toy da dat truoc' },
       en: { text: 'I have a reservation', pronunciation: 'I have a reservation' },
+      es: { text: 'Tengo una reserva', pronunciation: 'Ten-goh oo-nah reh-ser-vah' },
+      fr: { text: 'J\'ai une réservation', pronunciation: 'Zhay oon ray-ser-vah-see-ohn' },
+      it: { text: 'Ho una prenotazione', pronunciation: 'Oh oo-nah preh-noh-tah-tsee-oh-neh' },
     },
     expectedResponses: {
       ja: [
@@ -731,6 +797,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ห้องน้ำอยู่ตรงไหนครับ/ค่ะ', pronunciation: 'Hong nam yoo trong nai khrap/kha' },
       vi: { text: 'Nha ve sinh o dau?', pronunciation: 'Nha veh sinh o dau?' },
       en: { text: 'Where is the restroom?', pronunciation: 'Where is the restroom?' },
+      es: { text: '¿Dónde está el baño?', pronunciation: 'Don-deh es-tah el bah-nyoh?' },
+      fr: { text: 'Où sont les toilettes ?', pronunciation: 'Oo son lay twah-let?' },
+      it: { text: 'Dov\'è il bagno?', pronunciation: 'Doh-veh eel bah-nyoh?' },
     },
     expectedResponses: {
       ja: [
@@ -764,6 +833,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'นั่งข้างนอกได้ไหมครับ/ค่ะ', pronunciation: 'Nang khang nok dai mai khrap/kha' },
       vi: { text: 'Co the ngoi ngoai troi khong?', pronunciation: 'Co teh ngoi ngoai troi khong?' },
       en: { text: 'Can we sit outside?', pronunciation: 'Can we sit outside?' },
+      es: { text: '¿Podemos sentarnos afuera?', pronunciation: 'Poh-deh-mohs sen-tar-nohs ah-fweh-rah?' },
+      fr: { text: 'Peut-on s\'asseoir dehors ?', pronunciation: 'Puh-ton sah-swahr duh-or?' },
+      it: { text: 'Possiamo sederci fuori?', pronunciation: 'Pos-see-ah-moh seh-der-chee fwoh-ree?' },
     },
     expectedResponses: {
       ja: [
@@ -800,6 +872,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอดูเมนูหน่อยครับ/ค่ะ', pronunciation: 'Khor duu menu noi khrap/kha' },
       vi: { text: 'Cho tôi xem thực đơn', pronunciation: 'Cho toy sem tuc don' },
       en: { text: 'Can I see the menu, please?', pronunciation: 'Can I see the menu, please?' },
+      es: { text: '¿Puedo ver el menú?', pronunciation: 'Pweh-doh ver el meh-noo?' },
+      fr: { text: 'Puis-je voir le menu ?', pronunciation: 'Pwee-zhuh vwahr luh muh-noo?' },
+      it: { text: 'Posso vedere il menu?', pronunciation: 'Pos-soh veh-deh-reh eel meh-noo?' },
     },
   },
   {
@@ -812,6 +887,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'มีเมนูภาษาอังกฤษไหมครับ/ค่ะ', pronunciation: 'Mii menu phasa angkrit mai khrap/kha' },
       vi: { text: 'Có thực đơn tiếng Anh không?', pronunciation: 'Co tuc don tieng Anh khong?' },
       en: { text: 'Do you have an English menu?', pronunciation: 'Do you have an English menu?' },
+      es: { text: '¿Tienen menú en inglés?', pronunciation: 'Tee-eh-nen meh-noo en een-glehs?' },
+      fr: { text: 'Avez-vous un menu en anglais ?', pronunciation: 'Ah-vay voo uhn muh-noo ahn ahn-gleh?' },
+      it: { text: 'Avete un menu in inglese?', pronunciation: 'Ah-veh-teh oon meh-noo een een-gleh-zeh?' },
     },
     expectedResponses: {
       ja: [
@@ -846,6 +924,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอทิชชู่หน่อยครับ/ค่ะ', pronunciation: 'Khor tissue noi khrap/kha' },
       vi: { text: 'Cho tôi khăn giấy', pronunciation: 'Cho toy khan giay' },
       en: { text: 'Napkins, please', pronunciation: 'Napkins, please' },
+      es: { text: 'Servilletas, por favor', pronunciation: 'Ser-vee-yeh-tahs, por fah-vor' },
+      fr: { text: 'Des serviettes, s\'il vous plaît', pronunciation: 'Day ser-vee-et, seel voo pleh' },
+      it: { text: 'Tovaglioli, per favore', pronunciation: 'Toh-vah-lyoh-lee, per fah-voh-reh' },
     },
   },
   {
@@ -858,6 +939,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอช้อนส้อมหน่อยครับ/ค่ะ', pronunciation: 'Khor chon som noi khrap/kha' },
       vi: { text: 'Cho tôi nĩa/muỗng', pronunciation: 'Cho toy nia/muong' },
       en: { text: 'Fork/spoon, please', pronunciation: 'Fork/spoon, please' },
+      es: { text: 'Tenedor/cuchara, por favor', pronunciation: 'Teh-neh-dor/koo-chah-rah, por fah-vor' },
+      fr: { text: 'Fourchette/cuillère, s\'il vous plaît', pronunciation: 'Foor-shet/kwee-yehr, seel voo pleh' },
+      it: { text: 'Forchetta/cucchiaio, per favore', pronunciation: 'For-ket-tah/koo-kee-ah-yoh, per fah-voh-reh' },
     },
   },
 
@@ -872,6 +956,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'อาหารนี้ฮาลาลไหมครับ/ค่ะ', pronunciation: 'Aahaan nii halal mai khrap/kha' },
       vi: { text: 'Món này có halal không?', pronunciation: 'Mon nay co halal khong?' },
       en: { text: 'Is this dish halal?', pronunciation: 'Is this dish halal?' },
+      es: { text: '¿Este plato es halal?', pronunciation: 'Es-teh plah-toh es ah-lahl?' },
+      fr: { text: 'Ce plat est-il halal ?', pronunciation: 'Suh plah eh-teel ah-lahl?' },
+      it: { text: 'Questo piatto è halal?', pronunciation: 'Kwes-toh pee-ah-toh eh ah-lahl?' },
     },
     expectedResponses: {
       ja: [
@@ -906,6 +993,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'มีอาหารมังสวิรัติไหมครับ/ค่ะ', pronunciation: 'Mii aahaan mangsawirat mai khrap/kha' },
       vi: { text: 'Có món chay không?', pronunciation: 'Co mon chay khong?' },
       en: { text: 'Do you have vegetarian options?', pronunciation: 'Do you have vegetarian options?' },
+      es: { text: '¿Tienen opciones vegetarianas?', pronunciation: 'Tee-eh-nen op-see-oh-nehs veh-heh-tah-ree-ah-nahs?' },
+      fr: { text: 'Avez-vous des options végétariennes ?', pronunciation: 'Ah-vay voo day zop-see-ohn vay-zhay-tah-ree-en?' },
+      it: { text: 'Avete opzioni vegetariane?', pronunciation: 'Ah-veh-teh op-tsee-oh-nee veh-jeh-tah-ree-ah-neh?' },
     },
     expectedResponses: {
       ja: [
@@ -940,6 +1030,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ใช้เวลานานแค่ไหนครับ/ค่ะ', pronunciation: 'Chai wela naan khae nai khrap/kha' },
       vi: { text: 'Mất bao lâu ạ?', pronunciation: 'Mat bao lau a?' },
       en: { text: 'How long will it take?', pronunciation: 'How long will it take?' },
+      es: { text: '¿Cuánto tiempo tardará?', pronunciation: 'Kwahn-toh tee-em-poh tar-dah-rah?' },
+      fr: { text: 'Combien de temps faut-il ?', pronunciation: 'Kom-bee-an duh tahn foh-teel?' },
+      it: { text: 'Quanto tempo ci vorrà?', pronunciation: 'Kwahn-toh tem-poh chee vor-rah?' },
     },
     expectedResponses: {
       ja: [
@@ -974,6 +1067,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอเหมือนโต๊ะนั้นครับ/ค่ะ', pronunciation: 'Khor muean to nan khrap/kha' },
       vi: { text: 'Cho tôi giống bàn kia', pronunciation: 'Cho toy giong ban kia' },
       en: { text: 'I\'ll have what that table is having', pronunciation: 'I\'ll have what that table is having' },
+      es: { text: 'Quiero lo mismo que esa mesa', pronunciation: 'Kee-eh-roh loh mees-moh keh eh-sah meh-sah' },
+      fr: { text: 'Je voudrais la même chose que cette table', pronunciation: 'Zhuh voo-dreh lah mem shoz kuh set tah-bluh' },
+      it: { text: 'Vorrei lo stesso di quel tavolo', pronunciation: 'Vor-ray loh stes-soh dee kwel tah-voh-loh' },
     },
   },
 
@@ -988,6 +1084,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'รวมทิปแล้วหรือยังครับ/ค่ะ', pronunciation: 'Ruam tip laew ru yang khrap/kha' },
       vi: { text: 'Đã bao gồm tiền tip chưa?', pronunciation: 'Da bao gom tien tip chua?' },
       en: { text: 'Is the tip included?', pronunciation: 'Is the tip included?' },
+      es: { text: '¿Está incluida la propina?', pronunciation: 'Es-tah een-kloo-ee-dah lah proh-pee-nah?' },
+      fr: { text: 'Le pourboire est inclus ?', pronunciation: 'Luh poor-bwahr eh an-kloo?' },
+      it: { text: 'La mancia è inclusa?', pronunciation: 'Lah mahn-chah eh een-kloo-zah?' },
     },
     expectedResponses: {
       ja: [
@@ -1022,6 +1121,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ขอใบเสร็จหน่อยครับ/ค่ะ', pronunciation: 'Khor bai set noi khrap/kha' },
       vi: { text: 'Cho tôi hóa đơn', pronunciation: 'Cho toy hoa don' },
       en: { text: 'Receipt, please', pronunciation: 'Receipt, please' },
+      es: { text: 'El recibo, por favor', pronunciation: 'El reh-see-boh, por fah-vor' },
+      fr: { text: 'Le reçu, s\'il vous plaît', pronunciation: 'Luh ruh-soo, seel voo pleh' },
+      it: { text: 'Lo scontrino, per favore', pronunciation: 'Loh skon-tree-noh, per fah-voh-reh' },
     },
   },
 
@@ -1036,6 +1138,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'เค็มไปครับ/ค่ะ', pronunciation: 'Khem pai khrap/kha' },
       vi: { text: 'Mặn quá', pronunciation: 'Man qua' },
       en: { text: 'This is too salty', pronunciation: 'This is too salty' },
+      es: { text: 'Está muy salado', pronunciation: 'Es-tah mwee sah-lah-doh' },
+      fr: { text: 'C\'est trop salé', pronunciation: 'Seh troh sah-lay' },
+      it: { text: 'È troppo salato', pronunciation: 'Eh trop-poh sah-lah-toh' },
     },
   },
   {
@@ -1048,6 +1153,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ไม่ใช่ที่สั่งครับ/ค่ะ', pronunciation: 'Mai chai thi sang khrap/kha' },
       vi: { text: 'Đây không phải món tôi gọi', pronunciation: 'Day khong phai mon toy goi' },
       en: { text: 'This is not what I ordered', pronunciation: 'This is not what I ordered' },
+      es: { text: 'Esto no es lo que pedí', pronunciation: 'Es-toh noh es loh keh peh-dee' },
+      fr: { text: 'Ce n\'est pas ma commande', pronunciation: 'Suh neh pah mah koh-mahnd' },
+      it: { text: 'Non è il mio ordine', pronunciation: 'Non eh eel mee-oh or-dee-neh' },
     },
   },
 
@@ -1062,6 +1170,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'สวัสดีครับ/ค่ะ', pronunciation: 'Sawasdee khrap/kha' },
       vi: { text: 'Xin chào', pronunciation: 'Sin chao' },
       en: { text: 'Hello', pronunciation: 'Hello' },
+      es: { text: 'Hola', pronunciation: 'Oh-lah' },
+      fr: { text: 'Bonjour', pronunciation: 'Bon-zhoor' },
+      it: { text: 'Buongiorno', pronunciation: 'Bwon-jor-noh' },
     },
   },
   {
@@ -1074,6 +1185,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'อิ่มแล้วครับ/ค่ะ ขอบคุณครับ/ค่ะ', pronunciation: 'Im laew khrap/kha, khop khun khrap/kha' },
       vi: { text: 'Ăn ngon lắm, cảm ơn', pronunciation: 'An ngon lam, cam on' },
       en: { text: 'That was great, thank you', pronunciation: 'That was great, thank you' },
+      es: { text: 'Estaba delicioso, gracias', pronunciation: 'Es-tah-bah deh-lee-see-oh-soh, grah-see-ahs' },
+      fr: { text: 'C\'était délicieux, merci', pronunciation: 'Seh-teh day-lee-see-uh, mehr-see' },
+      it: { text: 'Era delizioso, grazie', pronunciation: 'Eh-rah deh-lee-tsee-oh-zoh, grah-tsee-eh' },
     },
   },
 
@@ -1088,6 +1202,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'ถ่ายรูปได้ไหมครับ/ค่ะ', pronunciation: 'Thai ruup dai mai khrap/kha' },
       vi: { text: 'Tôi có thể chụp ảnh không?', pronunciation: 'Toy co the chup anh khong?' },
       en: { text: 'Can I take a photo?', pronunciation: 'Can I take a photo?' },
+      es: { text: '¿Puedo tomar una foto?', pronunciation: 'Pweh-doh toh-mahr oo-nah foh-toh?' },
+      fr: { text: 'Puis-je prendre une photo ?', pronunciation: 'Pwee-zhuh prahn-druh oon foh-toh?' },
+      it: { text: 'Posso fare una foto?', pronunciation: 'Pos-soh fah-reh oo-nah foh-toh?' },
     },
     expectedResponses: {
       ja: [
@@ -1122,6 +1239,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'พูดภาษาอังกฤษได้ไหมครับ/ค่ะ', pronunciation: 'Phuut phasa angkrit dai mai khrap/kha' },
       vi: { text: 'Bạn nói tiếng Anh được không?', pronunciation: 'Ban noy tieng Anh duoc khong?' },
       en: { text: 'Do you speak English?', pronunciation: 'Do you speak English?' },
+      es: { text: '¿Habla inglés?', pronunciation: 'Ah-blah een-glehs?' },
+      fr: { text: 'Parlez-vous anglais ?', pronunciation: 'Par-lay voo ahn-gleh?' },
+      it: { text: 'Parla inglese?', pronunciation: 'Par-lah een-gleh-zeh?' },
     },
     expectedResponses: {
       ja: [
@@ -1156,6 +1276,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'รหัส WiFi คืออะไรครับ/ค่ะ', pronunciation: 'Rahat WiFi kue arai khrap/kha' },
       vi: { text: 'Mật khẩu WiFi là gì?', pronunciation: 'Mat khau WiFi la gi?' },
       en: { text: 'What\'s the WiFi password?', pronunciation: 'What\'s the WiFi password?' },
+      es: { text: '¿Cuál es la contraseña del WiFi?', pronunciation: 'Kwahl es lah kon-trah-seh-nyah del WiFi?' },
+      fr: { text: 'Quel est le mot de passe WiFi ?', pronunciation: 'Kel eh luh moh duh pass WiFi?' },
+      it: { text: 'Qual è la password del WiFi?', pronunciation: 'Kwahl eh lah password del WiFi?' },
     },
   },
   {
@@ -1168,6 +1291,9 @@ export const PHRASES: Phrase[] = [
       th: { text: 'อันนี้กินยังไงครับ/ค่ะ', pronunciation: 'An nii kin yang ngai khrap/kha' },
       vi: { text: 'Món này ăn như thế nào?', pronunciation: 'Mon nay an nhu the nao?' },
       en: { text: 'How do I eat this?', pronunciation: 'How do I eat this?' },
+      es: { text: '¿Cómo se come esto?', pronunciation: 'Koh-moh seh koh-meh es-toh?' },
+      fr: { text: 'Comment mange-t-on ceci ?', pronunciation: 'Koh-mahn mahnzh-ton suh-see?' },
+      it: { text: 'Come si mangia questo?', pronunciation: 'Koh-meh see mahn-jah kwes-toh?' },
     },
     expectedResponses: {
       ja: [

@@ -11,6 +11,7 @@ export interface Translation {
   literal: string;
   meaning: string;
   english: string;
+  pronunciation?: string;
 }
 
 // --- v2 types ---

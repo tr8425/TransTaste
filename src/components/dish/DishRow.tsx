@@ -9,6 +9,7 @@ interface DishRowProps {
   onClick: () => void;
   onAddToCart?: () => void;
   isInCart?: boolean;
+  convertedPrice?: string | null;
 }
 
 const RISK_STYLE: Record<string, string | null> = {
@@ -28,7 +29,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   dessert: "bg-pink-200",
 };
 
-export default function DishRow({ dish, onClick, onAddToCart, isInCart }: DishRowProps) {
+export default function DishRow({ dish, onClick, onAddToCart, isInCart, convertedPrice }: DishRowProps) {
   const { t } = useTranslation();
   const bgColor = CATEGORY_COLORS[dish.category] || "bg-cream-dark";
   const riskStyle = dish.allergen_risk ? RISK_STYLE[dish.allergen_risk] : null;
@@ -67,11 +68,23 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart }: DishRo
             <p className="text-xs text-brown-medium truncate">
               {dish.translation.english}
             </p>
+            {dish.translation.pronunciation && (
+              <p className="text-[11px] text-brown-medium/60 italic truncate">
+                {dish.translation.pronunciation}
+              </p>
+            )}
           </div>
           {(dish.price_display || dish.price) && (
-            <span className="text-xs font-medium text-amber-brand whitespace-nowrap">
-              {dish.price_display || dish.price}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="text-xs font-medium text-amber-brand whitespace-nowrap">
+                {dish.price_display || dish.price}
+              </span>
+              {convertedPrice && (
+                <span className="text-[10px] text-brown-medium/60 whitespace-nowrap">
+                  ≈ {convertedPrice}
+                </span>
+              )}
+            </div>
           )}
         </div>
 

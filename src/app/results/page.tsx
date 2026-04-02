@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CATEGORY_FILTERS } from "@/lib/constants";
 import { DishLite, MenuAnalysisResult } from "@/lib/types";
@@ -14,9 +15,19 @@ import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
+import { useExchangeRate } from "@/hooks/useExchangeRate";
 
 export default function ResultsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-cream" />}>
+      <ResultsContent />
+    </Suspense>
+  );
+}
+
+function ResultsContent() {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const [selectedDish, setSelectedDish] = useState<DishLite | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [showPaywall, setShowPaywall] = useState(false);
@@ -27,6 +38,7 @@ export default function ResultsPage() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [menuInput, setMenuInput] = useState<StoredMenuInput | null>(null);
   const cart = useCart();
+  const exchange = useExchangeRate();
 
   const dishToCartItem = (dish: DishLite) => ({
     dish_hash: dish.original,
@@ -50,9 +62,9 @@ export default function ResultsPage() {
     const errorStr = sessionStorage.getItem("scanError");
     let resultStr = sessionStorage.getItem("scanResult");
 
-    // If no fresh result, try loading from cache via resultKey
+    // If no fresh result, try loading from cache via URL param or sessionStorage key
     if (!errorStr && !resultStr) {
-      const cachedKey = sessionStorage.getItem("scanResultKey");
+      const cachedKey = searchParams.get("id") || sessionStorage.getItem("scanResultKey");
       if (cachedKey) {
         try {
           const cache = JSON.parse(localStorage.getItem("transtaste_cached_results") || "{}");
@@ -128,6 +140,17 @@ export default function ResultsPage() {
   useEffect(() => {
     if (isPhase2Free) setIsUnlocked(true);
   }, [isPhase2Free]);
+
+  // Fetch exchange rate when data is loaded and user has a home currency
+  useEffect(() => {
+    if (data && exchange.homeCurrency) {
+      const menuCurrency = data.dishes[0]?.currency;
+      if (menuCurrency && menuCurrency !== exchange.homeCurrency) {
+        exchange.fetchRate(menuCurrency, exchange.homeCurrency);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, exchange.homeCurrency]);
 
   const handleUnlock = () => setShowPaywall(true);
 
@@ -309,6 +332,28 @@ export default function ResultsPage() {
         </div>
       )}
 
+      {/* Exchange rate toggle */}
+      {exchange.homeCurrency && exchange.rateData && exchange.rateData.rate !== 1 && (
+        <div className="px-5 pb-2">
+          <button
+            onClick={exchange.toggleConversion}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              exchange.showConverted
+                ? "bg-coral/15 text-coral border border-coral/30"
+                : "bg-cream-dark text-brown-medium border border-transparent"
+            }`}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23" />
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+            {exchange.showConverted
+              ? t("results.showOriginal")
+              : t("results.showConverted", { currency: exchange.homeCurrency })}
+          </button>
+        </div>
+      )}
+
       {/* Category filters */}
       <div className="px-5 pb-3">
         <HorizontalScroll>
@@ -329,21 +374,27 @@ export default function ResultsPage() {
       </div>
 
       {/* Dish list */}
-      <div className="flex-1 px-2 pb-4">
+      <div className="flex-1 px-2 pb-40">
         {filteredDishes.length === 0 ? (
           <div className="text-center py-12 text-brown-medium text-sm">
             {t("results.noCategory")}
           </div>
         ) : (
-          filteredDishes.map((dish, i) => (
-            <DishRow
-              key={i}
-              dish={dish as unknown as DishLite}
-              onClick={() => setSelectedDish(dish as unknown as DishLite)}
-              onAddToCart={() => cart.addItem(dishToCartItem(dish as unknown as DishLite))}
-              isInCart={isDishInCart(dish as unknown as DishLite)}
-            />
-          ))
+          filteredDishes.map((dish, i) => {
+            const d = dish as unknown as DishLite;
+            const price = d.price ? parseFloat(d.price) : null;
+            const converted = price && d.currency ? exchange.convert(price, d.currency) : null;
+            return (
+              <DishRow
+                key={i}
+                dish={d}
+                onClick={() => setSelectedDish(d)}
+                onAddToCart={() => cart.addItem(dishToCartItem(d))}
+                isInCart={isDishInCart(d)}
+                convertedPrice={converted}
+              />
+            );
+          })
         )}
       </div>
 

@@ -202,6 +202,16 @@ export default function DishCard({
         <p className="text-sm text-coral font-semibold mt-1">
           {dish.translation.english}
         </p>
+        {dish.translation.pronunciation && (
+          <p className="text-xs text-brown-medium/70 italic mt-0.5 flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+            {dish.translation.pronunciation}
+          </p>
+        )}
       </div>
 
       {/* Price & category — Phase 1 data */}

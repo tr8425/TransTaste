@@ -11,6 +11,9 @@ const LANGUAGES = [
   { code: "zh", labelKey: "phrases.langZh" },
   { code: "th", labelKey: "phrases.langTh" },
   { code: "vi", labelKey: "phrases.langVi" },
+  { code: "es", labelKey: "phrases.langEs" },
+  { code: "fr", labelKey: "phrases.langFr" },
+  { code: "it", labelKey: "phrases.langIt" },
   { code: "en", labelKey: "phrases.langEn" },
 ] as const;
 

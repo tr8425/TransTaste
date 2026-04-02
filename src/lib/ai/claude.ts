@@ -26,7 +26,8 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON mu
       "translation": {
         "literal": "string — word-by-word translation",
         "meaning": "string — what the dish actually is",
-        "english": "string — natural English name"
+        "english": "string — natural English name",
+        "pronunciation": "string — romanized pronunciation guide for ordering (e.g. 'bul-go-gi', 'tom-yam-kung', 'gyū-don')"
       },
       "confidence": "'high' | 'medium' | 'low'",
       "category": "string — 'main' | 'side' | 'soup' | 'noodle' | 'rice' | 'appetizer' | 'dessert' | 'drink' | 'set'",
@@ -136,15 +137,19 @@ Many Asian restaurant menus prefix dish names with a brand or restaurant name:
 - You are stretching to find something interesting — if it feels forced, it IS forced
 
 ## Tone rules (when fun_fact IS generated):
-NEVER use: poverty, poor, waste, scraps, leftovers, garbage, disgusting, weird, strange, gross, acquired taste, stamina, virility, aphrodisiac
+NEVER use: poverty, poor, waste, scraps, leftovers, garbage, disgusting, weird, strange, gross, acquired taste, stamina, virility, aphrodisiac, sexual, erotic, seductive
 ALWAYS reframe positively:
 - "born from scarcity" → "born from culinary creativity"
 - "poor man's food" → "beloved comfort food"
 - "waste parts" → "nose-to-tail tradition"
 - "stamina food" → "nutrient-rich" or "traditionally valued for its nutrition"
+- War/famine origins → "resourcefulness" or "culinary ingenuity born from history"
 
 Every fun fact MUST end with why this food is special TODAY.
 Keep fun facts to 1-2 sentences. Be specific and surprising, not generic.
+
+## fun_fact_detail (collapsible extra info):
+For dishes with polarizing or strongly divisive reputations (e.g., live octopus, century egg, haggis, casu marzu), put the main fun_fact as a brief positive hook, and move detailed/challenging context into fun_fact_detail { label: "Deep Dive", content: "..." }. This way the user sees the friendly fact first and can optionally expand for more.
 
 # WARNING SYSTEM (separate from fun_fact)
 Add a warning object when a dish may surprise or challenge certain diners:
@@ -200,6 +205,16 @@ If the menu shows customization options (size, spice level, toppings, add-ons):
 - Note any price differences
 - Flag allergens in specific choices
 
+# MENU FORMAT RECOGNITION
+Handle diverse menu formats beyond standard printed menus:
+
+- **Kiosk screens**: Ignore UI elements (buttons, navigation bars, app chrome). Focus only on food item names, prices, and descriptions. If the image clearly shows a kiosk ordering interface, note restaurant_type accordingly.
+- **Handwritten menus**: Apply extra OCR tolerance. If characters are ambiguous, use context (cuisine type, surrounding items) to infer the most likely reading. Flag confidence as 'medium' or 'low' for unclear items.
+- **Chalkboard/whiteboard menus**: Same as handwritten — infer from context, flag low confidence items.
+- **QR-linked web menus**: If the input is a URL, treat the page content as the menu source.
+- **Hotel room service / airline menus**: Note the format in restaurant_type (e.g. "Hotel Room Service", "Airline Menu").
+- **Market price items (싯가/時価/시가)**: When a dish shows "market price" instead of a fixed price, set price to null, price_display to "Market Price", and add a note in how_to_eat suggesting the user ask staff for today's price.
+
 # HANDLING ERRORS
 If the input is NOT a food menu, return:
 {"error": "not_menu", "reason": "Description of what the image/text appears to be instead"}
@@ -249,7 +264,8 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary):
       "translation": {
         "literal": "string — word-by-word translation",
         "meaning": "string — what the dish actually is",
-        "english": "string — natural English name"
+        "english": "string — natural English name",
+        "pronunciation": "string — romanized pronunciation guide for ordering (e.g. 'bul-go-gi', 'tom-yam-kung', 'gyū-don')"
       },
       "confidence": "'high' | 'medium' | 'low'",
       "category": "'main' | 'side' | 'soup' | 'noodle' | 'rice' | 'appetizer' | 'dessert' | 'drink' | 'set' | 'salad'",

@@ -33,8 +33,10 @@ export default function HistoryPage() {
   const handleClick = (scan: RecentScan) => {
     if (scan.resultKey) {
       sessionStorage.setItem("scanResultKey", scan.resultKey);
+      router.push(`/results?id=${scan.resultKey}`);
+    } else {
+      router.push("/results");
     }
-    router.push("/results");
   };
 
   useEffect(() => {
