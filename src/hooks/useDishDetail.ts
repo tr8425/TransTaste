@@ -84,7 +84,8 @@ export function useDishDetail(
     } finally {
       setIsLoading(false);
     }
-  }, [dish, menuInput, retryCount]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- retryCount triggers re-fetch via useEffect below
+  }, [dish, menuInput]);
 
   useEffect(() => {
     if (dish) {
@@ -94,7 +95,7 @@ export function useDishDetail(
       setIsLoading(false);
       setError(null);
     }
-  }, [dish, fetchDetail]);
+  }, [dish, fetchDetail, retryCount]);
 
   const retry = useCallback(() => {
     setRetryCount((c) => c + 1);

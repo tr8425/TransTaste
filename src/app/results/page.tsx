@@ -35,7 +35,7 @@ function ResultsContent() {
   const { isPhase2Free } = useCredits();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
-  const [scanError, setScanError] = useState<string | null>(null);
+  const [scanError, setScanError] = useState<{ code: string; reason: string; _debug?: string } | null>(null);
   const [menuInput, setMenuInput] = useState<StoredMenuInput | null>(null);
   const cart = useCart();
   const exchange = useExchangeRate();
@@ -90,7 +90,13 @@ function ResultsContent() {
     sessionStorage.removeItem("scanResult");
 
     if (errorStr) {
-      setScanError(errorStr);
+      // Parse structured error or treat as plain code string
+      try {
+        const parsed = JSON.parse(errorStr);
+        setScanError({ code: parsed.error || errorStr, reason: parsed.reason || '', _debug: parsed._debug });
+      } catch {
+        setScanError({ code: errorStr, reason: '', _debug: undefined });
+      }
     } else if (resultStr) {
       try {
         const parsed = JSON.parse(resultStr) as MenuAnalysisResult;
@@ -126,9 +132,10 @@ function ResultsContent() {
           localStorage.setItem("transtaste_scan_history", JSON.stringify(merged));
         } catch { /* ignore */ }
       } catch {
-        setScanError("Failed to parse scan results.");
+        setScanError({ code: 'E_PARSE_FAIL', reason: 'Failed to parse scan results.' });
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only: parse sessionStorage once
   }, []);
 
   const filteredDishes = !data
@@ -160,7 +167,7 @@ function ResultsContent() {
   };
 
   // No credits state — soft paywall with inline pricing
-  if (scanError === "no_credits") {
+  if (scanError?.code === "E_NO_CREDITS") {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-[340px]">
@@ -223,6 +230,26 @@ function ResultsContent() {
 
   // Error state
   if (scanError) {
+    const errorMessages: Record<string, string> = {
+      E_NO_INPUT: t("errors.noInput"),
+      E_TIMEOUT: t("errors.timeout"),
+      E_STREAM_END: t("errors.streamEnded"),
+      E_FETCH_FAIL: t("errors.unexpected"),
+      E_RATE_LIMIT: t("errors.rateLimited"),
+      E_BAD_REQUEST: t("errors.unexpected"),
+      E_AUTH: t("errors.authFailed"),
+      E_NOT_MENU: t("errors.notMenu"),
+      E_OCR_FAIL: t("errors.ocrFailed"),
+      E_NO_TEXT: t("errors.noText"),
+      E_PARTIAL: t("errors.partial"),
+      E_PARSE_FAIL: t("errors.parseFailed"),
+      E_AI_RATE_LIMIT: t("errors.rateLimited"),
+      E_AI_ERROR: t("errors.aiError"),
+      E_MAX_TOKENS: t("errors.maxTokens"),
+      E_UNKNOWN: t("errors.unexpected"),
+    };
+    const userMessage = errorMessages[scanError.code] || scanError.reason || t("errors.unexpected");
+
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
         <div className="text-center max-w-[320px]">
@@ -244,8 +271,12 @@ function ResultsContent() {
           <h2 className="text-lg font-bold text-brown-dark mb-2">
             {t("results.somethingWrong")}
           </h2>
-          <p className="text-sm text-brown-medium mb-6 leading-relaxed">
-            {scanError}
+          <p className="text-sm text-brown-medium mb-4 leading-relaxed">
+            {userMessage}
+          </p>
+          {/* Error code for debugging */}
+          <p className="text-[10px] text-brown-medium/40 mb-6 font-mono select-all">
+            {scanError.code}{scanError._debug ? ` · ${scanError._debug}` : ''}
           </p>
           <Link
             href="/camera"

@@ -6,6 +6,8 @@ import { useCart } from "@/hooks/useCart";
 import {
   ALLERGEN_LABELS,
   ALLERGY_HEADERS,
+  DIETARY_LABELS,
+  DIETARY_HEADERS,
   CONFIRM_LABELS,
   ORDER_HEADERS,
   TOTAL_LABELS,
@@ -14,6 +16,7 @@ import { useTranslation } from "@/lib/i18n";
 
 interface UserSettings {
   allergen_preset?: string[];
+  dietary_beliefs?: string[];
 }
 
 function loadUserSettings(): UserSettings {
@@ -53,6 +56,7 @@ export default function PresentPage() {
   const { items, menuLanguage, totalPrice } = useCart();
 
   const [allergens, setAllergens] = useState<string[]>([]);
+  const [dietaryBeliefs, setDietaryBeliefs] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
   const lang = getLang(menuLanguage);
@@ -64,6 +68,9 @@ export default function PresentPage() {
     const settings = loadUserSettings();
     if (settings.allergen_preset) {
       setAllergens(settings.allergen_preset);
+    }
+    if (settings.dietary_beliefs) {
+      setDietaryBeliefs(settings.dietary_beliefs);
     }
   }, []);
 
@@ -128,6 +135,25 @@ export default function PresentPage() {
                   className="text-base font-semibold text-red-700 bg-red-100 px-3 py-1 rounded-full"
                 >
                   {ALLERGEN_LABELS[a]?.[lang] ?? ALLERGEN_LABELS[a]?.en ?? a}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dietary beliefs banner — in menu language */}
+        {dietaryBeliefs.length > 0 && (
+          <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-2xl">
+            <p className="text-base font-bold text-green-700 mb-2">
+              🥬 {DIETARY_HEADERS[lang] ?? DIETARY_HEADERS.en}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {dietaryBeliefs.map((d) => (
+                <span
+                  key={d}
+                  className="text-base font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full"
+                >
+                  {DIETARY_LABELS[d]?.[lang] ?? DIETARY_LABELS[d]?.en ?? d}
                 </span>
               ))}
             </div>

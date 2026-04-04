@@ -73,6 +73,11 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
                 {dish.translation.pronunciation}
               </p>
             )}
+            {dish.estimated_calories && (
+              <span className="text-[10px] text-brown-medium/50">
+                ~{dish.estimated_calories} kcal
+              </span>
+            )}
           </div>
           {(dish.price_display || dish.price) && (
             <div className="flex flex-col items-end">

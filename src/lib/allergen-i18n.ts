@@ -188,6 +188,39 @@ export const ORDER_HEADERS: Record<string, string> = {
   ko: "주문 목록",
 };
 
+export const DIETARY_LABELS: Record<string, Record<string, string>> = {
+  vegetarian: {
+    ja: "ベジタリアン", zh: "素食", th: "มังสวิรัติ", vi: "Ăn chay", en: "Vegetarian", ko: "채식",
+  },
+  vegan: {
+    ja: "ヴィーガン", zh: "纯素", th: "วีแกน", vi: "Thuần chay", en: "Vegan", ko: "비건",
+  },
+  halal: {
+    ja: "ハラール", zh: "清真", th: "ฮาลาล", vi: "Halal", en: "Halal", ko: "할랄",
+  },
+  kosher: {
+    ja: "コーシャ", zh: "犹太洁食", th: "โคเชอร์", vi: "Kosher", en: "Kosher", ko: "코셔",
+  },
+  pescatarian: {
+    ja: "ペスカタリアン", zh: "鱼素", th: "เพสคาทาเรียน", vi: "Pescatarian", en: "Pescatarian", ko: "페스코",
+  },
+  no_beef: {
+    ja: "牛肉不可", zh: "不吃牛肉", th: "ไม่ทานเนื้อวัว", vi: "Không ăn bò", en: "No beef", ko: "소고기 금지",
+  },
+  no_pork: {
+    ja: "豚肉不可", zh: "不吃猪肉", th: "ไม่ทานหมู", vi: "Không ăn heo", en: "No pork", ko: "돼지고기 금지",
+  },
+};
+
+export const DIETARY_HEADERS: Record<string, string> = {
+  ja: "食事制限があります",
+  zh: "有饮食限制",
+  th: "มีข้อจำกัดด้านอาหาร",
+  vi: "Có hạn chế ăn uống",
+  en: "Has dietary restrictions",
+  ko: "식이 제한이 있어요",
+};
+
 export const ALLERGY_HEADERS: Record<string, string> = {
   ja: "アレルギーがあります",
   zh: "有过敏症",

@@ -100,7 +100,9 @@
     "saferAlternatives": "Safer alternatives from this menu",
     "couldNotLoad": "Could not load details",
     "tapToRetry": "Tap to retry",
-    "dislikedWarning": "Contains ingredients you dislike: {items}."
+    "dislikedWarning": "Contains ingredients you dislike: {items}.",
+    "calorieEstimate": "~{kcal} kcal",
+    "calorieDisclaimer": "Calorie values are AI estimates and may vary."
   },
 
   "order": {
@@ -156,6 +158,7 @@
     "serverMightSay": "Server might say:",
     "removeBookmark": "Remove bookmark",
     "bookmarkPhrase": "Bookmark phrase",
+    "favorites": "Favorites",
     "langJa": "Japanese",
     "langZh": "Chinese",
     "langTh": "Thai",
@@ -463,9 +466,18 @@
 
   "errors": {
     "noInput": "No image or text provided. Please try again.",
-    "timeout": "Analysis timed out after 3 minutes. The menu image may be too complex. Please try again with a clearer photo.",
-    "streamEnded": "Stream ended unexpectedly. Please try again.",
-    "rateLimited": "Too many requests. Try again in {minutes} minutes.",
+    "timeout": "Analysis timed out after 3 minutes. Please try with a clearer photo.",
+    "streamEnded": "Connection lost during analysis. Please try again.",
+    "unexpected": "Something went wrong. Please try again.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "authFailed": "API key is invalid or expired. Check your settings.",
+    "notMenu": "This doesn't appear to be a food menu. Please take a photo of a menu.",
+    "ocrFailed": "Couldn't read the menu. Please try a clearer, well-lit photo.",
+    "noText": "No menu items found. Make sure the menu text is visible.",
+    "partial": "Could only read part of the menu. Try a clearer photo for full results.",
+    "parseFailed": "Failed to process the AI response. Please try again.",
+    "aiError": "AI service error. Please try again shortly.",
+    "maxTokens": "Menu is too large for a single scan. Try photographing fewer items.",
     "noApiKey": "No API key configured"
   }
 }

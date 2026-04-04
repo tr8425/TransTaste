@@ -32,6 +32,7 @@ const MOCK_RESULT: MenuAnalysisResult = {
       allergens: ["gluten", "soy"],
       allergen_risk: "check",
       alternative_dishes: [],
+      estimated_calories: 350,
       price_tier: "budget",
       image_search_query: "karaage japanese fried chicken",
     },
@@ -48,6 +49,7 @@ const MOCK_RESULT: MenuAnalysisResult = {
       allergens: ["shellfish", "gluten", "egg"],
       allergen_risk: "danger",
       alternative_dishes: ["唐揚げ", "豚の角煮"],
+      estimated_calories: 400,
       price_tier: "mid",
       image_search_query: "ebi fry japanese shrimp tempura",
     },
@@ -64,6 +66,7 @@ const MOCK_RESULT: MenuAnalysisResult = {
       allergens: ["pork", "soy"],
       allergen_risk: "warning",
       alternative_dishes: ["揚げ出し豆腐"],
+      estimated_calories: 300,
       price_tier: "budget",
       image_search_query: "mapo tofu japanese style",
     },
@@ -80,6 +83,7 @@ const MOCK_RESULT: MenuAnalysisResult = {
       allergens: ["soy", "gluten"],
       allergen_risk: "check",
       alternative_dishes: [],
+      estimated_calories: 150,
       price_tier: "budget",
       image_search_query: "agedashi tofu japanese",
     },
@@ -96,6 +100,7 @@ const MOCK_RESULT: MenuAnalysisResult = {
       allergens: ["pork", "soy"],
       allergen_risk: "warning",
       alternative_dishes: ["唐揚げ", "揚げ出し豆腐"],
+      estimated_calories: 550,
       price_tier: "mid",
       image_search_query: "buta no kakuni braised pork belly",
     },
@@ -123,7 +128,7 @@ export async function POST(request: NextRequest) {
     const rl = await checkRateLimit(`analyze:${ip}`, 20, 3600);
     if (!rl.allowed) {
       return NextResponse.json(
-        { error: "rate_limited", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
+        { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.`, _debug: `ip=${ip}` },
         { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.reset) } }
       );
     }
@@ -152,7 +157,7 @@ export async function POST(request: NextRequest) {
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: "network_error", reason: "Invalid JSON in request body" },
+        { error: "E_BAD_REQUEST", reason: "Invalid JSON in request body" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -160,7 +165,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.input || typeof body.input !== 'string') {
       return NextResponse.json(
-        { error: "network_error", reason: "Missing or invalid 'input' field" },
+        { error: "E_BAD_REQUEST", reason: "Missing or invalid 'input' field" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -168,7 +173,7 @@ export async function POST(request: NextRequest) {
     const inputType = (body.inputType || 'image') as InputType;
     if (!VALID_INPUT_TYPES.includes(inputType)) {
       return NextResponse.json(
-        { error: "network_error", reason: `Invalid inputType: ${body.inputType}. Must be one of: ${VALID_INPUT_TYPES.join(', ')}` },
+        { error: "E_BAD_REQUEST", reason: `Invalid inputType: ${body.inputType}. Must be one of: ${VALID_INPUT_TYPES.join(', ')}` },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -234,8 +239,9 @@ export async function POST(request: NextRequest) {
     console.error("Analyze API error:", err);
     return NextResponse.json(
       {
-        error: "network_error",
+        error: "E_UNKNOWN",
         reason: err instanceof Error ? err.message : "Internal server error",
+        _debug: `route:POST ${err instanceof Error ? err.stack?.split('\n')[1]?.trim() : ''}`,
       },
       { status: 500, headers: corsHeaders }
     );

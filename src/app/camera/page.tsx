@@ -4,17 +4,9 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import CameraView from "@/components/camera/CameraView";
 import { useTranslation } from "@/lib/i18n";
+import { compressBlob } from "@/lib/image-compress";
 
 const MAX_IMAGES = 10;
-
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
 
 export default function CameraPage() {
   const { t } = useTranslation();
@@ -26,7 +18,7 @@ export default function CameraPage() {
 
   const handleCapture = async (blob?: Blob | null) => {
     if (!blob) return;
-    const base64 = await blobToBase64(blob);
+    const base64 = await compressBlob(blob);
     sessionStorage.setItem("scanImage", base64);
     sessionStorage.setItem("scanInputType", "image");
     router.push("/loading-scan");
@@ -48,7 +40,7 @@ export default function CameraPage() {
 
     // Single file: existing immediate behavior
     if (files.length === 1 && selectedFiles.length === 0) {
-      const base64 = await blobToBase64(files[0]);
+      const base64 = await compressBlob(files[0]);
       sessionStorage.setItem("scanImage", base64);
       sessionStorage.setItem("scanInputType", "image");
       router.push("/loading-scan");
@@ -73,7 +65,7 @@ export default function CameraPage() {
 
   const handleAnalyzeAll = async () => {
     const base64Array = await Promise.all(
-      selectedFiles.map((f) => blobToBase64(f))
+      selectedFiles.map((f) => compressBlob(f))
     );
     const joined = base64Array.join("|||");
     sessionStorage.setItem("scanImage", joined);
@@ -125,6 +117,7 @@ export default function CameraPage() {
             <div className="mb-4 grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
               {previews.map((src, i) => (
                 <div key={i} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- blob URL preview, next/image not applicable */}
                   <img
                     src={src}
                     alt={`Menu image ${i + 1}`}

@@ -57,9 +57,67 @@ export interface MenuOption {
 
 export type InputType = 'image' | 'url' | 'text';
 
+/**
+ * Unified error codes — every error in the scan flow maps to one of these.
+ *
+ * Client-side (loading-scan):
+ *   E_NO_INPUT      — sessionStorage has no scan data
+ *   E_NO_CREDITS    — user ran out of free scans / pass expired
+ *   E_TIMEOUT       — 3-minute SSE timeout
+ *   E_STREAM_END    — SSE stream closed without done/error event
+ *   E_FETCH_FAIL    — fetch() threw (network offline, CORS, etc.)
+ *
+ * API route:
+ *   E_RATE_LIMIT    — IP rate limit exceeded (429)
+ *   E_BAD_REQUEST   — invalid JSON, missing input, bad inputType
+ *   E_AUTH          — API key invalid or missing (401)
+ *
+ * AI provider (claude.ts):
+ *   E_NOT_MENU      — image is not a food menu
+ *   E_OCR_FAIL      — image too blurry / unreadable
+ *   E_NO_TEXT       — no menu items identified
+ *   E_PARTIAL       — partial read (some items only)
+ *   E_PARSE_FAIL    — AI returned unparseable JSON
+ *   E_AI_RATE_LIMIT — Anthropic 429
+ *   E_AI_ERROR      — other Anthropic API error
+ *   E_MAX_TOKENS    — response truncated by token limit
+ *   E_UNKNOWN       — catch-all
+ */
+export type ErrorCode =
+  // client
+  | 'E_NO_INPUT'
+  | 'E_NO_CREDITS'
+  | 'E_TIMEOUT'
+  | 'E_STREAM_END'
+  | 'E_FETCH_FAIL'
+  // api route
+  | 'E_RATE_LIMIT'
+  | 'E_BAD_REQUEST'
+  | 'E_AUTH'
+  // ai provider
+  | 'E_NOT_MENU'
+  | 'E_OCR_FAIL'
+  | 'E_NO_TEXT'
+  | 'E_PARTIAL'
+  | 'E_PARSE_FAIL'
+  | 'E_AI_RATE_LIMIT'
+  | 'E_AI_ERROR'
+  | 'E_MAX_TOKENS'
+  | 'E_UNKNOWN'
+  // legacy compat (AI prompt still returns these)
+  | 'not_menu'
+  | 'no_text'
+  | 'ocr_failed'
+  | 'low_confidence'
+  | 'partial'
+  | 'network_error'
+  | 'rate_limited';
+
 export interface AnalysisError {
-  error: 'not_menu' | 'no_text' | 'ocr_failed' | 'low_confidence' | 'partial' | 'network_error';
+  error: ErrorCode;
   reason: string;
+  /** Debug-only: HTTP status or internal detail */
+  _debug?: string;
 }
 
 export type AnalysisResponse = MenuAnalysisResult | AnalysisError;
@@ -90,6 +148,7 @@ export interface DishLite {
   allergen_risk: 'danger' | 'warning' | 'check' | 'safe';
   alternative_dishes?: string[];
   disliked_ingredients?: string[];
+  estimated_calories?: number | null;
   price_tier: "budget" | "mid" | "premium";
   image_search_query: string;
 }

@@ -50,6 +50,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON mu
         "vegetarian": "boolean",
         "gluten_free": "boolean"
       },
+      "estimated_calories": "number | null — rough kcal estimate for a typical single serving. null if truly unknown (e.g. drinks with variable size). Round to nearest 50.",
       "price_tier": "'budget' | 'mid' | 'premium' — relative to this restaurant/region",
       "fun_fact": "string | null — engaging cultural context (see FUN FACT RULES below). null if no genuinely interesting fact exists.",
       "how_to_eat": "string | null — practical eating tips if non-obvious",
@@ -278,6 +279,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary):
       "allergens": ["string — from: shellfish, pork, gluten, dairy, nuts, egg, soy, fish, sesame, celery, mustard, sulfites"],
       "allergen_risk": "'danger' | 'warning' | 'check' | 'safe'",
       "alternative_dishes": ["string — safer alternatives from the same menu when allergen_risk is danger/warning, empty otherwise"],
+      "estimated_calories": "number | null — rough kcal estimate for a typical single serving. null if truly unknown. Round to nearest 50.",
       "price_tier": "'budget' | 'mid' | 'premium'",
       "image_search_query": "string — English query to find a photo of this dish"
     }
@@ -522,7 +524,7 @@ function isAnalysisError(obj: unknown): obj is AnalysisError {
 
 function validateResult(obj: unknown): MenuAnalysisResult | AnalysisError {
   if (typeof obj !== 'object' || obj === null) {
-    return { error: 'ocr_failed', reason: 'Invalid response structure from AI' };
+    return { error: 'E_PARSE_FAIL', reason: 'Invalid response structure from AI' };
   }
 
   // Check if it's an error response
@@ -534,11 +536,11 @@ function validateResult(obj: unknown): MenuAnalysisResult | AnalysisError {
 
   // Validate minimum required fields
   if (!Array.isArray(result.dishes)) {
-    return { error: 'ocr_failed', reason: 'Response missing dishes array' };
+    return { error: 'E_PARSE_FAIL', reason: 'Response missing dishes array' };
   }
 
   if (result.dishes.length === 0) {
-    return { error: 'no_text', reason: 'No menu items could be identified' };
+    return { error: 'E_NO_TEXT', reason: 'No menu items could be identified' };
   }
 
   // Normalize: ensure menu_meta exists
@@ -599,7 +601,7 @@ export const claudeSonnetProvider: AIProvider = {
       // Extract text from response
       const textBlock = response.content.find((block) => block.type === 'text');
       if (!textBlock || textBlock.type !== 'text') {
-        return { error: 'ocr_failed', reason: 'No text response from AI' };
+        return { error: 'E_AI_ERROR', reason: 'No text response from AI' };
       }
 
       console.log('[TransTaste] Claude response stop_reason:', response.stop_reason);
@@ -607,6 +609,7 @@ export const claudeSonnetProvider: AIProvider = {
 
       if (response.stop_reason === 'max_tokens') {
         console.warn('[TransTaste] Response was truncated by max_tokens limit!');
+        return { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.', _debug: `tokens=${response.usage?.output_tokens}` };
       }
 
       const parsed = parseJsonResponse(textBlock.text);
@@ -614,17 +617,17 @@ export const claudeSonnetProvider: AIProvider = {
     } catch (err: unknown) {
       if (err instanceof Anthropic.APIError) {
         if (err.status === 429) {
-          return { error: 'network_error', reason: 'Rate limit exceeded. Please try again in a moment.' };
+          return { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again in a moment.', _debug: `status=429` };
         }
         if (err.status === 401) {
-          return { error: 'network_error', reason: 'API authentication failed.' };
+          return { error: 'E_AUTH', reason: 'API authentication failed. Check your API key.', _debug: `status=401` };
         }
-        return { error: 'network_error', reason: `API error: ${err.message}` };
+        return { error: 'E_AI_ERROR', reason: `API error: ${err.message}`, _debug: `status=${err.status}` };
       }
       if (err instanceof Error && err.message.includes('Failed to parse JSON')) {
-        return { error: 'ocr_failed', reason: 'Could not parse AI response as valid menu data.' };
+        return { error: 'E_PARSE_FAIL', reason: 'Could not parse AI response as valid menu data.' };
       }
-      return { error: 'network_error', reason: err instanceof Error ? err.message : 'Unknown error occurred' };
+      return { error: 'E_UNKNOWN', reason: err instanceof Error ? err.message : 'Unknown error occurred' };
     }
   },
 
@@ -701,12 +704,15 @@ export function createMenuAnalysisStream(
 
         if (finalMessage.stop_reason === 'max_tokens') {
           console.warn('[TransTaste] Streaming response truncated by max_tokens');
+          emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.', _debug: `tokens=${finalMessage.usage?.output_tokens}` });
+          close();
+          return;
         }
 
         // Validate full response
         const textBlock = finalMessage.content.find((b) => b.type === 'text');
         if (!textBlock || textBlock.type !== 'text') {
-          emit('error', { error: 'ocr_failed', reason: 'No text response from AI' });
+          emit('error', { error: 'E_AI_ERROR', reason: 'No text response from AI' });
         } else {
           const parsed = parseJsonResponse(textBlock.text);
           const result = validateResult(parsed);
@@ -723,15 +729,15 @@ export function createMenuAnalysisStream(
         console.error('[TransTaste] Stream error:', err);
         if (err instanceof Anthropic.APIError) {
           if (err.status === 429) {
-            emit('error', { error: 'network_error', reason: 'Rate limit exceeded. Please try again.' });
+            emit('error', { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again.', _debug: `status=429` });
           } else if (err.status === 401) {
-            emit('error', { error: 'network_error', reason: 'API authentication failed.' });
+            emit('error', { error: 'E_AUTH', reason: 'API authentication failed.', _debug: `status=401` });
           } else {
-            emit('error', { error: 'network_error', reason: `API error: ${err.message}` });
+            emit('error', { error: 'E_AI_ERROR', reason: `API error: ${err.message}`, _debug: `status=${err.status}` });
           }
         } else {
           emit('error', {
-            error: 'network_error',
+            error: 'E_UNKNOWN',
             reason: err instanceof Error ? err.message : 'Unknown error',
           });
         }

@@ -227,6 +227,11 @@ export default function DishCard({
         <span className="text-xs text-brown-medium bg-cream-dark px-2 py-0.5 rounded-full capitalize">
           {t(`categories.${dish.category}`)}
         </span>
+        {dish.estimated_calories && (
+          <span className="text-xs text-brown-medium/70 bg-cream-dark px-2 py-0.5 rounded-full">
+            ~{dish.estimated_calories} kcal
+          </span>
+        )}
       </div>
 
       {/* Allergens & dietary — Phase 1 data */}

@@ -20,7 +20,11 @@ interface MenuMeta {
 export default function LoadingScanPage() {
   const router = useRouter();
   const credits = useCredits();
+  const creditsRef = useRef(credits);
+  creditsRef.current = credits;
   const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [dishes, setDishes] = useState<DishLite[]>([]);
   const [menuMeta, setMenuMeta] = useState<MenuMeta | null>(null);
   const [factIndex, setFactIndex] = useState(0);
@@ -80,7 +84,7 @@ export default function LoadingScanPage() {
     }
 
     if (!input) {
-      sessionStorage.setItem("scanError", t("errors.noInput"));
+      sessionStorage.setItem("scanError", "E_NO_INPUT");
       navigateToResults();
       return;
     }
@@ -101,7 +105,7 @@ export default function LoadingScanPage() {
       }
 
       if (!canScan) {
-        sessionStorage.setItem("scanError", "no_credits");
+        sessionStorage.setItem("scanError", "E_NO_CREDITS");
         navigateToResults();
         return;
       }
@@ -124,10 +128,7 @@ export default function LoadingScanPage() {
     // 3-minute timeout
     const timeoutId = setTimeout(() => {
       abortController.abort();
-      sessionStorage.setItem(
-        "scanError",
-        t("errors.timeout")
-      );
+      sessionStorage.setItem("scanError", "E_TIMEOUT");
       navigateToResults();
     }, TIMEOUT_MS);
 
@@ -169,14 +170,14 @@ export default function LoadingScanPage() {
             } else if (eventType === "done") {
               // Deduct credit only on successful analysis
               if (!creditUsedRef.current) {
-                credits.useCredit();
+                creditsRef.current.useCredit();
                 creditUsedRef.current = true;
               }
               sessionStorage.setItem("scanResult", JSON.stringify(parsed));
               navigateToResults();
               return;
             } else if (eventType === "error") {
-              sessionStorage.setItem("scanError", parsed.reason || t("results.somethingWrong"));
+              sessionStorage.setItem("scanError", JSON.stringify({ error: parsed.error || 'E_UNKNOWN', reason: parsed.reason, _debug: parsed._debug }));
               navigateToResults();
               return;
             }
@@ -188,7 +189,7 @@ export default function LoadingScanPage() {
 
       // Stream ended without done/error event
       if (!navigatedRef.current) {
-        sessionStorage.setItem("scanError", t("errors.streamEnded"));
+        sessionStorage.setItem("scanError", "E_STREAM_END");
         navigateToResults();
       }
     };
@@ -232,7 +233,7 @@ export default function LoadingScanPage() {
           const result = await res.json();
           // Deduct credit only on successful analysis
           if (!creditUsedRef.current) {
-            credits.useCredit();
+            creditsRef.current.useCredit();
             creditUsedRef.current = true;
           }
           sessionStorage.setItem("scanResult", JSON.stringify(result));
@@ -240,8 +241,8 @@ export default function LoadingScanPage() {
         }
       } catch (err) {
         if (abortController.signal.aborted) return;
-        const message = err instanceof Error ? err.message : t("errors.unexpected");
-        sessionStorage.setItem("scanError", message);
+        const detail = err instanceof Error ? err.message : 'Unknown error';
+        sessionStorage.setItem("scanError", JSON.stringify({ error: 'E_FETCH_FAIL', reason: detail }));
         navigateToResults();
       } finally {
         clearTimeout(timeoutId);

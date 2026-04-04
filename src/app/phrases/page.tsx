@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases-data";
+import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases";
 import { ALLERGEN_INGREDIENT_NAMES } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
@@ -17,20 +17,36 @@ const LANGUAGES = [
   { code: "en", labelKey: "phrases.langEn" },
 ] as const;
 
-type CategoryId = (typeof PHRASE_CATEGORIES)[number]["id"];
+type CategoryId = (typeof PHRASE_CATEGORIES)[number]["id"] | "favorites";
 type LangCode = (typeof LANGUAGES)[number]["code"];
+
+const FAVORITES_KEY = "transtaste_favorite_phrases";
+
+function loadFavorites(): Set<string> {
+  try {
+    const raw = localStorage.getItem(FAVORITES_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveFavorites(favs: Set<string>) {
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favs)));
+}
 
 function PhraseCard({
   phrase,
   targetLang,
   userLang,
+  isFavorite,
+  onToggleFavorite,
 }: {
   phrase: Phrase;
   targetLang: LangCode;
   userLang: string;
+  isFavorite: boolean;
+  onToggleFavorite: (key: string) => void;
 }) {
   const { t } = useTranslation();
-  const [bookmarked, setBookmarked] = useState(false);
   const translation = phrase.translations[targetLang];
   const responses = phrase.expectedResponses?.[targetLang] ?? [];
 
@@ -83,15 +99,15 @@ function PhraseCard({
       {/* Bookmark */}
       <div className="flex justify-end mt-3">
         <button
-          onClick={() => setBookmarked(!bookmarked)}
+          onClick={() => onToggleFavorite(phrase.key)}
           className="text-brown-light hover:text-coral transition-colors"
-          aria-label={bookmarked ? t("phrases.removeBookmark") : t("phrases.bookmarkPhrase")}
+          aria-label={isFavorite ? t("phrases.removeBookmark") : t("phrases.bookmarkPhrase")}
         >
           <svg
             width="20"
             height="20"
             viewBox="0 0 24 24"
-            fill={bookmarked ? "currentColor" : "none"}
+            fill={isFavorite ? "currentColor" : "none"}
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
@@ -111,8 +127,9 @@ export default function PhrasesPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>("basic");
   const [userLang, setUserLang] = useState("en");
   const [allergenPreset, setAllergenPreset] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  // Read user settings from localStorage
+  // Read user settings + favorites from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("transtaste_user_settings");
@@ -124,11 +141,24 @@ export default function PhrasesPage() {
     } catch {
       // ignore
     }
+    setFavorites(loadFavorites());
   }, []);
+
+  const toggleFavorite = (key: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      saveFavorites(next);
+      return next;
+    });
+  };
 
   // Expand no_ingredient template with user's allergen presets
   const filteredPhrases = useMemo(() => {
-    const base = PHRASES.filter((p) => p.category === selectedCategory);
+    const base = selectedCategory === "favorites"
+      ? PHRASES.filter((p) => favorites.has(p.key))
+      : PHRASES.filter((p) => p.category === selectedCategory);
     const expanded: Phrase[] = [];
     for (const phrase of base) {
       if (phrase.key === "no_ingredient" && allergenPreset.length > 0) {
@@ -156,7 +186,7 @@ export default function PhrasesPage() {
       }
     }
     return expanded;
-  }, [selectedCategory, allergenPreset]);
+  }, [selectedCategory, allergenPreset, favorites]);
 
   return (
     <main className="min-h-screen bg-cream pb-28">
@@ -190,6 +220,19 @@ export default function PhrasesPage() {
       {/* Category tabs */}
       <div className="px-5 mb-4">
         <HorizontalScroll>
+          {favorites.size > 0 && (
+            <button
+              onClick={() => setSelectedCategory("favorites")}
+              className={`flex-shrink-0 snap-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                selectedCategory === "favorites"
+                  ? "bg-brown-dark text-white"
+                  : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
+              }`}
+            >
+              <span>⭐</span>
+              <span>{t("phrases.favorites")}</span>
+            </button>
+          )}
           {PHRASE_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
@@ -215,6 +258,8 @@ export default function PhrasesPage() {
             phrase={phrase}
             targetLang={selectedLanguage}
             userLang={userLang}
+            isFavorite={favorites.has(phrase.key)}
+            onToggleFavorite={toggleFavorite}
           />
         ))}
       </div>

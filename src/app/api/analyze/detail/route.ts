@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const rl = await checkRateLimit(`detail:${ip}`, 30, 3600);
     if (!rl.allowed) {
       return NextResponse.json(
-        { error: "rate_limited", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
+        { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
         { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.reset) } }
       );
     }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Mock mode — no key at all
     if (!apiKey) {
       return NextResponse.json(
-        { error: "network_error", reason: "No API key configured (mock mode)" },
+        { error: "E_AUTH", reason: "No API key configured (mock mode)" },
         { status: 422, headers: corsHeaders }
       );
     }
@@ -67,14 +67,14 @@ export async function POST(request: NextRequest) {
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: "network_error", reason: "Invalid JSON" },
+        { error: "E_BAD_REQUEST", reason: "Invalid JSON" },
         { status: 400, headers: corsHeaders }
       );
     }
 
     if (!body.input || !body.dishOriginal) {
       return NextResponse.json(
-        { error: "network_error", reason: "Missing input or dishOriginal" },
+        { error: "E_BAD_REQUEST", reason: "Missing input or dishOriginal" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     if ("error" in result) {
       return NextResponse.json(
-        { error: "ocr_failed", reason: result.error },
+        { error: "E_AI_ERROR", reason: result.error },
         { status: 422, headers: corsHeaders }
       );
     }
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("Detail API error:", err);
     return NextResponse.json(
-      { error: "network_error", reason: err instanceof Error ? err.message : "Internal error" },
+      { error: "E_UNKNOWN", reason: err instanceof Error ? err.message : "Internal error", _debug: `detail:POST` },
       { status: 500, headers: corsHeaders }
     );
   }
