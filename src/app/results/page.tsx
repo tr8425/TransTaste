@@ -32,8 +32,10 @@ function ResultsContent() {
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [showPaywall, setShowPaywall] = useState(false);
   const [showCombo, setShowCombo] = useState(false);
-  const { isPhase2Free } = useCredits();
+  const credits = useCredits();
+  const { isPhase2Free } = credits;
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [paymentBanner, setPaymentBanner] = useState<"success" | "cancelled" | null>(null);
   const comboRef = useRef<HTMLDivElement>(null);
   const [scanError, setScanError] = useState<{ code: string; reason: string; _debug?: string } | null>(null);
   const [menuInput, setMenuInput] = useState<StoredMenuInput | null>(null);
@@ -57,6 +59,31 @@ function ResultsContent() {
   // Phase 2: detail for selected dish
   const { detail, isLoading: isDetailLoading, error: detailError, retry: retryDetail } =
     useDishDetail(selectedDish, menuInput);
+
+  // Handle payment redirect (Stripe success/cancel)
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const plan = searchParams.get("plan");
+    if (payment === "success" && plan) {
+      if (plan === "pass_7d" || plan === "pass_30d") {
+        credits.purchasePass(plan === "pass_7d" ? "7d" : "30d");
+      } else if (plan === "credits_50") {
+        credits.purchaseCredits(50);
+      }
+      setIsUnlocked(true);
+      setPaymentBanner("success");
+      // Clear query params without reload
+      window.history.replaceState({}, "", "/results");
+      const timer = setTimeout(() => setPaymentBanner(null), 4000);
+      return () => clearTimeout(timer);
+    } else if (payment === "cancelled") {
+      setPaymentBanner("cancelled");
+      window.history.replaceState({}, "", "/results");
+      const timer = setTimeout(() => setPaymentBanner(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const errorStr = sessionStorage.getItem("scanError");
@@ -161,7 +188,32 @@ function ResultsContent() {
 
   const handleUnlock = () => setShowPaywall(true);
 
-  const handlePurchase = () => {
+  const handlePurchase = async (planId: string) => {
+    // Map UI plan IDs to Stripe product IDs
+    const stripeProductId =
+      planId === "7d" ? "pass_7d" :
+      planId === "30d" ? "pass_30d" :
+      planId;
+
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: stripeProductId }),
+      });
+
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) {
+          window.location.href = url;
+          return;
+        }
+      }
+    } catch {
+      // Stripe unavailable — fall through to local purchase
+    }
+
+    // Fallback: local unlock (dev/demo mode)
     setIsUnlocked(true);
     setShowPaywall(false);
   };
@@ -322,6 +374,14 @@ function ResultsContent() {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
+      {/* Payment banner */}
+      {paymentBanner && (
+        <div className={`fixed top-0 left-0 right-0 z-50 py-3 px-5 text-center text-sm font-semibold ${
+          paymentBanner === "success" ? "bg-green-500 text-white" : "bg-amber-500 text-white"
+        }`}>
+          {paymentBanner === "success" ? t("payment.success") : t("payment.cancelled")}
+        </div>
+      )}
       {/* Header */}
       <div className="px-5 pt-12 pb-3">
         <div className="flex items-center justify-between mb-1">

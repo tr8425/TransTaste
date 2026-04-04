@@ -15,35 +15,45 @@ const PRODUCTS: Record<string, { name: string; amount: number }> = {
 };
 
 export async function POST(req: Request) {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
-  }
-
   try {
-    const { productId, userId } = await req.json();
+    const { productId } = await req.json();
     const product = PRODUCTS[productId];
     if (!product) {
       return NextResponse.json({ error: 'Invalid product' }, { status: 400 });
     }
 
-    const stripe = getStripe()!;
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: { name: product.name },
-          unit_amount: product.amount,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${req.headers.get('origin')}/profile?payment=success`,
-      cancel_url: `${req.headers.get('origin')}/profile?payment=cancelled`,
-      metadata: { userId, productId },
-    });
+    const origin = req.headers.get('origin') || 'http://localhost:3000';
+    // Determine return page — use referer to return to the page that initiated checkout
+    const referer = req.headers.get('referer') || '';
+    const returnPage = referer.includes('/results') ? '/results' : '/profile';
+    const successUrl = `${origin}${returnPage}?payment=success&plan=${productId}`;
+    const cancelUrl = `${origin}${returnPage}?payment=cancelled`;
 
-    return NextResponse.json({ url: session.url });
+    // If Stripe key is configured, create real checkout session
+    const stripe = getStripe();
+    if (stripe) {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: { name: product.name },
+            unit_amount: product.amount,
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        metadata: { productId },
+      });
+
+      return NextResponse.json({ url: session.url });
+    }
+
+    // No Stripe key — redirect to success directly (dev/demo mode)
+    console.warn('[TransTaste] Stripe not configured — using demo checkout');
+    return NextResponse.json({ url: successUrl });
   } catch (err) {
     console.error('Stripe checkout error:', err);
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
