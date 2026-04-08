@@ -128,9 +128,10 @@ export default function TipCulturePage() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("menu_language");
-      if (stored) {
-        const countryCode = LANGUAGE_TO_COUNTRY[stored.toLowerCase()];
+      const raw = localStorage.getItem("transtaste_user_settings");
+      const menuLang = raw ? JSON.parse(raw).menu_language : null;
+      if (menuLang) {
+        const countryCode = LANGUAGE_TO_COUNTRY[menuLang.toLowerCase()];
         if (countryCode) {
           const country = COUNTRIES.find((c) => c.code === countryCode);
           if (country) {

@@ -1,7 +1,8 @@
 "use client";
 
 import { FlavorProfile } from "@/lib/types";
-import { FLAVOR_AXES, FLAVOR_LABELS } from "@/lib/constants";
+import { FLAVOR_AXES } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n";
 
 interface FlavorRadarProps {
   profile: FlavorProfile;
@@ -23,6 +24,7 @@ function polarToCartesian(
 }
 
 export default function FlavorRadar({ profile, size = 120 }: FlavorRadarProps) {
+  const { t } = useTranslation();
   const padding = 24;
   const svgSize = size + padding * 2;
   const cx = svgSize / 2;
@@ -51,7 +53,7 @@ export default function FlavorRadar({ profile, size = 120 }: FlavorRadarProps) {
   // Axis labels
   const labelPositions = axes.map((axis, i) => {
     const [x, y] = polarToCartesian(cx, cy, radius + 14, i, axes.length);
-    return { axis, x, y, label: FLAVOR_LABELS[axis] || axis };
+    return { axis, x, y, label: t(`flavor.${axis}`) };
   });
 
   return (
@@ -61,7 +63,7 @@ export default function FlavorRadar({ profile, size = 120 }: FlavorRadarProps) {
       viewBox={`0 0 ${svgSize} ${svgSize}`}
       role="img"
       aria-label={`Flavor profile: ${axes
-        .map((a) => `${FLAVOR_LABELS[a]} ${profile[a as keyof FlavorProfile]}`)
+        .map((a) => `${t(`flavor.${a}`)} ${profile[a as keyof FlavorProfile]}`)
         .join(", ")}`}
     >
       <title>Flavor Radar Chart</title>

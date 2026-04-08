@@ -1,6 +1,6 @@
 ---
 name: i18n-conventions
-description: TransTaste i18n 규칙. 키 네이밍 3단계, ko/en JSON 동기화, useTranslation 훅 사용법. i18n 작업 시 필수 참조.
+description: TransTaste i18n 규칙. 키 네이밍 2단계, ko/en JSON 동기화, useTranslation 훅 사용법. i18n 작업 시 필수 참조.
 ---
 
 # Skill: i18n Conventions
@@ -20,20 +20,20 @@ src/lib/i18n/
 
 - 지원 언어: `ko`, `en`
 - 사용자 언어 설정: `localStorage.transtaste_user_settings.output_language`
-- 훅: `const { t } = useTranslation()` → `t('section.subsection.key')`
+- 훅: `const { t } = useTranslation()` → `t('section.key')`
 - 점 표기법 중첩 키 지원
 
-## 키 네이밍 규칙 (3단계)
+## 키 네이밍 규칙 (2단계)
 
 ```
-[페이지/컴포넌트].[섹션].[항목]
+[섹션].[항목]
 
 예시:
-  home.hero.title          — 홈 페이지 히어로 타이틀
-  results.dish.translation  — 결과 페이지 디쉬 번역
-  common.button.cancel      — 공통 버튼
-  nav.tab.scan              — 네비게이션 탭
-  profile.settings.language — 프로필 설정 언어
+  home.heroTitle       — 홈 페이지 히어로 타이틀
+  results.title        — 결과 페이지 타이틀
+  common.cancel        — 공통 버튼
+  nav.scan             — 네비게이션 탭
+  profile.title        — 프로필 페이지 타이틀
 ```
 
 ## 필수 규칙

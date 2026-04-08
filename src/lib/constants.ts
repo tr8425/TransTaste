@@ -39,14 +39,6 @@ export const FLAVOR_AXES = [
   "rich",
 ] as const;
 
-export const FLAVOR_LABELS: Record<string, string> = {
-  umami: "Umami",
-  salty: "Salty",
-  sweet: "Sweet",
-  sour: "Sour",
-  spicy: "Spicy",
-  rich: "Rich",
-};
 
 export const PASS_OPTIONS = [
   {

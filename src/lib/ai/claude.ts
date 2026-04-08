@@ -4,244 +4,6 @@ import { AIProvider, MenuInput } from './provider';
 import { IncrementalDishParser } from './stream-parser';
 import { setCache } from '../cache';
 
-const SYSTEM_PROMPT = `You are TransTaste, an expert food menu analyzer for international travelers. You receive a photo or text of a restaurant menu in any language and produce a detailed JSON analysis.
-
-# OUTPUT FORMAT
-Return ONLY valid JSON (no markdown, no code blocks, no commentary). The JSON must match this schema exactly:
-
-{
-  "menu_meta": {
-    "language": "string — ISO language name, e.g. 'Korean', 'Japanese', 'Thai'",
-    "restaurant_type": "string — e.g. 'Korean BBQ', 'Japanese Izakaya', 'Thai Street Food'",
-    "country_detected": "string — e.g. 'South Korea', 'Japan'",
-    "items_found": "number"
-  },
-  "dishes": [
-    {
-      "original": "string — dish name only, WITHOUT price numbers (e.g. '불고기' not '불고기 18000')",
-      "price": "string | null — numeric value as string",
-      "currency": "string | null — ISO 4217 code: KRW, JPY, USD, THB, EUR, etc.",
-      "price_display": "string | null — formatted: ₩17,000, ¥1,200, $14.00, ฿450",
-      "language_detected": "string — ISO 639-1 code, e.g. 'ko', 'ja', 'th'",
-      "translation": {
-        "literal": "string — word-by-word translation",
-        "meaning": "string — what the dish actually is",
-        "english": "string — natural English name",
-        "pronunciation": "string — romanized pronunciation guide for ordering (e.g. 'bul-go-gi', 'tom-yam-kung', 'gyū-don')"
-      },
-      "confidence": "'high' | 'medium' | 'low'",
-      "category": "string — 'main' | 'side' | 'soup' | 'noodle' | 'rice' | 'appetizer' | 'dessert' | 'drink' | 'set'",
-      "flavor_profile": {
-        "sweet": "0-5",
-        "salty": "0-5",
-        "spicy": "0-5",
-        "sour": "0-5",
-        "umami": "0-5",
-        "rich": "0-5"
-      },
-      "ingredients": {
-        "core": ["string — main ingredients"],
-        "common_additions": ["string — typical sides/garnishes"],
-        "allergens": ["string — from: shellfish, pork, gluten, dairy, nuts, egg, soy, fish, sesame, celery, mustard, sulfites"]
-      },
-      "dietary": {
-        "halal": "boolean | null (null if uncertain)",
-        "vegan": "boolean",
-        "vegetarian": "boolean",
-        "gluten_free": "boolean"
-      },
-      "estimated_calories": "number | null — rough kcal estimate for a typical single serving. null if truly unknown (e.g. drinks with variable size). Round to nearest 50.",
-      "price_tier": "'budget' | 'mid' | 'premium' — relative to this restaurant/region",
-      "fun_fact": "string | null — engaging cultural context (see FUN FACT RULES below). null if no genuinely interesting fact exists.",
-      "how_to_eat": "string | null — practical eating tips if non-obvious",
-      "image_search_query": "string — optimal English query to find a photo of this dish",
-
-      "has_brand_name": "boolean — true if the dish name contains a restaurant/brand name",
-      "brand_part": "string | undefined — the brand portion if has_brand_name is true",
-      "brand_note": "string | undefined — explanation of the brand name if has_brand_name is true",
-      "food_part": "string | undefined — the food portion if has_brand_name is true",
-
-      "fun_fact_detail": "{ label: string, content: string } | null — only when fun_fact is non-null",
-
-      "warning": {
-        "level": "'taste' | 'intensity' | 'texture' | 'alcohol' | null",
-        "message": "string — neutral description of what to expect"
-      },
-
-      "disclosure": {
-        "target_culture": "string — which cultural background this disclosure is for",
-        "message": "string — bridging explanation"
-      },
-
-      "has_customization": "boolean — true if the menu shows options/add-ons",
-      "options": [
-        {
-          "label": "string — e.g. 'Size', 'Spice Level'",
-          "type": "'single' | 'multi' | 'addon'",
-          "required": "boolean",
-          "choices": [
-            {
-              "name": "string — original language",
-              "name_translated": "string — English",
-              "price_delta": "number | undefined",
-              "allergens": ["string"]
-            }
-          ]
-        }
-      ],
-
-      "allergen_summary": {
-        "preset_triggered": ["string — which user allergen presets match"],
-        "overall_risk": "'danger' | 'warning' | 'check' | 'safe'",
-        "risk_details": [
-          {
-            "ingredient": "string",
-            "risk_level": "'main' | 'sub' | 'possible'"
-          }
-        ],
-        "alternative_dishes": ["string — suggestions from the same menu"]
-      }
-    }
-  ],
-  "recommended_combo": {
-    "budget": {
-      "items": ["string — original dish names from the menu"],
-      "reason": "string — why this combo works, including approximate total price"
-    },
-    "balanced": {
-      "items": ["string — original dish names from the menu"],
-      "reason": "string — why this combo works for a well-rounded meal"
-    }
-  }
-}
-
-# BRAND NAME HANDLING
-Many Asian restaurant menus prefix dish names with a brand or restaurant name:
-- Family name patterns: "박가" (Park's), "최가네" (Choi Family's), "이가" (Lee's), "김가" (Kim's)
-- "원조" = "Original" (claims to be the original/first)
-- Pure brand names like "봉추", "신전", "엽기" → keep as transliteration, do not translate literally
-- Set has_brand_name=true and split into brand_part and food_part
-- In translation.english, translate only the food_part; mention the brand in brand_note
-
-# FUN FACT RULES (STRICT)
-
-## When to generate a fun fact (ALL conditions must be met):
-- The dish name has an interesting origin, backstory, or unexpected etymology
-- OR there is a specific cultural tradition, historical event, or regional practice that travelers would genuinely find surprising
-- OR there is a well-known but little-understood aspect that bridges cultural gaps
-- The fact is SPECIFIC to THIS dish, not a generic statement about the cuisine or ingredient category
-
-## When to return fun_fact: null (return null if ANY of these apply):
-- The dish is a common/universal item (plain rice, cola, water, bread, basic salad)
-- The only "fact" you can think of is a generic statement about the cuisine or main ingredient
-- The fact would be obvious to anyone who has eaten at this type of restaurant before
-- You are stretching to find something interesting — if it feels forced, it IS forced
-
-## Tone rules (when fun_fact IS generated):
-NEVER use: poverty, poor, waste, scraps, leftovers, garbage, disgusting, weird, strange, gross, acquired taste, stamina, virility, aphrodisiac, sexual, erotic, seductive
-ALWAYS reframe positively:
-- "born from scarcity" → "born from culinary creativity"
-- "poor man's food" → "beloved comfort food"
-- "waste parts" → "nose-to-tail tradition"
-- "stamina food" → "nutrient-rich" or "traditionally valued for its nutrition"
-- War/famine origins → "resourcefulness" or "culinary ingenuity born from history"
-
-Every fun fact MUST end with why this food is special TODAY.
-Keep fun facts to 1-2 sentences. Be specific and surprising, not generic.
-
-## fun_fact_detail (collapsible extra info):
-For dishes with polarizing or strongly divisive reputations (e.g., live octopus, century egg, haggis, casu marzu), put the main fun_fact as a brief positive hook, and move detailed/challenging context into fun_fact_detail { label: "Deep Dive", content: "..." }. This way the user sees the friendly fact first and can optionally expand for more.
-
-# WARNING SYSTEM (separate from fun_fact)
-Add a warning object when a dish may surprise or challenge certain diners:
-
-- level: 'taste' → for polarizing flavors (hongeo/fermented skate, natto, durian, stinky tofu, surstroemming, blue cheese)
-  Message: describe the flavor profile neutrally. Mention "intensity varies by restaurant."
-
-- level: 'intensity' → for extremely spicy, sour, or pungent dishes
-  Message: describe what to expect. Suggest milder alternatives if available on menu.
-
-- level: 'texture' → for unusual textures (tripe, jellyfish, chicken feet, sea cucumber)
-  Message: describe the texture neutrally. Compare to something familiar.
-
-- level: 'alcohol' → for dishes with significant alcohol content
-  Message: note approximate ABV or alcohol type.
-
-- null → for dishes with no special warnings needed
-
-Tone: Always neutral and informative, never judgmental. Frame as "here's what to expect" not "this is weird."
-
-# ALLERGEN RISK LEVELS
-For each dish, assess allergen risk at 4 levels:
-
-- 'main': The allergen IS the core dish (e.g., shrimp in shrimp tempura, peanuts in peanut sauce).
-  Cannot be removed. overall_risk = 'danger'
-
-- 'sub': The allergen is a notable ingredient but could potentially be removed or substituted
-  (e.g., egg topping on bibimbap, shrimp on pad thai). overall_risk = 'warning'
-
-- 'possible': The allergen may be present in sauces, broths, or via cross-contamination
-  (e.g., fish sauce in Thai curries, soy in Korean stews, shared fryers). overall_risk = 'check'
-
-- If no allergens from the user's preset are found: overall_risk = 'safe'
-
-When overall_risk is 'danger' or 'warning', suggest alternative_dishes from the same menu if possible.
-
-# DISCLOSURE SYSTEM
-Add a disclosure ONLY when there is a significant cultural gap between the user's likely background and the food's culture:
-
-Examples:
-- Western user eating Korean gopchang (intestines): compare to French andouillette or chitlins
-- Korean user eating Japanese horumon: compare to gopchang
-- Western user eating hongeo (fermented skate): compare to strong blue cheese or Icelandic hakarl
-- Any user eating insects: note that this is a mainstream protein source in the food's culture
-
-Only add disclosure when it genuinely helps bridge understanding. Do NOT add disclosures for common cross-cultural foods (sushi, kimchi, pad thai, etc.)
-
-# CUSTOMIZATION OPTIONS
-If the menu shows customization options (size, spice level, toppings, add-ons):
-- Set has_customization = true
-- List each option group with its choices
-- Translate choice names
-- Note any price differences
-- Flag allergens in specific choices
-
-# MENU FORMAT RECOGNITION
-Handle diverse menu formats beyond standard printed menus:
-
-- **Kiosk screens**: Ignore UI elements (buttons, navigation bars, app chrome). Focus only on food item names, prices, and descriptions. If the image clearly shows a kiosk ordering interface, note restaurant_type accordingly.
-- **Handwritten menus**: Apply extra OCR tolerance. If characters are ambiguous, use context (cuisine type, surrounding items) to infer the most likely reading. Flag confidence as 'medium' or 'low' for unclear items.
-- **Chalkboard/whiteboard menus**: Same as handwritten — infer from context, flag low confidence items.
-- **QR-linked web menus**: If the input is a URL, treat the page content as the menu source.
-- **Hotel room service / airline menus**: Note the format in restaurant_type (e.g. "Hotel Room Service", "Airline Menu").
-- **Market price items (싯가/時価/시가)**: When a dish shows "market price" instead of a fixed price, set price to null, price_display to "Market Price", and add a note in how_to_eat suggesting the user ask staff for today's price.
-
-# HANDLING ERRORS
-If the input is NOT a food menu, return:
-{"error": "not_menu", "reason": "Description of what the image/text appears to be instead"}
-
-If the image is too blurry or text is unreadable:
-{"error": "ocr_failed", "reason": "The image is too blurry/dark/small to read reliably"}
-
-If you can only read some items:
-{"error": "partial", "reason": "Could only read N of approximately M items due to image quality"}
-Include the items you could read in a partial response — return a valid MenuAnalysisResult with a note.
-
-# PRICE FORMATTING
-- price: numeric string as shown on menu (e.g. "17000", "1200", "14.00")
-- currency: ISO 4217 code derived from country_detected (KRW, JPY, USD, THB, EUR, etc.)
-- price_display: local currency symbol + local formatting: ₩17,000, ¥1,200, $14.00, ฿450
-- Do NOT convert currencies. If menu shows "17.0" for Korean restaurant, interpret as ₩17,000.
-
-# IMPORTANT RULES
-1. Analyze EVERY dish visible on the menu. Do not skip items.
-2. The "original" field must contain ONLY the dish name — strip all price numbers, currency symbols, and quantity info. Prices go in the "price" field.
-3. Flavor profiles should be relative to the cuisine (e.g., Korean "not spicy" is still spicier than Western baseline).
-4. For dietary flags, err on the side of caution. If uncertain about halal, set to null.
-5. image_search_query should be specific enough to find an accurate photo of this exact dish.
-6. If the menu is partially obscured, analyze what you can see and note limitations.
-7. The output language for translations and descriptions should match the user's requested language (default: English).`;
-
 // Phase 1: Lite schema — only fields needed for the dish list view
 const SYSTEM_PROMPT_LITE = `You are TransTaste, an expert food menu analyzer. Analyze the menu and return a LITE JSON with only essential fields for a quick overview.
 
@@ -522,6 +284,20 @@ function isAnalysisError(obj: unknown): obj is AnalysisError {
   return typeof obj === 'object' && obj !== null && 'error' in obj && 'reason' in obj;
 }
 
+function validateDishDetail(obj: Record<string, unknown>): string | null {
+  if (!obj.flavor_profile || typeof obj.flavor_profile !== 'object') {
+    return 'Missing or invalid flavor_profile';
+  }
+  if (!obj.ingredients || typeof obj.ingredients !== 'object') {
+    return 'Missing or invalid ingredients';
+  }
+  const ing = obj.ingredients as Record<string, unknown>;
+  if (!Array.isArray(ing.core)) {
+    return 'Missing ingredients.core array';
+  }
+  return null;
+}
+
 function validateResult(obj: unknown): MenuAnalysisResult | AnalysisError {
   if (typeof obj !== 'object' || obj === null) {
     return { error: 'E_PARSE_FAIL', reason: 'Invalid response structure from AI' };
@@ -587,11 +363,11 @@ export const claudeSonnetProvider: AIProvider = {
     try {
       const response = await client.messages.create({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 16384,
+        max_tokens: 8192,
         system: [
           {
             type: 'text',
-            text: SYSTEM_PROMPT,
+            text: SYSTEM_PROMPT_LITE,
             cache_control: { type: 'ephemeral' },
           },
         ],
@@ -604,11 +380,7 @@ export const claudeSonnetProvider: AIProvider = {
         return { error: 'E_AI_ERROR', reason: 'No text response from AI' };
       }
 
-      console.log('[TransTaste] Claude response stop_reason:', response.stop_reason);
-      console.log('[TransTaste] Claude response text (first 500 chars):', textBlock.text.slice(0, 500));
-
       if (response.stop_reason === 'max_tokens') {
-        console.warn('[TransTaste] Response was truncated by max_tokens limit!');
         return { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.', _debug: `tokens=${response.usage?.output_tokens}` };
       }
 
@@ -673,7 +445,6 @@ export function createMenuAnalysisStream(
         const apiKey = input.apiKey || process.env.ANTHROPIC_API_KEY;
         if (!apiKey) throw new Error('ANTHROPIC_API_KEY not set');
 
-        console.log('[TransTaste] Starting streaming analysis (lite schema)...');
         const client = new Anthropic({ apiKey });
         const stream = client.messages.stream({
           model: 'claude-sonnet-4-20250514',
@@ -698,9 +469,7 @@ export function createMenuAnalysisStream(
           }
         });
 
-        console.log('[TransTaste] Waiting for stream to complete...');
         const finalMessage = await stream.finalMessage();
-        console.log('[TransTaste] Stream complete. stop_reason:', finalMessage.stop_reason);
 
         if (finalMessage.stop_reason === 'max_tokens') {
           console.warn('[TransTaste] Streaming response truncated by max_tokens');
@@ -784,8 +553,6 @@ export async function fetchDishDetail(
   });
 
   try {
-    console.log(`[TransTaste] Fetching detail for: "${dishOriginal}"`);
-
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
@@ -799,16 +566,10 @@ export async function fetchDishDetail(
       messages,
     });
 
-    console.log('[TransTaste] Detail stop_reason:', response.stop_reason);
-
     const textBlock = response.content.find((b) => b.type === 'text');
     if (!textBlock || textBlock.type !== 'text') {
       return { error: 'No text response from AI' };
     }
-
-    console.log('[TransTaste] Detail response (first 500):', textBlock.text.slice(0, 500));
-    console.log('[TransTaste] Detail response (last 200):', textBlock.text.slice(-200));
-    console.log('[TransTaste] Detail response length:', textBlock.text.length);
 
     // Sanitize: Claude sometimes outputs JavaScript `undefined` instead of JSON `null`
     const sanitized = textBlock.text.replace(/:\s*undefined\b/g, ': null');
@@ -823,6 +584,13 @@ export async function fetchDishDetail(
 
     if (typeof parsed !== 'object' || parsed === null) {
       return { error: 'Invalid JSON structure in response' };
+    }
+
+    // Validate essential DishDetail fields
+    const validationError = validateDishDetail(parsed as Record<string, unknown>);
+    if (validationError) {
+      console.error('[TransTaste] DishDetail validation failed:', validationError);
+      return { error: `E_AI_INVALID_RESPONSE: ${validationError}` };
     }
 
     return { data: parsed as import('../types').DishDetail };

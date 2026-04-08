@@ -41,8 +41,12 @@ export default function TravelPage() {
   const [lastCountry] = useState(() => {
     if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem("menu_language");
-      return raw || null;
+      const stored = localStorage.getItem("transtaste_user_settings");
+      if (stored) {
+        const settings = JSON.parse(stored);
+        return settings.menu_language || null;
+      }
+      return null;
     } catch {
       return null;
     }
