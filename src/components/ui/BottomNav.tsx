@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
@@ -116,8 +117,22 @@ const TABS: Tab[] = [
 export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   if (HIDDEN_ROUTES.includes(pathname)) return null;
+
+  // SSR / pre-hydration: render the shell without labels so users never see
+  // the en-locked text flash before the client-side locale resolves.
+  if (!mounted) {
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex justify-center" aria-hidden>
+        <div className="w-full max-w-mobile bg-cream/95 backdrop-blur-md border-t border-brown-light/10 px-3 pb-6 pt-2">
+          <div className="flex items-center justify-around h-[52px]" />
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
