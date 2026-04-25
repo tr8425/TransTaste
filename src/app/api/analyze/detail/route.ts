@@ -82,9 +82,8 @@ export async function POST(request: NextRequest) {
     const inputType = (body.inputType || "image") as InputType;
 
     // Build cache keys
-    const cacheInput = inputType === "image" ? body.input.slice(0, 200) : body.input;
     const phase1Key = buildCacheKey({
-      input: cacheInput,
+      input: body.input,
       inputType,
       srcLang: "auto",
       tgtLang: body.outputLanguage || "en",

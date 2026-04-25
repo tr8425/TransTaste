@@ -179,11 +179,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Build cache key
-    const cacheInput = inputType === 'image'
-      ? body.input.slice(0, 200)
-      : body.input;
     const cacheKey = buildCacheKey({
-      input: cacheInput,
+      input: body.input,
       inputType,
       srcLang: 'auto',
       tgtLang: body.outputLanguage || 'en',
