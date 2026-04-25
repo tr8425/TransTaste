@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check:i18n && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

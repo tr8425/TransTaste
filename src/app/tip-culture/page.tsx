@@ -119,7 +119,7 @@ function dismissNoTipBanner() {
 export default function TipCulturePage() {
   const { t } = useTranslation();
   const [selectedCode, setSelectedCode] = useState("JP");
-  const [detectedCountry, setDetectedCountry] = useState<{ code: string; name: string; flag: string } | null>(null);
+  const [detectedCountry, setDetectedCountry] = useState<{ code: string; flag: string } | null>(null);
   const [noTipDismissed, setNoTipDismissed] = useState(true); // default true to avoid flash
 
   useEffect(() => {
@@ -135,7 +135,7 @@ export default function TipCulturePage() {
         if (countryCode) {
           const country = COUNTRIES.find((c) => c.code === countryCode);
           if (country) {
-            setDetectedCountry({ code: country.code, name: country.name, flag: country.flag });
+            setDetectedCountry({ code: country.code, flag: country.flag });
             setSelectedCode(country.code);
           }
         }
@@ -179,7 +179,7 @@ export default function TipCulturePage() {
         <h1 className="text-xl font-bold text-brown-dark">{t("tipCulture.title")}</h1>
         {detectedCountry && (
           <p className="text-xs text-brown-medium mt-1">
-            {t("tipCulture.basedOnScan", { flag: detectedCountry.flag, country: detectedCountry.name })}
+            {t("tipCulture.basedOnScan", { flag: detectedCountry.flag, country: t(`country.${detectedCountry.code}.name`) })}
           </p>
         )}
       </div>
@@ -198,7 +198,7 @@ export default function TipCulturePage() {
               }`}
             >
               <span className="text-sm">{country.flag}</span>
-              {country.name}
+              {t(`country.${country.code}.name`)}
             </button>
           ))}
         </HorizontalScroll>
@@ -227,7 +227,7 @@ export default function TipCulturePage() {
           <div className="mb-2">
             <TipBadge tip={selected.tip} t={t} />
           </div>
-          <p className="text-xs text-brown-medium leading-relaxed">{selected.tip.note}</p>
+          <p className="text-xs text-brown-medium leading-relaxed">{t(`country.${selected.code}.tipNote`)}</p>
 
           {selected.tip.type !== "none" && <TipCalculator tip={selected.tip} t={t} />}
 
@@ -238,7 +238,7 @@ export default function TipCulturePage() {
                 {t("tipCulture.noTipBannerTitle")}
               </p>
               <p className="text-xs text-brown-medium leading-relaxed mb-2">
-                {t("tipCulture.noTipBannerDesc", { country: selected.name })}
+                {t("tipCulture.noTipBannerDesc", { country: t(`country.${selected.code}.name`) })}
               </p>
               <button
                 onClick={() => {
@@ -283,7 +283,7 @@ export default function TipCulturePage() {
             <div className="flex items-start gap-2">
               <span className="text-sm flex-shrink-0 mt-0.5">{utensilEmoji(selected.dining.primary_utensil)}</span>
               <p className="text-xs text-brown-medium leading-relaxed">
-                {selected.dining.utensil_tip}
+                {t(`country.${selected.code}.utensilTip`)}
               </p>
             </div>
 
@@ -300,7 +300,7 @@ export default function TipCulturePage() {
               <div className="flex items-start gap-2">
                 <span className="text-sm flex-shrink-0 mt-0.5">{"\u{1F4A1}"}</span>
                 <p className="text-xs text-brown-medium leading-relaxed italic">
-                  {selected.dining.time_note}
+                  {t(`country.${selected.code}.timeNote`)}
                 </p>
               </div>
             )}
@@ -310,10 +310,10 @@ export default function TipCulturePage() {
               <div className="mt-2 pt-3 border-t border-brown-light/10">
                 <p className="text-xs font-semibold text-brown-dark mb-2">{t("tipCulture.goodToKnow")}</p>
                 <ul className="space-y-1.5">
-                  {selected.culture.notes.map((note, i) => (
+                  {selected.culture.notes.map((_, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="text-[10px] text-coral mt-1 flex-shrink-0">{"\u25CF"}</span>
-                      <span className="text-xs text-brown-medium leading-relaxed">{note}</span>
+                      <span className="text-xs text-brown-medium leading-relaxed">{t(`country.${selected.code}.notes.${i}`)}</span>
                     </li>
                   ))}
                 </ul>

@@ -225,10 +225,10 @@ export default function HomePage() {
         </h3>
         <div className="grid grid-cols-2 gap-2.5">
           {[
-            { emoji: "🍜", name: "Pho Bo", origin: "Vietnamese" },
-            { emoji: "🍣", name: "Omakase", origin: "Japanese" },
-            { emoji: "🥘", name: "Tom Yum", origin: "Thai" },
-            { emoji: "🥟", name: "Xiao Long Bao", origin: "Chinese" },
+            { emoji: "🍜", name: "Pho Bo", originKey: "vietnamese" },
+            { emoji: "🍣", name: "Omakase", originKey: "japanese" },
+            { emoji: "🥘", name: "Tom Yum", originKey: "thai" },
+            { emoji: "🥟", name: "Xiao Long Bao", originKey: "chinese" },
           ].map((dish) => (
             <button
               key={dish.name}
@@ -244,7 +244,7 @@ export default function HomePage() {
                 <p className="text-sm font-medium text-brown-dark leading-tight">
                   {dish.name}
                 </p>
-                <p className="text-[11px] text-brown-medium">{dish.origin}</p>
+                <p className="text-[11px] text-brown-medium">{t(`home.cuisine.${dish.originKey}`)}</p>
               </div>
             </button>
           ))}

@@ -262,7 +262,7 @@ export default function LoadingScanPage() {
     dishes.length > 0
       ? t("loading.found", { count: dishes.length })
       : menuMeta
-        ? t("loading.scanning", { type: menuMeta.restaurant_type || "menu" })
+        ? t("loading.scanning", { type: menuMeta.restaurant_type || t("loading.menuFallback") })
         : t("loading.analyzing");
 
   const subtitleText = menuMeta
@@ -327,7 +327,7 @@ export default function LoadingScanPage() {
                         dish.allergen_risk === "warning" ? "bg-amber-500 text-white" :
                         "bg-amber-500/20 text-amber-700"
                       }`}>
-                        {dish.allergen_risk}
+                        {t(`risk.${dish.allergen_risk}`)}
                       </span>
                     )}
                   </div>

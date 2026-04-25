@@ -24,7 +24,7 @@ export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
         >
           <path d="M20 6L9 17l-5-5" />
         </svg>
-        Trip Pass
+        {t("common.tripPassBadge")}
       </span>
     );
   }

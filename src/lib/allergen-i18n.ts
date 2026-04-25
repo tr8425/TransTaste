@@ -239,20 +239,23 @@ export const TOTAL_LABELS: Record<string, string> = {
   ko: "합계",
 };
 
-/** Simple tip culture by country code */
-export const TIP_CULTURE: Record<string, { percent: number; note: string }> = {
-  JP: { percent: 0, note: "No tip (Japan)" },
-  KR: { percent: 0, note: "No tip (Korea)" },
-  CN: { percent: 0, note: "No tip (China)" },
-  TH: { percent: 0, note: "No tip (Thailand)" },
-  VN: { percent: 0, note: "No tip (Vietnam)" },
-  US: { percent: 18, note: "Tip 18%" },
-  CA: { percent: 15, note: "Tip 15%" },
-  GB: { percent: 10, note: "Tip 10%" },
-  FR: { percent: 0, note: "Service included (France)" },
-  IT: { percent: 0, note: "Coperto included (Italy)" },
-  DE: { percent: 10, note: "Tip 10%" },
-  ES: { percent: 0, note: "No tip expected (Spain)" },
-  AU: { percent: 0, note: "No tip (Australia)" },
-  MX: { percent: 15, note: "Tip 15%" },
+/**
+ * Simple tip culture by country code.
+ * `noteKey` resolves to `tipCulture.tipNote.<key>` in i18n JSON.
+ */
+export const TIP_CULTURE: Record<string, { percent: number; noteKey: string }> = {
+  JP: { percent: 0, noteKey: "noTipJP" },
+  KR: { percent: 0, noteKey: "noTipKR" },
+  CN: { percent: 0, noteKey: "noTipCN" },
+  TH: { percent: 0, noteKey: "noTipTH" },
+  VN: { percent: 0, noteKey: "noTipVN" },
+  US: { percent: 18, noteKey: "tip18" },
+  CA: { percent: 15, noteKey: "tip15" },
+  GB: { percent: 10, noteKey: "tip10" },
+  FR: { percent: 0, noteKey: "serviceIncludedFR" },
+  IT: { percent: 0, noteKey: "copertoIT" },
+  DE: { percent: 10, noteKey: "tip10" },
+  ES: { percent: 0, noteKey: "noTipES" },
+  AU: { percent: 0, noteKey: "noTipAU" },
+  MX: { percent: 15, noteKey: "tip15" },
 };

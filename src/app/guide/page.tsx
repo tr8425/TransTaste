@@ -30,7 +30,7 @@ export default function GuideIndexPage() {
               className="bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors text-center"
             >
               <span className="text-2xl block mb-1">{country.flag}</span>
-              <p className="text-sm font-semibold text-brown-dark">{country.name}</p>
+              <p className="text-sm font-semibold text-brown-dark">{t(`country.${country.code}.name`)}</p>
               <p className="text-[10px] text-brown-medium mt-0.5">
                 {country.tip.type === "none"
                   ? t("tipCulture.noTip")

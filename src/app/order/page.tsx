@@ -200,7 +200,7 @@ export default function OrderPage() {
                       updateQuantity(item.dish_hash, item.quantity - 1)
                     }
                     className="w-8 h-8 flex items-center justify-center text-brown-medium hover:text-brown-dark transition-colors"
-                    aria-label="Decrease quantity"
+                    aria-label={t("common.aria.decreaseQuantity")}
                   >
                     <svg
                       width="14"
@@ -221,7 +221,7 @@ export default function OrderPage() {
                       updateQuantity(item.dish_hash, item.quantity + 1)
                     }
                     className="w-8 h-8 flex items-center justify-center text-brown-medium hover:text-brown-dark transition-colors"
-                    aria-label="Increase quantity"
+                    aria-label={t("common.aria.increaseQuantity")}
                   >
                     <svg
                       width="14"
@@ -240,7 +240,7 @@ export default function OrderPage() {
                 <button
                   onClick={() => removeItem(item.dish_hash)}
                   className="w-8 h-8 flex items-center justify-center text-brown-medium/40 hover:text-danger transition-colors ml-1"
-                  aria-label="Remove item"
+                  aria-label={t("common.aria.removeItem")}
                 >
                   <svg
                     width="16"
@@ -292,7 +292,7 @@ export default function OrderPage() {
 
         {tipInfo && (
           <div className="flex justify-between text-sm text-brown-medium mb-2">
-            <span>{tipInfo.note}</span>
+            <span>{t(`tipCulture.tipNote.${tipInfo.noteKey}`)}</span>
             <span>
               {tipAmount > 0
                 ? formatPrice(tipAmount, currency)

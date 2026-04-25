@@ -14,17 +14,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   );
   if (!country) return {};
 
+  const countryName = t(`country.${country.code}.name`);
+  const tipNote = t(`country.${country.code}.tipNote`);
   const tipText =
     country.tip.type === "none"
       ? "Tipping is not customary"
       : `Tip ${country.tip.range_min}-${country.tip.range_max}%`;
 
   return {
-    title: `${country.name} Restaurant Guide — Tipping, Etiquette & Dining Tips`,
-    description: `Dining guide for ${country.name}: ${tipText}. ${country.tip.note} Plus dining etiquette, meal times, and essential restaurant phrases.`,
+    title: `${countryName} Restaurant Guide — Tipping, Etiquette & Dining Tips`,
+    description: `Dining guide for ${countryName}: ${tipText}. ${tipNote} Plus dining etiquette, meal times, and essential restaurant phrases.`,
     openGraph: {
-      title: `${country.name} Dining Guide — TransTaste`,
-      description: `Everything you need to know about eating at restaurants in ${country.name}.`,
+      title: `${countryName} Dining Guide — TransTaste`,
+      description: `Everything you need to know about eating at restaurants in ${countryName}.`,
     },
   };
 }
@@ -48,12 +50,12 @@ export default function CountryGuidePage({ params }: Props) {
           <span className="mx-1">/</span>
           <Link href="/guide" className="hover:text-coral">{t("guide.breadcrumb")}</Link>
           <span className="mx-1">/</span>
-          <span className="text-brown-dark">{country.name}</span>
+          <span className="text-brown-dark">{t(`country.${country.code}.name`)}</span>
         </nav>
 
         {/* Header */}
         <h1 className="text-3xl font-bold text-brown-dark mb-2">
-          {country.flag} {t("guide.restaurantGuide", { country: country.name })}
+          {country.flag} {t("guide.restaurantGuide", { country: t(`country.${country.code}.name`) })}
         </h1>
         <p className="text-sm text-brown-medium mb-8">
           {t("guide.guideSubtitle")}
@@ -62,7 +64,7 @@ export default function CountryGuidePage({ params }: Props) {
         {/* Tipping */}
         <section className="bg-cream-dark rounded-xl p-4 mb-4">
           <h2 className="text-base font-semibold text-brown-dark mb-2">{t("tipCulture.tipping")}</h2>
-          <p className="text-sm text-brown-dark leading-relaxed">{country.tip.note}</p>
+          <p className="text-sm text-brown-dark leading-relaxed">{t(`country.${country.code}.tipNote`)}</p>
           {country.tip.type !== "none" && (
             <p className="text-sm text-coral font-medium mt-2">
               {t("guide.recommended", { min: country.tip.range_min, max: country.tip.range_max })}
@@ -98,12 +100,12 @@ export default function CountryGuidePage({ params }: Props) {
         {/* Dining Etiquette */}
         <section className="bg-cream-dark rounded-xl p-4 mb-4">
           <h2 className="text-base font-semibold text-brown-dark mb-2">{t("tipCulture.diningEtiquette")}</h2>
-          <p className="text-sm text-brown-dark mb-2">{country.dining.utensil_tip}</p>
+          <p className="text-sm text-brown-dark mb-2">{t(`country.${country.code}.utensilTip`)}</p>
           <p className="text-sm text-brown-medium">
             {t("guide.lunch")}: {country.dining.lunch_hours} · {t("guide.dinner")}: {country.dining.dinner_hours}
           </p>
           {country.dining.time_note && (
-            <p className="text-sm text-brown-medium italic mt-1">{country.dining.time_note}</p>
+            <p className="text-sm text-brown-medium italic mt-1">{t(`country.${country.code}.timeNote`)}</p>
           )}
         </section>
 
@@ -112,10 +114,10 @@ export default function CountryGuidePage({ params }: Props) {
           <section className="bg-cream-dark rounded-xl p-4 mb-6">
             <h2 className="text-base font-semibold text-brown-dark mb-2">{t("tipCulture.goodToKnow")}</h2>
             <ul className="space-y-2">
-              {country.culture.notes.map((note, i) => (
+              {country.culture.notes.map((_, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-brown-dark">
                   <span className="text-coral text-xs mt-1 flex-shrink-0">●</span>
-                  {note}
+                  {t(`country.${country.code}.notes.${i}`)}
                 </li>
               ))}
             </ul>
@@ -125,7 +127,7 @@ export default function CountryGuidePage({ params }: Props) {
         {/* CTA */}
         <section className="bg-coral/5 rounded-xl p-4 border border-coral/20 text-center">
           <p className="text-sm text-brown-dark mb-3">
-            {t("guide.visitCta", { country: country.name })}
+            {t("guide.visitCta", { country: t(`country.${country.code}.name`) })}
           </p>
           <Link
             href="/"

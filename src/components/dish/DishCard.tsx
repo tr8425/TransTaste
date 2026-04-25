@@ -229,7 +229,7 @@ export default function DishCard({
         </span>
         {dish.estimated_calories && (
           <span className="text-xs text-brown-medium/70 bg-cream-dark px-2 py-0.5 rounded-full">
-            ~{dish.estimated_calories} kcal
+            {t("dish.calorieEstimate", { kcal: dish.estimated_calories })}
           </span>
         )}
       </div>
@@ -367,7 +367,11 @@ export default function DishCard({
                     {t("dishCard.ingredients")}
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
-                    {["Main ingredient", "Seasoning", "Spice"].map((name) => (
+                    {[
+                      t("dishCard.placeholderMain"),
+                      t("dishCard.placeholderSeasoning"),
+                      t("dishCard.placeholderSpice"),
+                    ].map((name) => (
                       <IngredientChip key={name} name={name} isAllergen={false} />
                     ))}
                   </div>
