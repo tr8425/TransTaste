@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CreditState } from "@/lib/types";
 
 const STORAGE_KEY = "transtaste_credits";
@@ -9,24 +9,52 @@ const DEFAULT_STATE: CreditState = {
   hasPass: false,
 };
 
+/** Demote an expired pass. Returns the cleaned state and whether anything changed. */
+function reconcileExpiry(s: CreditState): { state: CreditState; changed: boolean } {
+  if (!s.hasPass || !s.passExpiresAt) return { state: s, changed: false };
+  if (new Date(s.passExpiresAt).getTime() > Date.now()) return { state: s, changed: false };
+  // Pass expired — clear pass fields, keep remaining credits intact
+  const cleaned: CreditState = { ...s, hasPass: false };
+  delete cleaned.passType;
+  delete cleaned.passExpiresAt;
+  return { state: cleaned, changed: true };
+}
+
 export function useCredits() {
   const [state, setState] = useState<CreditState>(DEFAULT_STATE);
   const [freeEvent, setFreeEvent] = useState(false);
 
-  useEffect(() => {
+  const loadAndReconcile = useCallback(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setState(JSON.parse(stored));
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as CreditState;
+      const { state: next, changed } = reconcileExpiry(parsed);
+      setState(next);
+      if (changed) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
       }
     } catch {
       // Ignore parse errors
     }
+  }, []);
+
+  useEffect(() => {
+    loadAndReconcile();
     fetch("/api/event-status")
       .then((r) => r.json())
       .then((d) => { if (d.active) setFreeEvent(true); })
       .catch(() => {});
-  }, []);
+
+    // Re-check on tab focus + every 5 min while tab is open
+    const onVisibility = () => { if (!document.hidden) loadAndReconcile(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    const interval = setInterval(loadAndReconcile, 5 * 60 * 1000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(interval);
+    };
+  }, [loadAndReconcile]);
 
   const save = (next: CreditState) => {
     setState(next);
