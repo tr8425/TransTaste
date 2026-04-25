@@ -29,7 +29,14 @@ export function useDishDetail(
   const [retryCount, setRetryCount] = useState(0);
 
   const fetchDetail = useCallback(async () => {
-    if (!dish || !menuInput) return;
+    if (!dish) return;
+    if (!menuInput) {
+      // sessionStorage was wiped (e.g. tab restored from cache without scan context)
+      setIsLoading(false);
+      setDetail(null);
+      setError("E_NO_MENU_INPUT");
+      return;
+    }
 
     const cacheKey = dish.original;
 

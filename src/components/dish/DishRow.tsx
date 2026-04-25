@@ -75,7 +75,7 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
             )}
             {dish.estimated_calories && (
               <span className="text-[10px] text-brown-medium/50">
-                ~{dish.estimated_calories} kcal
+                {t("dish.calorieEstimate", { kcal: dish.estimated_calories })}
               </span>
             )}
           </div>

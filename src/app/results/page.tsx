@@ -157,10 +157,18 @@ function ResultsContent() {
           const prev = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
           const merged = [...newEntries, ...prev].slice(0, 20);
           localStorage.setItem("transtaste_scan_history", JSON.stringify(merged));
+
+          // Stamp URL with resultKey so revisits restore from cache
+          if (!searchParams.get("id")) {
+            window.history.replaceState({}, "", `/results?id=${resultKey}`);
+          }
         } catch { /* ignore */ }
       } catch {
         setScanError({ code: 'E_PARSE_FAIL', reason: 'Failed to parse scan results.' });
       }
+    } else {
+      // No fresh result, no cached id, no error — likely a stale tab revisit
+      setScanError({ code: 'E_NO_INPUT', reason: 'No scan data available.' });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only: parse sessionStorage once
   }, []);

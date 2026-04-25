@@ -110,7 +110,7 @@ export default function ProfilePage() {
 function ProfileContent() {
   const credits = useCredits();
   const searchParams = useSearchParams();
-  const { t, setLocale } = useTranslation();
+  const { t, locale, setLocale } = useTranslation();
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [dislikedInput, setDislikedInput] = useState("");
@@ -208,9 +208,10 @@ function ProfileContent() {
     setPaywallOpen(false);
   };
 
-  // Format pass expiry
+  // Format pass expiry — locale-aware
+  const dateLocale = locale === "ko" ? "ko-KR" : "en-US";
   const passExpiry = credits.passExpiresAt
-    ? new Date(credits.passExpiresAt).toLocaleDateString("en-US", {
+    ? new Date(credits.passExpiresAt).toLocaleDateString(dateLocale, {
         month: "short",
         day: "numeric",
       })
