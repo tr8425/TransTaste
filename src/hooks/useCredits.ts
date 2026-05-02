@@ -46,12 +46,21 @@ export function useCredits() {
       .then((d) => { if (d.active) setFreeEvent(true); })
       .catch(() => {});
 
-    // Re-check on tab focus + every 5 min while tab is open
+    // Re-check on every signal that the tab might be returning to active use
+    // or that another tab/page mutated localStorage.
     const onVisibility = () => { if (!document.hidden) loadAndReconcile(); };
+    const onStorage = (e: StorageEvent) => { if (e.key === STORAGE_KEY) loadAndReconcile(); };
+    const onPageShow = () => loadAndReconcile();
     document.addEventListener("visibilitychange", onVisibility);
-    const interval = setInterval(loadAndReconcile, 5 * 60 * 1000);
+    window.addEventListener("focus", loadAndReconcile);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("storage", onStorage);
+    const interval = setInterval(loadAndReconcile, 60 * 1000);
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", loadAndReconcile);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("storage", onStorage);
       clearInterval(interval);
     };
   }, [loadAndReconcile]);
