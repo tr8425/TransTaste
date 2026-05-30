@@ -1,12 +1,34 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { DishLite } from "@/lib/types";
 import { FUN_FACTS_LOADING_COUNT } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
 import { useCredits } from "@/hooks/useCredits";
 import { useTranslation } from "@/lib/i18n";
+
+// Indices into funFacts.0..9 that are thematically relevant to each language.
+// "6" (hottest chili in the world) is generic and rotates in everywhere.
+const FACTS_BY_LANG: Record<string, number[]> = {
+  ja: [0, 4, 9, 6],
+  ko: [2, 6],
+  zh: [3, 7, 6],
+  th: [1, 5, 6],
+  vi: [8, 6],
+  it: [1, 6],
+};
+
+function getFactPool(language: string | undefined): number[] {
+  const lang = (language || "").toLowerCase();
+  if (lang.includes("japan")) return FACTS_BY_LANG.ja;
+  if (lang.includes("korea")) return FACTS_BY_LANG.ko;
+  if (lang.includes("chinese") || lang.includes("mandarin") || lang.includes("cantonese")) return FACTS_BY_LANG.zh;
+  if (lang.includes("thai")) return FACTS_BY_LANG.th;
+  if (lang.includes("vietnam")) return FACTS_BY_LANG.vi;
+  if (lang.includes("italian")) return FACTS_BY_LANG.it;
+  return Array.from({ length: FUN_FACTS_LOADING_COUNT }, (_, i) => i);
+}
 
 const FOOD_EMOJIS = ["🍜", "🍣", "🥘", "🍛", "🍲", "🥟", "🍝", "🌮"];
 const TIMEOUT_MS = 180_000; // 3 minutes
@@ -34,9 +56,14 @@ export default function LoadingScanPage() {
   const startedRef = useRef(false);
   const creditUsedRef = useRef(false);
 
+  // Pool of fun-fact indices that match the detected menu language.
+  // Re-derives whenever menuMeta arrives so the rotation switches off
+  // generic facts as soon as we know the cuisine.
+  const factPool = useMemo(() => getFactPool(menuMeta?.language), [menuMeta?.language]);
+
   useEffect(() => {
-    setFactIndex(Math.floor(Math.random() * FUN_FACTS_LOADING_COUNT));
-  }, []);
+    setFactIndex(factPool[Math.floor(Math.random() * factPool.length)]);
+  }, [factPool]);
 
   // Cycle emoji
   useEffect(() => {
@@ -46,13 +73,17 @@ export default function LoadingScanPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Cycle fun facts every 8s
+  // Cycle fun facts every 8s, staying within the language-relevant pool
   useEffect(() => {
     const timer = setInterval(() => {
-      setFactIndex((prev) => (prev + 1) % FUN_FACTS_LOADING_COUNT);
+      setFactIndex((prev) => {
+        const currentIdx = factPool.indexOf(prev);
+        const nextIdx = currentIdx === -1 ? 0 : (currentIdx + 1) % factPool.length;
+        return factPool[nextIdx];
+      });
     }, 8000);
     return () => clearInterval(timer);
-  }, []);
+  }, [factPool]);
 
   const navigateToResults = useCallback(() => {
     if (navigatedRef.current) return;

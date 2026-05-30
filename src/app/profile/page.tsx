@@ -636,6 +636,10 @@ function ProfileContent() {
             {t("common.version")}
           </p>
           <div className="flex items-center justify-center gap-3 text-xs text-brown-medium/50">
+            <Link href="/faq" className="hover:text-brown-medium transition-colors underline">
+              {t("faq.title")}
+            </Link>
+            <span>/</span>
             <Link href="/terms" className="hover:text-brown-medium transition-colors underline">
               {t("profile.terms")}
             </Link>

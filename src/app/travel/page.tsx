@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
@@ -46,6 +46,8 @@ const QUICK_PHRASES = [
   { key: "travel.quickAllergy", emoji: "\u{26A0}\uFE0F" },
 ];
 
+const TIPS_PER_GROUP = 4;
+
 export default function TravelPage() {
   const { t } = useTranslation();
   const [lastCountry] = useState(() => {
@@ -61,6 +63,15 @@ export default function TravelPage() {
       return null;
     }
   });
+  // Rotate which tip we show so revisits surface a different one each time.
+  const [tipIndex, setTipIndex] = useState(0);
+  useEffect(() => {
+    setTipIndex(Math.floor(Math.random() * TIPS_PER_GROUP));
+  }, []);
+  const tipGroup =
+    lastCountry === "ja" || lastCountry === "ko" || lastCountry === "th"
+      ? lastCountry
+      : "default";
 
   return (
     <main className="min-h-screen bg-cream pb-28">
@@ -159,13 +170,7 @@ export default function TravelPage() {
             <div>
               <p className="text-xs font-semibold text-amber-brand mb-1">{t("travel.travelTip")}</p>
               <p className="text-xs text-brown-medium leading-relaxed">
-                {lastCountry === "ja"
-                  ? t("travel.tipJa")
-                  : lastCountry === "ko"
-                  ? t("travel.tipKo")
-                  : lastCountry === "th"
-                  ? t("travel.tipTh")
-                  : t("travel.tipDefault")}
+                {t(`travel.tips.${tipGroup}.${tipIndex}`)}
               </p>
             </div>
           </div>

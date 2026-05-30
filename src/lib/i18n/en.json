@@ -166,7 +166,33 @@
     "tipJa": "In Japan, say \"itadakimasu\" before eating — it shows gratitude for the meal.",
     "tipKo": "In Korea, wait for the eldest person to start eating before you begin.",
     "tipTh": "In Thailand, use a spoon for rice dishes and a fork to push food onto the spoon.",
-    "tipDefault": "Take a photo of your hotel's address in the local language — it helps taxi drivers get you home."
+    "tipDefault": "Take a photo of your hotel's address in the local language — it helps taxi drivers get you home.",
+    "tips": {
+      "ja": {
+        "0": "Say \"itadakimasu\" before eating — it shows gratitude for the meal.",
+        "1": "Slurping noodles is polite — it shows you're enjoying the meal.",
+        "2": "Tipping is uncommon in Japan; excellent service is simply the standard.",
+        "3": "Many izakaya add an otoshi (small appetizer + cover charge) automatically — it isn't an error."
+      },
+      "ko": {
+        "0": "Wait for the eldest person to start eating before you begin.",
+        "1": "Pour drinks for others, never for yourself — use both hands when serving elders.",
+        "2": "Banchan (side dishes) are free and refillable — just ask the server.",
+        "3": "Water and utensils are often self-service near the entrance."
+      },
+      "th": {
+        "0": "Use a spoon for rice dishes and a fork to push food onto the spoon.",
+        "1": "\"Mai phet\" means \"not spicy\" — useful when ordering.",
+        "2": "Busy street stalls usually mean fresh, safe food — that's the local signal.",
+        "3": "Dishes come out as they're ready, not all at once — that's intentional."
+      },
+      "default": {
+        "0": "Take a photo of your hotel's address in the local language — it helps taxi drivers get you home.",
+        "1": "Save offline maps before you travel — they work without data and save battery.",
+        "2": "Learn \"please\" and \"thank you\" in the local language — small effort, big effect.",
+        "3": "Carry small bills and coins — many street vendors can't break large notes."
+      }
+    }
   },
 
   "phrases": {
@@ -984,5 +1010,11 @@
     "termsTitle": "Terms of Service",
     "linkToTerms": "Terms of Service →",
     "linkToPrivacy": "Privacy Policy →"
+  },
+
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Quick answers about pricing, allergens, supported languages, and more.",
+    "link": "FAQ →"
   }
 }
