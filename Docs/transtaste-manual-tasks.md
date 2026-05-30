@@ -1,6 +1,10 @@
 # TransTaste — 사람이 직접 해야 하는 작업 목록
-> 최초 작성: 2026-03-27 | 최종 수정: 2026-04-03
+> 최초 작성: 2026-03-27 | 최종 수정: 2026-05-31 (세션 9 검증 반영)
 > QA v2·v3 결과 및 기능 명세 v2 기준으로 상태 갱신
+>
+> **2026-05-31 갱신:** 세션 9에서 Playwright MCP 브라우저 검증으로 다수 프론트엔드 P0/P1/P2 항목
+> 완료 확인 (모바일 390×844). 남은 미완료는 대부분 인프라(Supabase Auth·Stripe) / 콘텐츠 의존.
+> 상세: `Docs/handoff-2026-05-30-session9.md`
 
 ---
 
@@ -40,13 +44,13 @@
 | 1-5 | ✅ | 알러지 4단계 감지 | QA API 연동 후 확인 |
 | 1-6 | ✅ | 식이 신념 감지 | halal·vegan·vegetarian·gluten_free 동작 확인 |
 | 1-7 | ✅ | 페이월 모달 | QA API 연동 후 확인 |
-| 1-8 | 🔴 ❌ | **output_language 프롬프트 전달** | QA v3 G: ko 설정에도 fun_fact·재료·how_to_eat 영어 고정. 프롬프트 최상단에 언어 지시 추가 필요 |
-| 1-9 | 🔴 ❌ | **스캔/히스토리 단위 정규화** | QA v3 H: 요리 단위 나열. resultKey 기준 그룹핑 필요 |
-| 1-10 | 🟠 ❌ | **크레딧 Infinity 버그 수정** | QA v3 NEW-1: API 키 입력 시 "undefined회" 표시 |
-| 1-11 | 🟠 ❌ | **에러 메시지 한국어 통일** | QA v3 F-2: 영어 하드코딩 잔존 |
-| 1-12 | 🟡 ❌ | URL 유효성 검사 | QA v3 NEW-2: 잘못된 URL에도 버튼 활성화 |
-| 1-13 | 🟡 ❌ | 모달 모바일 잘림 수정 | QA v3 NEW-3: 390×732 뷰포트에서 버튼 가려짐 |
-| 1-14 | 🟡 ❌ | 영어 메뉴 발음 처리 | QA v3 A-1: 영어 메뉴에 한국어 음성전사 표기 |
+| 1-8 | ✅ | **output_language 프롬프트 전달** | 세션 9 검증: ko 설정 시 결과·상세 전반 한국어 렌더 확인 (`claude.ts` 언어 지시) |
+| 1-9 | ✅ | **스캔/히스토리 단위 정규화** | 세션 9 검증: 1 스캔 = 1 항목, `resultKey` dedupe 동작 |
+| 1-10 | ✅ | **크레딧 Infinity 버그 수정** | 세션 9 검증: `useCredits`+`CreditBadge` 이중 방어 → "undefined회" 미발생 |
+| 1-11 | ✅ | **에러 메시지 한국어 통일** | 세션 9 검증: `errors.*` ko 완전 번역, 영어 누출 없음 |
+| 1-12 | ✅ | URL 유효성 검사 | 세션 9 검증: 빈/abc/ftp→disabled, https→enabled |
+| 1-13 | ✅ | 모달 모바일 잘림 수정 | 세션 9 검증: BottomSheet `max-h-[90dvh]`, 하단 CTA 노출 |
+| 1-14 | 🟡 ❌ | 영어 메뉴 발음 처리 | QA v3 A-1: 영어 메뉴에 한국어 음성전사 표기 (미검증) |
 
 ---
 
@@ -103,10 +107,10 @@
 | 5-2 | ✅ | 환경변수 복사 | Vercel env로 API 키 관리 중 (프로필 노출 이슈 해결 예정) |
 | 5-3 | ⏳ | 도메인 구매 | namecheap에서 transtaste.app 구매 (미결 사항으로 남아있음) |
 | 5-4 | ⏳ | 도메인 연결 | Vercel Dashboard → Domains → transtaste.app 추가 |
-| 5-5 | 🟡 ❌ | PWA 아이콘 제작 | 192×192, 512×512 PNG 제작 → public/ 교체 |
-| 5-6 | 🟠 ❌ | **og:image 제작 및 등록** | QA v2 1-6: og:image 없음. SNS 공유 시 썸네일 없음 |
-| 5-7 | 🟡 ❌ | 페이지별 title 분리 | QA v2: 모든 페이지 동일 title. 홈/결과/프로필 각각 설정 필요 |
-| 5-8 | 🟡 ❌ | html lang 속성 수정 | QA v3 발견 4: `<html lang="en">` → `lang="ko"` (또는 동적 적용) |
+| 5-5 | ✅ | PWA 아이콘 제작 | `src/app/icons/icon-192.png`·`icon-512.png` + `icon.tsx`·`apple-icon.tsx` + `public/manifest.json` 존재 |
+| 5-6 | ✅ | **og:image 제작 및 등록** | 세션 9 검증: `opengraph-image.tsx`·`twitter-image.tsx` 동적 생성, 메타 태그 노출 |
+| 5-7 | ✅ | 페이지별 title 분리 | 세션 9 검증: phrases/faq/travel/results 각각 고유 title |
+| 5-8 | ✅ | html lang 속성 수정 | 세션 9 검증: HtmlLangSync → `document.documentElement.lang==="ko"` |
 
 ---
 
@@ -119,7 +123,7 @@
 | 6-3 | ⏳ | 발효/특이식품 주의 목록 | 큐레이션 후 JSON 작성 |
 | 6-4 | ⏳ | 매운맛 국가별 스케일 | 리서치 후 JSON 작성 |
 | 6-5 | 🔴 ❌ | **알러지 배너 현지어 JSON** | Equal Eats형 알러지 카드용. EU 14대 알러지 × 8개 언어. `/data/allergy-phrases.json` |
-| 6-6 | 🟡 ❌ | 레이더 차트 라벨 i18n | QA v3 G: "Umami"·"Rich"·"Salty" 영어 고정. 프론트 i18n으로 처리 (Umami→감칠맛 등) |
+| 6-6 | ✅ | 레이더 차트 라벨 i18n | 세션 9 검증: 결과 상세 FlavorRadar 라벨 한국어(감칠맛·짠맛·단맛·신맛·매운맛·고소함) |
 
 ---
 
@@ -129,16 +133,16 @@
 
 | # | 우선순위 | 작업 | 비고 |
 |---|---|---|---|
-| 7-1 | 🔴 | **홈 Recent Scans URL 고유화** | QA v2 1-1: 모든 칩이 /results로만 이동. id 파라미터 없음 |
-| 7-2 | 🔴 | **Popular Dishes 클릭 처리** | QA v2 1-3: 클릭 시 페이지 상단 스크롤만. hover 없음. 비활성화 처리 또는 기능 연결 |
-| 7-3 | 🟠 | **카메라 X 버튼 경로 수정** | QA v2 1-2: X 탭 시 /results로 이동. 홈(/)으로 수정 |
-| 7-4 | 🟠 | **히스토리 삭제 기능** | QA v2 6-3: 개별·전체 삭제 없음 |
-| 7-5 | 🟠 | **프로필 누락 항목** | QA v2 5-1: 로그아웃·결제내역·FAQ 없음 |
-| 7-6 | 🟠 | **BottomNav 카메라 탭 aria-label** | QA v2 9-1: 스크린리더 접근성 |
-| 7-7 | 🟡 | **온보딩 브라우저 언어 감지** | QA v3 발견 5: 한국어 브라우저에도 English 기본 선택 |
-| 7-8 | 🟡 | **H1 헤딩 구조 수정** | QA v2 9-2: 로고가 H1. 슬로건을 H1으로 |
-| 7-9 | 🟡 | **카테고리 탭 sticky 처리** | 피드백 문서: 스크롤 시 탭 사라짐 |
-| 7-10 | 🟡 | **카메라 스캔 피드백 UX** | 피드백 문서: 스캔 중 시각적 피드백 없음 |
+| 7-1 | ✅ | **홈 Recent Scans URL 고유화** | 세션 9 검증: 히스토리 행 클릭 → `/results?id=scan_xxx` |
+| 7-2 | ✅ | **Popular Dishes 클릭 처리** | 세션 9 검증: 클릭 시 `scanText` 설정 후 `/loading-scan` 텍스트 스캔 실행 |
+| 7-3 | ✅ | **카메라 X 버튼 경로 수정** | 세션 9 검증: travel→camera 진입 후에도 X→`/`(router.push) |
+| 7-4 | ✅ | **히스토리 삭제 기능** | 세션 9 검증: 개별 X(항목+cached_results 동시 제거) + 전체 삭제 |
+| 7-5 | ⏳ | **프로필 누락 항목** | FAQ ✅(세션 9 확인). 로그아웃·결제내역은 인프라 의존(2-5 / Stripe)으로 미완 |
+| 7-6 | ✅ | **BottomNav 카메라 탭 aria-label** | 세션 9 검증: 스캔 링크 accessible name "스캔" 노출 |
+| 7-7 | ✅ | **온보딩 브라우저 언어 감지** | 세션 9 검증: ko 브라우저→한국어 선택, en→English (`navigator.language` primary) |
+| 7-8 | ✅ | **H1 헤딩 구조 수정** | 세션 9 검증: hero title=H1, 로고=`<p aria-label>` |
+| 7-9 | ✅ | **카테고리 탭 sticky 처리** | 세션 9 검증: `sticky top-0 z-20 backdrop-blur-sm` |
+| 7-10 | ✅ | **카메라 스캔 피드백 UX** | 코드 검증: 셔터 시 흰색 플래시(`animate-camera-flash` 220ms) + 버튼 disabled |
 | 7-11 | ⏳ | **F-1 low_confidence 에러** | QA v3 미테스트 (API 키 오류). 다음 세션에서 재테스트 필요 |
 
 ---
@@ -177,24 +181,24 @@ EXCHANGE_RATE_API_KEY=...
 
 ## 출시 전 필수 체크리스트 (P0 + P1 요약)
 
+> 세션 9(2026-05-31) 기준 — 프론트엔드 항목은 대부분 해소. 남은 블로커는 인프라/콘텐츠 의존.
+
 ```
-🔴 P0 — 이것 없이는 출시 불가
-  □ output_language 프롬프트 전달 수정 (1-8) — 다국어 전면 미동작
-  □ 스캔/히스토리 단위 정규화 (1-9) — 요리 단위로 나열
-  □ Supabase Auth UI 연결 (2-4) — /login·/signup 404
+🔴 P0 — 이것 없이는 출시 불가 (전부 인프라/콘텐츠 의존, 대시보드 작업 필요)
+  □ Supabase Auth UI 연결 (2-4) — /login·/signup 라우트 없음
   □ 로그아웃 기능 구현 (2-5)
   □ 크레딧 서버 검증 (2-6) — API 키 우회 시 차감 미동작
-  □ 홈 Recent Scans URL 고유화 (7-1)
-  □ 알러지 배너 현지어 JSON 제작 (6-5)
+  □ 알러지 배너 현지어 JSON 제작 (6-5) — EU 14대 × 8개 언어 콘텐츠
 
-🟠 P1 — 출시 전 반드시
-  □ 크레딧 Infinity 버그 수정 (1-10) — "undefined회" 표시
-  □ 에러 메시지 한국어 통일 (1-11)
+🟠 P1 — 출시 전 반드시 (Stripe 대시보드 의존)
   □ Stripe 상품 4개 생성 — Credits 150회 추가 (4-2)
-  □ Stripe Checkout 실연동 (4-5)
   □ Webhook 엔드포인트 등록 (4-4)
-  □ og:image 제작 및 등록 (5-6)
-  □ 카메라 X 버튼 경로 수정 (7-3)
-  □ 히스토리 삭제 기능 (7-4)
-  □ 프로필 누락 항목 추가 (7-5)
+  □ Stripe Checkout 실연동 (4-5)
+
+✅ 세션 9에서 완료 확인 (프론트엔드)
+  output_language(1-8) · 히스토리 정규화(1-9) · 크레딧 방어(1-10) · 에러 ko(1-11)
+  · URL 검증(1-12) · 모달(1-13) · og:image(5-6) · 페이지 title(5-7) · html lang(5-8)
+  · 레이더 i18n(6-6) · Recent Scans URL(7-1) · Popular Dishes(7-2) · 카메라 X(7-3)
+  · 히스토리 삭제(7-4) · 카메라 aria-label(7-6) · 온보딩 언어감지(7-7) · H1(7-8)
+  · 카테고리 sticky(7-9) · 스캔 피드백(7-10) · PWA 아이콘(5-5)
 ```
