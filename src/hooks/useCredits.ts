@@ -28,10 +28,21 @@ export function useCredits() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return;
-      const parsed = JSON.parse(stored) as CreditState;
-      const { state: next, changed } = reconcileExpiry(parsed);
+      const parsed = JSON.parse(stored) as Partial<CreditState>;
+      // JSON.stringify(Infinity) → null and partial writes can leave remaining
+      // missing/non-finite. Coerce to a safe integer before reconciling.
+      const sanitized: CreditState = {
+        remaining: Number.isFinite(parsed.remaining)
+          ? Math.max(0, Math.floor(parsed.remaining as number))
+          : DEFAULT_STATE.remaining,
+        hasPass: !!parsed.hasPass,
+        ...(parsed.passType ? { passType: parsed.passType } : {}),
+        ...(parsed.passExpiresAt ? { passExpiresAt: parsed.passExpiresAt } : {}),
+      };
+      const { state: next, changed } = reconcileExpiry(sanitized);
       setState(next);
-      if (changed) {
+      const drifted = changed || JSON.stringify(parsed) !== JSON.stringify(next);
+      if (drifted) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
       }
     } catch {

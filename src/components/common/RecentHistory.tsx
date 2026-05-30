@@ -36,8 +36,10 @@ export default function RecentHistory({ items }: RecentHistoryProps) {
   const handleClick = (item: RecentScan) => {
     if (item.resultKey) {
       sessionStorage.setItem("scanResultKey", item.resultKey);
+      router.push(`/results?id=${item.resultKey}`);
+    } else {
+      router.push("/results");
     }
-    router.push("/results");
   };
 
   return (
@@ -46,20 +48,33 @@ export default function RecentHistory({ items }: RecentHistoryProps) {
         {t("home.recentScans")}
       </h3>
       <HorizontalScroll>
-        {items.map((item, i) => (
-          <button
-            key={i}
-            onClick={() => handleClick(item)}
-            className="flex-shrink-0 snap-start flex items-center gap-2 bg-cream-dark rounded-full px-3 py-2.5 min-h-[44px] border border-brown-light/10 hover:border-coral/30 transition-colors"
-          >
-            <span className="text-sm font-medium text-brown-dark truncate max-w-[120px]">
-              {item.original}
-            </span>
-            <span className="text-xs text-brown-medium whitespace-nowrap">
-              {formatRelativeTime(item.scannedAt, locale)}
-            </span>
-          </button>
-        ))}
+        {items.map((item, i) => {
+          // Session-based label: "Japanese · 5 dishes" for new entries;
+          // fall back to the original dish name for legacy entries.
+          const isSession = typeof item.dishCount === "number";
+          const sessionLabel = isSession
+            ? [item.restaurantType, item.language].filter(Boolean).join(" · ") || item.language || "Menu"
+            : item.original;
+          return (
+            <button
+              key={item.resultKey || i}
+              onClick={() => handleClick(item)}
+              className="flex-shrink-0 snap-start flex items-center gap-2 bg-cream-dark rounded-full px-3 py-2.5 min-h-[44px] border border-brown-light/10 hover:border-coral/30 transition-colors"
+            >
+              <span className="text-sm font-medium text-brown-dark truncate max-w-[140px]">
+                {sessionLabel}
+              </span>
+              {isSession && item.dishCount! > 0 && (
+                <span className="text-[10px] font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full">
+                  {item.dishCount}
+                </span>
+              )}
+              <span className="text-xs text-brown-medium whitespace-nowrap">
+                {formatRelativeTime(item.scannedAt, locale)}
+              </span>
+            </button>
+          );
+        })}
       </HorizontalScroll>
     </div>
   );

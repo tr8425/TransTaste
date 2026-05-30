@@ -89,26 +89,46 @@ export default function HistoryPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {scans.map((scan, i) => (
-              <button
-                key={i}
-                onClick={() => handleClick(scan)}
-                className="w-full flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors text-left"
-              >
-                <div className="w-10 h-10 rounded-lg bg-coral/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">🍽️</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-brown-dark truncate">
-                    {scan.original}
-                  </p>
-                  <p className="text-xs text-brown-medium">{scan.english}</p>
-                </div>
-                <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
-                  {formatRelativeTime(scan.scannedAt, locale)}
-                </span>
-              </button>
-            ))}
+            {scans.map((scan, i) => {
+              const isSession = typeof scan.dishCount === "number";
+              const title = isSession
+                ? [scan.restaurantType, scan.language].filter(Boolean).join(" · ") || scan.language || "Menu"
+                : scan.original;
+              const subtitle = isSession
+                ? (scan.preview && scan.preview.length > 0
+                    ? scan.preview.map((p) => p.translated).join(" · ")
+                    : "")
+                : scan.english;
+              return (
+                <button
+                  key={scan.resultKey || i}
+                  onClick={() => handleClick(scan)}
+                  className="w-full flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-coral/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg">🍽️</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-medium text-brown-dark truncate">
+                        {title}
+                      </p>
+                      {isSession && scan.dishCount! > 0 && (
+                        <span className="text-[10px] font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                          {scan.dishCount}
+                        </span>
+                      )}
+                    </div>
+                    {subtitle && (
+                      <p className="text-xs text-brown-medium truncate">{subtitle}</p>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
+                    {formatRelativeTime(scan.scannedAt, locale)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

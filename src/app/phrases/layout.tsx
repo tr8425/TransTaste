@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Restaurant Phrasebook — 5 Languages",
+  title: "Restaurant Phrasebook — 8 Languages",
   description:
-    "Essential restaurant phrases in Japanese, Chinese, Thai, Vietnamese and English. Pronunciation guides and expected server responses included.",
+    "Essential restaurant phrases in Japanese, Chinese, Thai, Vietnamese, Spanish, French, Italian, and English. Pronunciation guides and expected server responses included.",
   openGraph: {
     title: "Restaurant Phrasebook — TransTaste",
-    description: "50+ restaurant phrases in 5 Asian languages with pronunciation guides.",
+    description: "50+ restaurant phrases in 8 languages with pronunciation guides.",
   },
 };
 

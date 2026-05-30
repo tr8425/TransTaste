@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CATEGORY_FILTERS } from "@/lib/constants";
-import { DishLite, MenuAnalysisResult } from "@/lib/types";
+import { DishLite, MenuAnalysisResult, RecentScan, RecentScanPreview } from "@/lib/types";
 import DishRow from "@/components/dish/DishRow";
 import DishCard from "@/components/dish/DishCard";
 import LockedBlock from "@/components/common/LockedBlock";
@@ -136,14 +136,41 @@ function ResultsContent() {
         if (country) cart.setCountryDetected(country);
 
         // Cache full result and save to scan history
-        const resultKey = `scan_${Date.now()}`;
-        const newEntries = parsed.dishes.slice(0, 3).map((d) => ({
-          original: d.original,
-          english: d.translation?.english || d.original,
-          scannedAt: new Date().toISOString(),
-          resultKey,
-        }));
+        // Use a resultKey we can dedupe on: if we restored from a cached id,
+        // reuse that key instead of minting a new one (prevents revisits from
+        // duplicating history entries).
+        const cachedId = searchParams.get("id");
+        const resultKey = cachedId || `scan_${Date.now()}`;
         try {
+          // Determine output language to render preview text in the user's language
+          let outputLang = "en";
+          try {
+            const rawSettings = localStorage.getItem("transtaste_user_settings");
+            if (rawSettings) outputLang = JSON.parse(rawSettings).output_language || "en";
+          } catch { /* ignore */ }
+
+          const previewText = (d: DishLite): string => {
+            if (outputLang === "en") return d.translation?.english || d.original;
+            return d.translation?.meaning || d.translation?.english || d.original;
+          };
+
+          const preview: RecentScanPreview[] = parsed.dishes.slice(0, 3).map((d) => ({
+            original: d.original,
+            translated: previewText(d),
+          }));
+
+          const firstDish = parsed.dishes[0];
+          const newEntry: RecentScan = {
+            original: firstDish?.original || "Menu",
+            english: firstDish?.translation?.english || firstDish?.original || "Menu",
+            scannedAt: new Date().toISOString(),
+            resultKey,
+            dishCount: parsed.dishes.length,
+            language: parsed.menu_meta?.language || parsed.menu_language,
+            restaurantType: parsed.menu_meta?.restaurant_type || parsed.restaurant_type,
+            preview,
+          };
+
           // Cache full result (keep max 10)
           const cachedResults = JSON.parse(localStorage.getItem("transtaste_cached_results") || "{}");
           cachedResults[resultKey] = parsed;
@@ -153,13 +180,15 @@ function ResultsContent() {
           }
           localStorage.setItem("transtaste_cached_results", JSON.stringify(cachedResults));
 
-          // Save history entries
-          const prev = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
-          const merged = [...newEntries, ...prev].slice(0, 20);
+          // Save history: 1 scan = 1 entry. Dedupe by resultKey to prevent
+          // re-renders or revisits from accumulating duplicate rows.
+          const prev: RecentScan[] = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
+          const deduped = prev.filter((s) => s.resultKey !== resultKey);
+          const merged = [newEntry, ...deduped].slice(0, 20);
           localStorage.setItem("transtaste_scan_history", JSON.stringify(merged));
 
           // Stamp URL with resultKey so revisits restore from cache
-          if (!searchParams.get("id")) {
+          if (!cachedId) {
             window.history.replaceState({}, "", `/results?id=${resultKey}`);
           }
         } catch { /* ignore */ }

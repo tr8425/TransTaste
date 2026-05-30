@@ -7,14 +7,14 @@ import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
 const LANGUAGES = [
-  { code: "ja", labelKey: "phrases.langJa" },
-  { code: "zh", labelKey: "phrases.langZh" },
-  { code: "th", labelKey: "phrases.langTh" },
-  { code: "vi", labelKey: "phrases.langVi" },
-  { code: "es", labelKey: "phrases.langEs" },
-  { code: "fr", labelKey: "phrases.langFr" },
-  { code: "it", labelKey: "phrases.langIt" },
-  { code: "en", labelKey: "phrases.langEn" },
+  { code: "ja", flag: "\u{1F1EF}\u{1F1F5}", short: "JP", labelKey: "phrases.langJa" },
+  { code: "zh", flag: "\u{1F1E8}\u{1F1F3}", short: "CN", labelKey: "phrases.langZh" },
+  { code: "th", flag: "\u{1F1F9}\u{1F1ED}", short: "TH", labelKey: "phrases.langTh" },
+  { code: "vi", flag: "\u{1F1FB}\u{1F1F3}", short: "VN", labelKey: "phrases.langVi" },
+  { code: "es", flag: "\u{1F1EA}\u{1F1F8}", short: "ES", labelKey: "phrases.langEs" },
+  { code: "fr", flag: "\u{1F1EB}\u{1F1F7}", short: "FR", labelKey: "phrases.langFr" },
+  { code: "it", flag: "\u{1F1EE}\u{1F1F9}", short: "IT", labelKey: "phrases.langIt" },
+  { code: "en", flag: "\u{1F1EC}\u{1F1E7}", short: "EN", labelKey: "phrases.langEn" },
 ] as const;
 
 type CategoryId = (typeof PHRASE_CATEGORIES)[number]["id"] | "favorites";
@@ -205,13 +205,16 @@ export default function PhrasesPage() {
             <button
               key={lang.code}
               onClick={() => setSelectedLanguage(lang.code)}
-              className={`flex-1 min-w-0 px-1 py-1.5 rounded-full text-xs font-medium transition-colors text-center ${
+              aria-label={t(lang.labelKey)}
+              title={t(lang.labelKey)}
+              className={`flex-1 min-w-0 px-1 py-1.5 rounded-full text-[11px] font-semibold transition-colors text-center flex items-center justify-center gap-1 ${
                 selectedLanguage === lang.code
                   ? "bg-coral text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >
-              {t(lang.labelKey)}
+              <span className="text-sm leading-none" aria-hidden="true">{lang.flag}</span>
+              <span>{lang.short}</span>
             </button>
           ))}
         </div>

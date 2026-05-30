@@ -94,7 +94,7 @@ export default function CameraPage() {
 
   return (
     <>
-      <CameraView onCapture={handleCapture} onGallery={handleGallery} onBack={() => router.back()} onQrDetected={handleQrDetected} />
+      <CameraView onCapture={handleCapture} onGallery={handleGallery} onBack={() => router.push("/")} onQrDetected={handleQrDetected} />
       <input
         ref={fileInputRef}
         type="file"

@@ -552,32 +552,58 @@ function ProfileContent() {
           </div>
         </div>
 
-        {/* ── API Key (dev/demo) ── */}
-        <div className="bg-cream-dark rounded-xl p-4">
-          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
-            {t("profile.apiKey")}
-          </h2>
-          <p className="text-xs text-brown-medium/60 mb-2">
-            {t("profile.apiKeyDesc")}
-          </p>
-          <input
-            type="password"
-            placeholder="sk-ant-api03-..."
-            value={apiKeyInput}
-            onChange={(e) => {
-              const v = e.target.value;
-              setApiKeyInput(v);
-              try {
-                if (v.trim()) localStorage.setItem("transtaste_api_key", v.trim());
-                else localStorage.removeItem("transtaste_api_key");
-              } catch { /* ignore */ }
-            }}
-            className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30 font-mono"
-          />
-          <p className="text-[10px] text-brown-medium/40 mt-1.5">
-            {t("profile.apiKeyNote")}
-          </p>
-        </div>
+        {/* ── Advanced / Developer (collapsed by default) ── */}
+        <details className="group bg-cream-dark rounded-xl">
+          <summary className="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+            <div>
+              <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider">
+                {t("profile.advancedSettings")}
+              </h2>
+              <p className="text-xs text-brown-medium/60 mt-0.5">
+                {t("profile.advancedSettingsDesc")}
+              </p>
+            </div>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#A1825F"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="flex-shrink-0 transition-transform group-open:rotate-180"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </summary>
+          <div className="px-4 pb-4 pt-1 border-t border-brown-light/10">
+            <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mt-3 mb-1">
+              {t("profile.apiKey")}
+            </h3>
+            <p className="text-xs text-brown-medium/60 mb-2">
+              {t("profile.apiKeyDesc")}
+            </p>
+            <input
+              type="password"
+              placeholder="sk-ant-api03-..."
+              value={apiKeyInput}
+              onChange={(e) => {
+                const v = e.target.value;
+                setApiKeyInput(v);
+                try {
+                  if (v.trim()) localStorage.setItem("transtaste_api_key", v.trim());
+                  else localStorage.removeItem("transtaste_api_key");
+                } catch { /* ignore */ }
+              }}
+              className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30 font-mono"
+            />
+            <p className="text-[10px] text-brown-medium/40 mt-1.5">
+              {t("profile.apiKeyNote")}
+            </p>
+          </div>
+        </details>
 
         {/* ── Account ── */}
         <div className="bg-cream-dark rounded-xl p-4">

@@ -3,6 +3,10 @@ import BottomNav from "@/components/ui/BottomNav";
 import CartProvider from "@/components/order/CartProvider";
 import "./globals.css";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://transtaste.vercel.app");
+
 export const metadata: Metadata = {
   title: {
     default: "TransTaste — Travel Menu Translator",
@@ -11,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Scan any foreign restaurant menu and instantly understand every dish. Get translations, allergen warnings, flavor profiles, and cultural dining tips.",
   manifest: "/manifest.json",
-  metadataBase: new URL("https://transtaste.app"),
+  metadataBase: new URL(siteUrl),
   openGraph: {
     type: "website",
     siteName: "TransTaste",

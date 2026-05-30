@@ -4,6 +4,42 @@ import { AIProvider, MenuInput } from './provider';
 import { IncrementalDishParser } from './stream-parser';
 import { setCache } from '../cache';
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  ko: 'Korean (한국어)',
+  ja: 'Japanese (日本語)',
+  zh: 'Chinese (中文)',
+  th: 'Thai (ภาษาไทย)',
+  vi: 'Vietnamese (Tiếng Việt)',
+  es: 'Spanish (Español)',
+  fr: 'French (Français)',
+  it: 'Italian (Italiano)',
+  de: 'German (Deutsch)',
+  pt: 'Portuguese (Português)',
+};
+
+function languageDirective(code: string | undefined): string {
+  const lang = code || 'en';
+  const name = LANGUAGE_NAMES[lang] || lang;
+  return (
+    `OUTPUT LANGUAGE: ${name}.\n` +
+    `Write the following fields in ${name}:\n` +
+    `  - translation.meaning, translation.literal\n` +
+    `  - ingredients.core[], ingredients.common_additions[]\n` +
+    `  - fun_fact, fun_fact_detail.label, fun_fact_detail.content\n` +
+    `  - how_to_eat\n` +
+    `  - warning.message, disclosure.message, brand_note\n` +
+    `  - recommended_combo.budget.reason, recommended_combo.balanced.reason\n` +
+    `  - options[].label, options[].choices[].name_translated\n` +
+    `Keep these fields in English regardless of output language:\n` +
+    `  - all JSON keys\n` +
+    `  - translation.english, translation.pronunciation (romanization)\n` +
+    `  - enum values: category, allergen tags, risk levels, price_tier, dietary booleans\n` +
+    `  - ISO codes: currency, language_detected\n` +
+    `  - image_search_query (search engines work best in English)`
+  );
+}
+
 // Phase 1: Lite schema — only fields needed for the dish list view
 const SYSTEM_PROMPT_LITE = `You are TransTaste, an expert food menu analyzer. Analyze the menu and return a LITE JSON with only essential fields for a quick overview.
 
@@ -87,7 +123,7 @@ Unreadable: {"error": "ocr_failed", "reason": "..."}
 1. Analyze EVERY dish visible. Do not skip items.
 2. The "original" field must contain ONLY the dish name — strip all price numbers, currency symbols, and quantity info. Prices go in the "price" field.
 3. If uncertain about halal, set to null.
-4. Output language matches user's requested language (default: English).
+4. Natural-language fields (translation.meaning, translation.literal, recommended_combo reasons) must be written in the OUTPUT LANGUAGE specified in the user message. JSON keys, enum values, ISO codes, translation.english, and translation.pronunciation stay English.
 5. Keep this response CONCISE — only the fields above, nothing extra.`;
 
 // Phase 2: Detail prompt — single dish deep analysis
@@ -99,8 +135,8 @@ Return ONLY valid JSON (no markdown, no code blocks):
 {
   "flavor_profile": { "sweet": "0-5", "salty": "0-5", "spicy": "0-5", "sour": "0-5", "umami": "0-5", "rich": "0-5" },
   "ingredients": {
-    "core": ["string — main ingredients"],
-    "common_additions": ["string — typical sides/garnishes"],
+    "core": ["string — main ingredients written in OUTPUT LANGUAGE"],
+    "common_additions": ["string — typical sides/garnishes in OUTPUT LANGUAGE"],
     "allergens": ["string — from: shellfish, pork, gluten, dairy, nuts, egg, soy, fish, sesame, celery, mustard, sulfites"]
   },
   "fun_fact": "string | null — see rules below",
@@ -146,14 +182,12 @@ If menu shows options (size, spice level, toppings): set has_customization=true 
 # RULES
 - Flavor profiles relative to the cuisine.
 - If uncertain about halal, set null.
-- Output language matches user's requested language.`;
+- Natural-language fields (fun_fact, fun_fact_detail.content, how_to_eat, warning.message, disclosure.message, brand_note, ingredients.core[], ingredients.common_additions[], options[].label, options[].choices[].name_translated) MUST be written in the OUTPUT LANGUAGE specified in the user message. JSON keys, enum values, ISO codes, and allergen tags stay English.`;
 
 function buildUserMessage(input: MenuInput): Anthropic.MessageCreateParams['messages'] {
-  const contextParts: string[] = [];
-
-  if (input.outputLanguage && input.outputLanguage !== 'en') {
-    contextParts.push(`Output language: ${input.outputLanguage} (write all descriptions, fun facts, translations in this language, but keep JSON keys in English)`);
-  }
+  // Output language directive is always first and unconditional — model treats it
+  // as the controlling instruction for every natural-language field.
+  const contextParts: string[] = [languageDirective(input.outputLanguage)];
 
   if (input.allergenPreset && input.allergenPreset.length > 0) {
     contextParts.push(`User allergen presets: ${input.allergenPreset.join(', ')}. Flag any dishes containing these allergens in allergen_summary.`);

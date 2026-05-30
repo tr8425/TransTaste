@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
-const TOOLS = [
+type Tool = {
+  id: string;
+  href: string;
+  emoji: string;
+  labelKey: string;
+  descKey: string;
+  comingSoon?: boolean;
+};
+
+const TOOLS: readonly Tool[] = [
   {
     id: "phrases",
     href: "/phrases",
@@ -26,6 +35,7 @@ const TOOLS = [
     emoji: "\u{1F4CB}",
     labelKey: "travel.order",
     descKey: "travel.orderDesc",
+    comingSoon: true,
   },
 ] as const;
 
@@ -80,34 +90,65 @@ export default function TravelPage() {
 
       {/* Tool cards */}
       <div className="px-5 space-y-3">
-        {TOOLS.map((tool) => (
-          <Link
-            key={tool.id}
-            href={tool.href}
-            className="flex items-center gap-4 bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors active:scale-[0.98]"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-coral/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl">{tool.emoji}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-brown-dark">{t(tool.labelKey)}</p>
-              <p className="text-xs text-brown-medium mt-0.5">{t(tool.descKey)}</p>
-            </div>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#C4A882"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="flex-shrink-0"
+        {TOOLS.map((tool) => {
+          const cardContent = (
+            <>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${tool.comingSoon ? "bg-brown-light/10" : "bg-coral/10"}`}>
+                <span className={`text-2xl ${tool.comingSoon ? "opacity-50" : ""}`}>{tool.emoji}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className={`text-sm font-semibold ${tool.comingSoon ? "text-brown-medium" : "text-brown-dark"}`}>
+                    {t(tool.labelKey)}
+                  </p>
+                  {tool.comingSoon && (
+                    <span className="text-[10px] font-bold text-amber-brand bg-amber-brand/15 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                      {t("travel.comingSoon")}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-brown-medium mt-0.5">{t(tool.descKey)}</p>
+              </div>
+              {!tool.comingSoon && (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#C4A882"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="flex-shrink-0"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              )}
+            </>
+          );
+
+          if (tool.comingSoon) {
+            return (
+              <div
+                key={tool.id}
+                aria-disabled="true"
+                className="flex items-center gap-4 bg-cream-dark/60 rounded-xl p-4 cursor-not-allowed select-none"
+              >
+                {cardContent}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={tool.id}
+              href={tool.href}
+              className="flex items-center gap-4 bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors active:scale-[0.98]"
             >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
-        ))}
+              {cardContent}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Tip of the day / context card */}

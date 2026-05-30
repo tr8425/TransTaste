@@ -215,10 +215,26 @@ export interface CreditState {
   passExpiresAt?: string;
 }
 
-export interface RecentScan {
+export interface RecentScanPreview {
   original: string;
+  /** Translated to user's output_language; falls back to English then original. */
+  translated: string;
+}
+
+export interface RecentScan {
+  /** First dish's original name — kept for legacy entries and chip display fallback. */
+  original: string;
+  /** First dish's English translation — kept for legacy entries. */
   english: string;
   scannedAt: string | Date;
   /** Key to look up cached MenuAnalysisResult in localStorage */
   resultKey?: string;
+  /** Total dish count in this scan session (set on entries written from v0.3+). */
+  dishCount?: number;
+  /** Detected menu language (e.g. "Japanese", "Korean"). */
+  language?: string;
+  /** Detected restaurant type (e.g. "Ramen Shop", "Tapas Bar"). */
+  restaurantType?: string;
+  /** Up to 3 dishes for compact preview, with translations in the user's language. */
+  preview?: RecentScanPreview[];
 }

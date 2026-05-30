@@ -29,7 +29,8 @@ export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
     );
   }
 
-  const isWarning = credits <= 3;
+  const safeCredits = Number.isFinite(credits) ? Math.max(0, Math.floor(credits)) : 0;
+  const isWarning = safeCredits <= 3;
 
   return (
     <span
@@ -46,7 +47,7 @@ export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
       >
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
-      <span>{t("profile.scansLeft", { count: credits })}</span>
+      <span>{t("profile.scansLeft", { count: safeCredits })}</span>
     </span>
   );
 }
