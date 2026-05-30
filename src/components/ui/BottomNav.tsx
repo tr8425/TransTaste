@@ -146,6 +146,7 @@ export default function BottomNav() {
                 <Link
                   key={tab.href}
                   href={tab.href}
+                  aria-label={t(tab.labelKey)}
                   className="w-14 h-14 -mt-5 rounded-full bg-coral shadow-lg shadow-coral/25 flex items-center justify-center hover:bg-coral-dark transition-colors active:scale-95"
                 >
                   {tab.icon(false)}
@@ -157,6 +158,7 @@ export default function BottomNav() {
               <Link
                 key={tab.href}
                 href={tab.href}
+                aria-current={isActive ? "page" : undefined}
                 className={`flex flex-col items-center gap-0.5 py-1 px-1 transition-colors ${
                   isActive ? "text-coral" : "text-brown-medium/60 hover:text-brown-medium"
                 }`}

@@ -336,8 +336,18 @@ function ResultsContent() {
       E_AI_ERROR: t("errors.aiError"),
       E_MAX_TOKENS: t("errors.maxTokens"),
       E_UNKNOWN: t("errors.unexpected"),
+      // Legacy lowercase codes still emitted by claude.ts AI prompt
+      not_menu: t("errors.notMenu"),
+      ocr_failed: t("errors.ocrFailed"),
+      no_text: t("errors.noText"),
+      low_confidence: t("errors.partial"),
+      partial: t("errors.partial"),
+      network_error: t("errors.unexpected"),
+      rate_limited: t("errors.rateLimited"),
     };
-    const userMessage = errorMessages[scanError.code] || scanError.reason || t("errors.unexpected");
+    // Fall back to the unexpected-error i18n string instead of the raw English
+    // reason so users in non-English locales never see untranslated text.
+    const userMessage = errorMessages[scanError.code] || t("errors.unexpected");
 
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">

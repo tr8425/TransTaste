@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
 
@@ -103,6 +103,19 @@ export default function OnboardingPage() {
 
   // Step 2 state
   const [language, setLanguage] = useState("en");
+
+  // Auto-detect the user's preferred language from the browser on first paint.
+  // Falls back to "en" when the primary tag isn't one of our supported locales.
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    const raw = (navigator.language || "en").toLowerCase();
+    const primary = raw.split("-")[0];
+    const supported = new Set<string>(LANGUAGES.map((l) => l.code));
+    if (supported.has(primary) && primary !== "en") {
+      setLanguage(primary);
+      setLocale(primary);
+    }
+  }, [setLocale]);
 
   const handleLanguageChange = (code: string) => {
     setLanguage(code);

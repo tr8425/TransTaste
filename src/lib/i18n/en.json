@@ -102,6 +102,7 @@
   },
 
   "dish": {
+    "flavorRadarChart": "Flavor Radar Chart",
     "flavorProfile": "Flavor Profile",
     "ingredients": "Ingredients",
     "howToEat": "How to Eat",
@@ -302,7 +303,10 @@
     "title": "Scan History",
     "subtitle": "Your recent menu scans",
     "noHistory": "No scans yet",
-    "noHistoryDesc": "Scan a menu to see your history here"
+    "noHistoryDesc": "Scan a menu to see your history here",
+    "deleteOne": "Delete this scan",
+    "clearAll": "Clear all",
+    "clearAllConfirm": "Clear all scan history? This cannot be undone."
   },
 
   "camera": {

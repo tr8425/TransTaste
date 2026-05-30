@@ -39,6 +39,38 @@ export default function HistoryPage() {
     }
   };
 
+  const persist = (next: RecentScan[]) => {
+    setScans(next);
+    try {
+      localStorage.setItem("transtaste_scan_history", JSON.stringify(next));
+    } catch { /* ignore */ }
+  };
+
+  const handleDeleteOne = (e: React.MouseEvent, scan: RecentScan, index: number) => {
+    e.stopPropagation();
+    const next = scans.filter((s, i) => (s.resultKey ? s.resultKey !== scan.resultKey : i !== index));
+    persist(next);
+    // Also drop the cached result so it isn't restored on a stale link
+    if (scan.resultKey) {
+      try {
+        const raw = localStorage.getItem("transtaste_cached_results");
+        if (raw) {
+          const cache = JSON.parse(raw);
+          delete cache[scan.resultKey];
+          localStorage.setItem("transtaste_cached_results", JSON.stringify(cache));
+        }
+      } catch { /* ignore */ }
+    }
+  };
+
+  const handleClearAll = () => {
+    if (typeof window !== "undefined" && !window.confirm(t("history.clearAllConfirm"))) return;
+    persist([]);
+    try {
+      localStorage.removeItem("transtaste_cached_results");
+    } catch { /* ignore */ }
+  };
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem("transtaste_scan_history");
@@ -49,11 +81,21 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4">
-        <h1 className="text-xl font-bold text-brown-dark">{t("history.title")}</h1>
-        <p className="text-xs text-brown-medium mt-0.5">
-          {t("history.subtitle")}
-        </p>
+      <div className="px-5 pt-12 pb-4 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-brown-dark">{t("history.title")}</h1>
+          <p className="text-xs text-brown-medium mt-0.5">
+            {t("history.subtitle")}
+          </p>
+        </div>
+        {scans.length > 0 && (
+          <button
+            onClick={handleClearAll}
+            className="mt-1 text-xs font-medium text-brown-medium hover:text-coral transition-colors flex-shrink-0"
+          >
+            {t("history.clearAll")}
+          </button>
+        )}
       </div>
 
       {/* Scan list */}
@@ -100,33 +142,47 @@ export default function HistoryPage() {
                     : "")
                 : scan.english;
               return (
-                <button
+                <div
                   key={scan.resultKey || i}
-                  onClick={() => handleClick(scan)}
-                  className="w-full flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors text-left"
+                  className="group relative w-full flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-coral/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg">🍽️</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-medium text-brown-dark truncate">
-                        {title}
-                      </p>
-                      {isSession && scan.dishCount! > 0 && (
-                        <span className="text-[10px] font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full flex-shrink-0">
-                          {scan.dishCount}
-                        </span>
+                  <button
+                    onClick={() => handleClick(scan)}
+                    className="flex flex-1 items-center gap-3 min-w-0 text-left"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-coral/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg">🍽️</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-brown-dark truncate">
+                          {title}
+                        </p>
+                        {isSession && scan.dishCount! > 0 && (
+                          <span className="text-[10px] font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                            {scan.dishCount}
+                          </span>
+                        )}
+                      </div>
+                      {subtitle && (
+                        <p className="text-xs text-brown-medium truncate">{subtitle}</p>
                       )}
                     </div>
-                    {subtitle && (
-                      <p className="text-xs text-brown-medium truncate">{subtitle}</p>
-                    )}
-                  </div>
-                  <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
-                    {formatRelativeTime(scan.scannedAt, locale)}
-                  </span>
-                </button>
+                    <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
+                      {formatRelativeTime(scan.scannedAt, locale)}
+                    </span>
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteOne(e, scan, i)}
+                    aria-label={t("history.deleteOne")}
+                    className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-brown-medium/50 hover:text-coral hover:bg-coral/10 transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
               );
             })}
           </div>

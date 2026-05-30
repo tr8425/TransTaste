@@ -66,7 +66,7 @@ export default function FlavorRadar({ profile, size = 120 }: FlavorRadarProps) {
         .map((a) => `${t(`flavor.${a}`)} ${profile[a as keyof FlavorProfile]}`)
         .join(", ")}`}
     >
-      <title>Flavor Radar Chart</title>
+      <title>{t("dish.flavorRadarChart")}</title>
 
       {/* Grid rings */}
       {ringPaths.map((points, i) => (

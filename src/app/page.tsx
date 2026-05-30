@@ -18,6 +18,17 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
+function isValidHttpUrl(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  try {
+    const url = new URL(trimmed);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export default function HomePage() {
   const { t } = useTranslation();
   const credits = useCredits();
@@ -58,7 +69,7 @@ export default function HomePage() {
 
   const handleUrlSubmit = () => {
     const trimmed = urlInput.trim();
-    if (!trimmed) return;
+    if (!isValidHttpUrl(trimmed)) return;
     sessionStorage.setItem("scanImage", trimmed);
     sessionStorage.setItem("scanInputType", "url");
     setShowUrlModal(false);
@@ -80,9 +91,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Nav bar */}
       <nav className="flex items-center justify-between px-5 pt-12 pb-4">
-        <h1 className="text-xl font-bold text-brown-dark tracking-tight">
+        <p className="text-xl font-bold text-brown-dark tracking-tight" aria-label="TransTaste">
           Trans<span className="text-coral">Taste</span>
-        </h1>
+        </p>
         <CreditBadge credits={credits.remaining} hasPass={credits.hasPass} />
       </nav>
 
@@ -92,9 +103,9 @@ export default function HomePage() {
           <span className="text-5xl">🍽️</span>
         </div>
 
-        <h2 className="text-lg font-semibold text-brown-dark text-center mb-1">
+        <h1 className="text-lg font-semibold text-brown-dark text-center mb-1">
           {t("home.heroTitle")}
-        </h2>
+        </h1>
         <p className="text-sm text-brown-medium text-center mb-6 max-w-[280px]">
           {t("home.heroDesc")}
         </p>
@@ -287,7 +298,7 @@ export default function HomePage() {
             </p>
             <button
               onClick={handleUrlSubmit}
-              disabled={!urlInput.trim()}
+              disabled={!isValidHttpUrl(urlInput)}
               className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {t("home.fetchAndAnalyze")}
