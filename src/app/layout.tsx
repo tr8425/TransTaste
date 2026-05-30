@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import BottomNav from "@/components/ui/BottomNav";
 import CartProvider from "@/components/order/CartProvider";
+import HtmlLangSync from "@/components/common/HtmlLangSync";
 import "./globals.css";
 
 const siteUrl =
@@ -85,6 +86,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <HtmlLangSync />
         <CartProvider>
           <div className="mobile-container">
             {children}
