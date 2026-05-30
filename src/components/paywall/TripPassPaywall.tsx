@@ -25,8 +25,8 @@ export default function TripPassPaywall({
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-mobile bg-cream rounded-t-2xl sm:rounded-2xl p-6 pb-10 sm:m-4 animate-slide-up">
+      {/* Modal — caps height to viewport so the CTA stays reachable on 390x732 */}
+      <div className="relative w-full max-w-mobile bg-cream rounded-t-2xl sm:rounded-2xl p-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto">
         {/* Close / Skip */}
         <button
           onClick={onClose}

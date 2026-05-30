@@ -265,7 +265,7 @@ export default function HomePage() {
       {/* URL Modal */}
       {showUrlModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-8 animate-slide-up">
+          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] animate-slide-up max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-brown-dark flex items-center gap-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D85A30" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -310,7 +310,7 @@ export default function HomePage() {
       {/* Text Modal */}
       {showTextModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-8 animate-slide-up">
+          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] animate-slide-up max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-brown-dark">
                 {t("home.textModalTitle")}

@@ -64,7 +64,7 @@ Return ONLY valid JSON (no markdown, no code blocks, no commentary):
         "literal": "string — word-by-word translation",
         "meaning": "string — what the dish actually is",
         "english": "string — natural English name",
-        "pronunciation": "string — romanized pronunciation guide for ordering (e.g. 'bul-go-gi', 'tom-yam-kung', 'gyū-don')"
+        "pronunciation": "string | null — romanized pronunciation guide for ordering (e.g. 'bul-go-gi', 'tom-yam-kung', 'gyū-don'). Set to null when the dish name is already in Latin script (English, Spanish, French, Italian, etc.) — no romanization needed. Only provide for non-Latin scripts: CJK, Thai, Arabic, Cyrillic, Devanagari, etc."
       },
       "confidence": "'high' | 'medium' | 'low'",
       "category": "'main' | 'side' | 'soup' | 'noodle' | 'rice' | 'appetizer' | 'dessert' | 'drink' | 'set' | 'salad'",
@@ -124,7 +124,8 @@ Unreadable: {"error": "ocr_failed", "reason": "..."}
 2. The "original" field must contain ONLY the dish name — strip all price numbers, currency symbols, and quantity info. Prices go in the "price" field.
 3. If uncertain about halal, set to null.
 4. Natural-language fields (translation.meaning, translation.literal, recommended_combo reasons) must be written in the OUTPUT LANGUAGE specified in the user message. JSON keys, enum values, ISO codes, translation.english, and translation.pronunciation stay English.
-5. Keep this response CONCISE — only the fields above, nothing extra.`;
+5. translation.pronunciation must be null for Latin-script source languages (English, Spanish, French, Italian, German, Portuguese, etc.) — never transliterate Latin script into another writing system.
+6. Keep this response CONCISE — only the fields above, nothing extra.`;
 
 // Phase 2: Detail prompt — single dish deep analysis
 const SYSTEM_PROMPT_DETAIL = `You are TransTaste. Given a menu and a specific dish name, return a detailed analysis of ONLY that one dish.

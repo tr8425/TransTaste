@@ -492,8 +492,8 @@ function ResultsContent() {
         </div>
       )}
 
-      {/* Category filters */}
-      <div className="px-5 pb-3">
+      {/* Category filters — sticky so they remain accessible while scrolling */}
+      <div className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm px-5 py-3 border-b border-brown-light/10">
         <HorizontalScroll>
           {CATEGORY_FILTERS.map((cat) => (
             <button

@@ -41,9 +41,9 @@ export default function BottomSheet({
         onClick={onClose}
       />
 
-      {/* Sheet */}
+      {/* Sheet — dvh keeps the cap accurate when mobile browser chrome resizes */}
       <div
-        className="relative w-full max-w-mobile bg-cream rounded-t-2xl max-h-[85vh] overflow-y-auto animate-slide-up"
+        className="relative w-full max-w-mobile bg-cream rounded-t-2xl max-h-[90dvh] overflow-y-auto animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle */}
@@ -52,7 +52,7 @@ export default function BottomSheet({
         </div>
 
         {/* Content */}
-        <div className="px-5 pb-8">{children}</div>
+        <div className="px-5 pb-[max(2rem,env(safe-area-inset-bottom))]">{children}</div>
       </div>
 
       <style jsx>{`

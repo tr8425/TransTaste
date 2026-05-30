@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCamera } from "@/hooks/useCamera";
 import { useTranslation } from "@/lib/i18n";
 
@@ -15,6 +15,8 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
   const { t } = useTranslation();
   const { videoRef, isReady, error, start, capture, toggleFlash, isFlashOn, qrData, clearQr } =
     useCamera();
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
 
   useEffect(() => {
     start();
@@ -34,9 +36,19 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
   }, [qrData, onQrDetected, clearQr]);
 
   const handleCapture = async () => {
-    const blob = await capture();
-    if (blob) {
-      await onCapture(blob);
+    if (isCapturing) return;
+    setIsCapturing(true);
+    // Camera-shutter style flash + a brief disabled state so the user sees
+    // immediate feedback while we compress the image and navigate.
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 220);
+    try {
+      const blob = await capture();
+      if (blob) {
+        await onCapture(blob);
+      }
+    } finally {
+      setIsCapturing(false);
     }
   };
 
@@ -85,6 +97,14 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
             {t("camera.placeMenu")}
           </span>
         </div>
+
+        {/* Shutter flash overlay — fades out within ~220ms */}
+        {showFlash && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-white pointer-events-none animate-camera-flash"
+          />
+        )}
 
         {/* Error state — friendly UI */}
         {error && (
@@ -138,10 +158,15 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
         {/* Capture button */}
         <button
           onClick={handleCapture}
-          disabled={!isReady}
-          className="w-[72px] h-[72px] rounded-full border-4 border-white flex items-center justify-center disabled:opacity-40"
+          disabled={!isReady || isCapturing}
+          aria-label={t("camera.takePhoto")}
+          className="w-[72px] h-[72px] rounded-full border-4 border-white flex items-center justify-center disabled:opacity-40 transition-transform active:scale-95"
         >
-          <div className="w-[58px] h-[58px] rounded-full bg-white" />
+          <div
+            className={`rounded-full bg-white transition-all duration-150 ${
+              isCapturing ? "w-[42px] h-[42px]" : "w-[58px] h-[58px]"
+            }`}
+          />
         </button>
 
         {/* Flash toggle */}
