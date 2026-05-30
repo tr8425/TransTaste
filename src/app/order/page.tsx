@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
-import { ALLERGEN_LABELS, TIP_CULTURE } from "@/lib/allergen-i18n";
+import { ALLERGEN_LABELS, TIP_CULTURE, normalizeMenuLang } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
 
 interface UserSettings {
@@ -48,10 +48,7 @@ export default function OrderPage() {
   } = useCart();
 
   const { t } = useTranslation();
-  const langCode = (() => {
-    const code = menuLanguage.slice(0, 2).toLowerCase();
-    return ["ja", "zh", "th", "vi", "ko", "en"].includes(code) ? code : "en";
-  })();
+  const langCode = normalizeMenuLang(menuLanguage);
   const [allergens, setAllergens] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const [showConfirmedBanner, setShowConfirmedBanner] = useState(false);

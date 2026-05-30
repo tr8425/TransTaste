@@ -11,6 +11,7 @@ import {
   CONFIRM_LABELS,
   ORDER_HEADERS,
   TOTAL_LABELS,
+  normalizeMenuLang,
 } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
 
@@ -43,12 +44,6 @@ function formatPrice(amount: number, currency?: string): string {
   }
 }
 
-function getLang(menuLanguage: string): string {
-  // Normalize to 2-letter code
-  const code = menuLanguage.slice(0, 2).toLowerCase();
-  if (["ja", "zh", "th", "vi", "ko", "en"].includes(code)) return code;
-  return "en";
-}
 
 export default function PresentPage() {
   const { t } = useTranslation();
@@ -59,7 +54,7 @@ export default function PresentPage() {
   const [dietaryBeliefs, setDietaryBeliefs] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  const lang = getLang(menuLanguage);
+  const lang = normalizeMenuLang(menuLanguage);
   const currency = items[0]?.currency;
 
   // Hydrate allergens from localStorage
