@@ -15,15 +15,11 @@ const FAQ_EN: FaqEntry[] = [
   },
   {
     q: "How much does it cost?",
-    a: "Every new account gets 10 free scans. After that you can buy a Trip Pass (7 days for $2.99 or 30 days for $5.99 — unlimited scans during the trip) or a one-time 50-scan credit pack for $1.99. No subscription.",
+    a: "TransTaste is currently validating 3-day, 7-day, and 30-day trip-pass concepts. The prices shown in the app are research hypotheses only: checkout is disabled and no payment is taken. Beta users receive a small cumulative scan allowance, which may change as analysis costs are measured.",
   },
   {
     q: "Can I trust the allergen warnings?",
     a: "Allergen flags are AI-generated estimates meant for reference. Always confirm with restaurant staff before ordering — especially if you have a life-threatening allergy. TransTaste is not a medical device.",
-  },
-  {
-    q: "Why does my Profile have an API key field?",
-    a: "It's optional, for developers and power users. Paste your own Anthropic API key and your scans use that key directly instead of consuming credits. The key is stored locally in your browser and never sent to our servers.",
   },
   {
     q: "Does it work offline?",
@@ -31,11 +27,11 @@ const FAQ_EN: FaqEntry[] = [
   },
   {
     q: "Which languages are supported?",
-    a: "Menu translation accepts photos in dozens of languages and renders results in English, Korean, Japanese, Chinese, Thai, Vietnamese, Spanish, French, or Italian. The restaurant phrasebook covers those 8 languages with pronunciation guides.",
+    a: "The core product UI currently supports English, Korean, and Japanese as its launch-quality set. Additional menu and phrasebook languages remain available in beta and require language-specific review before public launch.",
   },
   {
     q: "How is my data used?",
-    a: "Menu images are sent to Anthropic for analysis and cached briefly for performance. We don't sell or share personal data. Full details are in the Privacy Policy.",
+    a: "In a real-analysis environment, menu images are sent to the configured AI provider for processing. TransTaste does not retain the original image by default. Structured results and essential operational logs follow separate retention rules; model-improvement use requires explicit opt-in.",
   },
 ];
 
@@ -46,15 +42,11 @@ const FAQ_KO: FaqEntry[] = [
   },
   {
     q: "비용은 어떻게 되나요?",
-    a: "신규 가입 시 무료 스캔 10회를 드립니다. 이후에는 트립 패스(7일 $2.99 / 30일 $5.99 — 여행 기간 동안 무제한 스캔) 또는 50회 크레딧 팩($1.99)을 일회성으로 구매할 수 있습니다. 구독은 없습니다.",
+    a: "현재 3일·7일·30일 여행 패스의 상품성을 검증하고 있습니다. 앱에 표시된 가격은 조사용 가설이며 결제 기능은 비활성화되어 실제 청구가 발생하지 않습니다. 베타 사용자에게는 분석 원가 측정에 따라 변경될 수 있는 소량의 누적 무료 스캔을 제공합니다.",
   },
   {
     q: "알레르기 경고를 신뢰해도 되나요?",
     a: "알레르기 표시는 AI가 생성한 참고용 정보입니다. 주문 전에는 반드시 식당 직원에게 확인하세요. 생명에 영향을 줄 수 있는 알레르기가 있는 경우 특히 중요합니다. TransTaste는 의료기기가 아닙니다.",
-  },
-  {
-    q: "프로필의 API 키 입력란은 무엇인가요?",
-    a: "개발자나 파워 유저를 위한 선택 사항입니다. 본인의 Anthropic API 키를 입력하면 크레딧을 소모하지 않고 본인 키로 직접 스캔합니다. 키는 기기에만 저장되며 서버로 전송되지 않습니다.",
   },
   {
     q: "오프라인에서도 사용할 수 있나요?",
@@ -62,11 +54,11 @@ const FAQ_KO: FaqEntry[] = [
   },
   {
     q: "어떤 언어를 지원하나요?",
-    a: "메뉴 사진은 수십 개 언어를 인식하며, 결과는 영어·한국어·일본어·중국어·태국어·베트남어·스페인어·프랑스어·이탈리아어로 표시할 수 있습니다. 레스토랑 회화집은 이 8개 언어에 대해 발음 가이드까지 제공합니다.",
+    a: "핵심 제품 UI는 영어·한국어·일본어를 우선 출시 품질 범위로 지원합니다. 그 밖의 메뉴·회화 언어는 베타로 제공하며 공개 출시 전 언어별 검수가 필요합니다.",
   },
   {
     q: "내 데이터는 어떻게 사용되나요?",
-    a: "메뉴 이미지는 분석을 위해 Anthropic으로 전송되며 성능을 위해 잠시 캐시됩니다. 개인정보를 판매하거나 외부와 공유하지 않습니다. 자세한 내용은 개인정보처리방침에서 확인하세요.",
+    a: "실제 분석 환경에서는 메뉴 이미지가 설정된 AI 제공자에게 전송되어 처리되며 TransTaste는 원본 이미지를 기본적으로 보존하지 않습니다. 구조화 결과와 필수 운영 로그는 별도 보존 정책을 따르고, 모델 개선 활용은 명시적 동의를 받은 경우에만 허용합니다.",
   },
 ];
 

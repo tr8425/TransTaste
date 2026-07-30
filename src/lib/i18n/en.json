@@ -27,7 +27,7 @@
     "getStarted": "Get Started",
     "skipForNow": "Skip for now",
     "saveAndStart": "Save & Start Scanning",
-    "freeScans": "10 free scans included",
+    "freeScans": "Beta menu scans included",
     "iSpeak": "I speak...",
     "anyAllergies": "Any allergies?",
     "allergySubtitle": "We'll flag these in every scan",
@@ -48,9 +48,50 @@
     "homeCurrencyHint": "We'll convert menu prices for you"
   },
 
+  "quickSetup": {
+    "loading": "Loading dietary preferences",
+    "eyebrow": "Before we analyze",
+    "title": "Anything we should look out for?",
+    "description": "A quick choice helps us sort the menu around your needs. You can change this later.",
+    "savedPreferences": "Your saved preferences are ready. Review them or continue as-is.",
+    "dietLegend": "Dietary preferences",
+    "none": "No preference",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "halal": "Halal",
+    "avoidLabel": "Ingredients to avoid",
+    "avoidHint": "Optional. Separate multiple ingredients with commas.",
+    "avoidPlaceholder": "e.g. peanuts, shellfish",
+    "safetyNote": "Saved allergen alerts still apply. AI guidance may miss ingredients or cross-contact, so always confirm serious allergies with restaurant staff.",
+    "continue": "Save & analyze menu",
+    "skip": "Skip for this scan"
+  },
+
   "home": {
-    "heroTitle": "Scan any menu, understand every dish",
-    "heroDesc": "Point your camera at a foreign menu and get instant translations, allergens & fun facts",
+    "heroTitle": "Find what you can eat. Order it clearly.",
+    "heroDesc": "Scan a foreign menu to understand dishes, spot dietary concerns, and show your order in the local language.",
+    "positioningBadge": "Built for dietary needs abroad",
+    "primaryCta": "Scan a Menu",
+    "sampleCta": "Try a sample menu",
+    "otherInputs": "Other ways to analyze",
+    "proofEyebrow": "From menu to decision",
+    "proofTitle": "Know what needs your attention",
+    "originalMenu": "Original menu",
+    "demoAvoid": "Best to avoid",
+    "demoAvoidDetail": "Ebi fry commonly contains shellfish, egg, and wheat.",
+    "demoCheck": "Ask the server",
+    "demoCheckDetail": "Karaage marinade may contain soy or wheat.",
+    "demoClear": "No listed concern",
+    "demoClearDetail": "No selected ingredients found in the menu description.",
+    "showServerTitle": "Ready when it is time to order",
+    "showServerDesc": "Build your order, then show the original dish names and dietary request in the restaurant's language.",
+    "trustLanguagesValue": "8",
+    "trustLanguages": "order languages",
+    "trustAllergensValue": "14",
+    "trustAllergens": "allergen types",
+    "trustNoSignupValue": "0",
+    "trustNoSignup": "sign-ups to try",
+    "safetyNote": "AI-generated guidance can miss ingredients or cross-contact. Always confirm dietary needs with restaurant staff.",
     "scanMenu": "Scan Menu",
     "gallery": "Gallery",
     "url": "URL",
@@ -75,6 +116,10 @@
   },
 
   "loading": {
+    "progressStages": "Analysis progress",
+    "stageReading": "Read menu",
+    "stageUnderstanding": "Understand dishes",
+    "stageSafety": "Check safety",
     "analyzing": "Analyzing your menu...",
     "identifying": "Identifying dishes, flavors & allergens",
     "scanning": "Scanning {type}...",
@@ -96,9 +141,17 @@
     "addToOrder": "Add to Order",
     "added": "Added \u2713",
     "noScans": "No scans remaining",
-    "noScansDesc": "You've used all your free scans. Pick an option to keep exploring:",
+    "noScansDesc": "You've used the current beta allowance. Checkout is not available yet, but you can review the proposed trip passes or keep using the sample flow.",
     "somethingWrong": "Something went wrong",
-    "demoBanner": "Showing example data — no API key configured. Set your API key in Profile to use real menu analysis."
+    "demoBanner": "Showing clearly labeled example data. Real AI analysis is available only in an authorized test environment.",
+    "decisionEyebrow": "Your menu at a glance",
+    "decisionTitle": "Start with what needs attention",
+    "avoid": "Best to avoid",
+    "askStaff": "Ask staff",
+    "safer": "No listed concern",
+    "decisionSafety": "“No listed concern” only means no selected issue was found in the available menu text. It is not a safety guarantee.",
+    "confirmWithStaff": "Some dishes need an ingredient or preparation check.",
+    "openPhrases": "Ask in local language"
   },
 
   "dish": {
@@ -117,6 +170,7 @@
     "couldNotLoad": "Could not load details",
     "tapToRetry": "Tap to retry",
     "dislikedWarning": "Contains ingredients you dislike: {items}.",
+    "dietaryMismatch": "Does not match your selection: {items}",
     "calorieEstimate": "~{kcal} kcal",
     "calorieDisclaimer": "Calorie values are AI estimates and may vary."
   },
@@ -139,13 +193,40 @@
     "tipSuggestion": "Tip suggestion",
     "orderDone": "Done ordering?",
     "clearCart": "Clear order",
-    "keepOrder": "Keep"
+    "keepOrder": "Keep",
+    "confirmBeforeOrdering": "{count} selected dishes need confirmation",
+    "confirmBeforeOrderingDesc": "Ask staff about ingredients and preparation before placing this order.",
+    "showToServerHint": "Opens a high-contrast order card in the menu language."
   },
 
   "present": {
     "noItems": "No items in order",
     "goBack": "Go Back",
+    "showThisScreen": "Show this screen to restaurant staff",
+    "screenAwake": "Screen stays awake while this page is open",
     "disclaimer": "This order was generated by AI (TransTaste). Please verify items with restaurant staff. Allergen information is for reference only and may not reflect actual preparation."
+  },
+
+  "pricing": {
+    "eyebrow": "Product validation",
+    "title": "Would this be worth paying for on a trip?",
+    "description": "Choose the option you would seriously consider. This records interest only—there is no checkout or charge.",
+    "hypothesisNote": "These are test prices based on market research, not final launch prices.",
+    "pass3d": "3-Day Short Trip Pass",
+    "pass3dDesc": "For a weekend or one-city trip.",
+    "pass7d": "7-Day Trip Pass",
+    "pass7dDesc": "For a typical week-long trip. Our recommended test option.",
+    "pass30d": "30-Day Travel Pass",
+    "pass30dDesc": "For longer travel or multiple destinations.",
+    "bestForTrip": "Recommended",
+    "interested": "I would consider this",
+    "interestRecorded": "Interest recorded ✓",
+    "validationOnly": "No payment will be taken",
+    "validationOnlyDesc": "This experiment stores an anonymous click only in this browser. It does not collect email, menu text, or payment details.",
+    "resultsTitle": "Help decide whether TransTaste should become a paid product",
+    "resultsDesc": "Review the proposed trip-pass prices after trying the menu flow.",
+    "seeOptions": "Review proposed pricing",
+    "exportData": "Export this browser’s validation data"
   },
 
   "travel": {
@@ -161,7 +242,7 @@
     "travelTip": "Travel Tip",
     "quickWater": "Water, please",
     "quickCheck": "Check, please",
-    "quickNoSpicy": "No spicy",
+    "quickNoSpicy": "Is this spicy?",
     "quickAllergy": "Allergic to...",
     "tipJa": "In Japan, say \"itadakimasu\" before eating — it shows gratitude for the meal.",
     "tipKo": "In Korea, wait for the eldest person to start eating before you begin.",
@@ -267,7 +348,7 @@
     "active": "Active",
     "scansLeft": "{count} scans left",
     "expires": "Expires {date}",
-    "getMoreScans": "Get More Scans",
+    "getMoreScans": "Review Proposed Passes",
     "language": "Language",
     "iSpeak": "I speak",
     "menuLanguage": "Menu language",
@@ -277,11 +358,6 @@
     "noDietary": "No dietary preferences selected",
     "tipGuide": "Tip Guide",
     "tipGuideDesc": "Show banner when visiting countries where tipping isn't expected",
-    "advancedSettings": "Advanced",
-    "advancedSettingsDesc": "Developer options",
-    "apiKey": "API Key",
-    "apiKeyDesc": "Use your own Anthropic API key for unlimited scans",
-    "apiKeyNote": "Stored locally on your device only. Never sent to our servers.",
     "account": "Account",
     "notSignedIn": "Not signed in",
     "signIn": "Sign In",
@@ -302,22 +378,10 @@
     "menuLangFr": "French",
     "homeCurrency": "Home Currency",
     "homeCurrencyDesc": "For price conversion on results",
-    "noCurrency": "Not set"
-  },
-
-  "paywall": {
-    "title": "Want to explore deeper?",
-    "subtitle": "Unlock flavor profiles, fun facts & eating guides",
-    "skip": "Skip",
-    "reassurance": "One-time payment \u00b7 No subscription \u00b7 Instant access",
-    "pass7d": "7-Day Trip Pass",
-    "pass7dDesc": "Perfect for a week-long trip",
-    "pass7dBadge": "Traveler Pick",
-    "pass30d": "30-Day Trip Pass",
-    "pass30dDesc": "For the extended explorer",
-    "credits50": "50 Credits",
-    "credits50Desc": "Pay as you go",
-    "unlimitedScans": "Unlimited scans for your trip"
+    "noCurrency": "Not set",
+    "sectionNavigation": "Profile sections",
+    "sectionUsage": "Usage & passes",
+    "sectionDietary": "Food preferences"
   },
 
   "payment": {
@@ -336,6 +400,8 @@
   },
 
   "camera": {
+    "turnFlashOn": "Turn flash on",
+    "turnFlashOff": "Turn flash off",
     "takePhoto": "Take Photo",
     "chooseFromGallery": "Choose from Gallery",
     "cameraNotAvailable": "Camera not available",
@@ -421,10 +487,10 @@
   },
 
   "risk": {
-    "danger": "Allergen",
+    "danger": "Best to avoid",
     "warning": "Check",
     "check": "Ask staff",
-    "safe": "Safe"
+    "safe": "No listed concern"
   },
 
   "errorScreen": {
@@ -536,6 +602,7 @@
     "unexpected": "Something went wrong. Please try again.",
     "rateLimited": "Too many requests. Please wait a moment and try again.",
     "authFailed": "API key is invalid or expired. Check your settings.",
+    "serviceUnavailable": "Menu analysis is not available right now. Please try again later.",
     "notMenu": "This doesn't appear to be a food menu. Please take a photo of a menu.",
     "ocrFailed": "Couldn't read the menu. Please try a clearer, well-lit photo.",
     "noText": "No menu items found. Make sure the menu text is visible.",

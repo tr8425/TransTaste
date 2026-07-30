@@ -8,7 +8,7 @@ export interface MenuInput {
   allergenPreset?: string[];
   dietaryBeliefs?: string[];
   dislikedIngredients?: string[];
-  apiKey?: string; // user-provided key overrides server env
+  apiKey?: string; // resolved by the server route
 }
 
 export interface AIProvider {

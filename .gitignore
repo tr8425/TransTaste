@@ -12,6 +12,8 @@
 
 # playwright mcp (browser snapshot/console artifacts)
 .playwright-mcp/
+.playwright-cli/
+/.codex/*.log
 
 # next.js
 /.next/
@@ -44,5 +46,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-.vercel

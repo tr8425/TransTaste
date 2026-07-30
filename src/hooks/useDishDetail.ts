@@ -54,15 +54,9 @@ export function useDishDetail(
     setDetail(null);
 
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      try {
-        const userKey = localStorage.getItem("transtaste_api_key");
-        if (userKey) headers["x-api-key"] = userKey;
-      } catch { /* ignore */ }
-
       const res = await fetch("/api/analyze/detail", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           input: menuInput.input,
           inputType: menuInput.inputType,

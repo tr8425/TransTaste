@@ -12,22 +12,27 @@ export default function CameraPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null!);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<Blob[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
-  const handleCapture = async (blob?: Blob | null) => {
+  const replacePreview = (files: Blob[]) => {
+    previews.forEach((url) => URL.revokeObjectURL(url));
+    const limitedFiles = files.slice(0, MAX_IMAGES);
+    setSelectedFiles(limitedFiles);
+    setPreviews(limitedFiles.map((file) => URL.createObjectURL(file)));
+    setShowPreview(limitedFiles.length > 0);
+  };
+
+  const handleCapture = (blob?: Blob | null) => {
     if (!blob) return;
-    const base64 = await compressBlob(blob);
-    sessionStorage.setItem("scanImage", base64);
-    sessionStorage.setItem("scanInputType", "image");
-    router.push("/loading-scan");
+    replacePreview([blob]);
   };
 
   const handleQrDetected = (url: string) => {
     sessionStorage.setItem("scanImage", url);
     sessionStorage.setItem("scanInputType", "url");
-    router.push("/loading-scan");
+    router.push("/scan-setup");
   };
 
   const handleGallery = () => {
@@ -38,22 +43,8 @@ export default function CameraPage() {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Single file: existing immediate behavior
-    if (files.length === 1 && selectedFiles.length === 0) {
-      const base64 = await compressBlob(files[0]);
-      sessionStorage.setItem("scanImage", base64);
-      sessionStorage.setItem("scanInputType", "image");
-      router.push("/loading-scan");
-      return;
-    }
-
-    // Multiple files: show preview overlay
     const combined = [...selectedFiles, ...files].slice(0, MAX_IMAGES);
-    setSelectedFiles(combined);
-
-    const previewUrls = combined.map((f) => URL.createObjectURL(f));
-    setPreviews(previewUrls);
-    setShowPreview(true);
+    replacePreview(combined);
 
     // Reset input so the same files can be re-selected
     e.target.value = "";
@@ -64,13 +55,15 @@ export default function CameraPage() {
   };
 
   const handleAnalyzeAll = async () => {
+    if (selectedFiles.length === 0) return;
     const base64Array = await Promise.all(
       selectedFiles.map((f) => compressBlob(f))
     );
     const joined = base64Array.join("|||");
     sessionStorage.setItem("scanImage", joined);
     sessionStorage.setItem("scanInputType", "image");
-    router.push("/loading-scan");
+    previews.forEach((url) => URL.revokeObjectURL(url));
+    router.push("/scan-setup");
   };
 
   const handleCancel = () => {
@@ -124,7 +117,9 @@ export default function CameraPage() {
                     className="h-32 w-full rounded-lg object-cover"
                   />
                   <button
+                    type="button"
                     onClick={() => handleRemoveImage(i)}
+                    aria-label={`${t("common.aria.removeItem")} ${i + 1}`}
                     className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-charcoal text-xs text-white shadow"
                   >
                     ✕

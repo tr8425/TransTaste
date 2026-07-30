@@ -1,0 +1,5 @@
+# This repository is a Next.js application and does not use Unity.
+# Keep the user-scoped unityMCP registration available for other projects,
+# but disable it when Codex is started from this repository.
+[mcp_servers.unityMCP]
+enabled = false

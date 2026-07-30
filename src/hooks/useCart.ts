@@ -8,6 +8,8 @@ export interface CartItem {
   name_translated: string;
   price?: number;
   currency?: string;
+  allergen_risk?: "danger" | "warning" | "check" | "safe";
+  allergens?: string[];
   quantity: number;
 }
 

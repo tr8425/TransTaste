@@ -59,6 +59,20 @@ export default function HorizontalScroll({
         {children}
       </div>
 
+      {canScrollLeft && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-cream to-transparent md:hidden"
+        />
+      )}
+
+      {canScrollRight && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-cream to-transparent md:hidden"
+        />
+      )}
+
       {/* Left arrow — PC only (hover group) */}
       {canScrollLeft && (
         <button

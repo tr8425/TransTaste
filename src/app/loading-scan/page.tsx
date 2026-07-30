@@ -227,18 +227,15 @@ export default function LoadingScanPage() {
 
     const analyze = async () => {
       try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
         let userSettings: Record<string, unknown> = {};
         try {
-          const userKey = localStorage.getItem("transtaste_api_key");
-          if (userKey) headers["x-api-key"] = userKey;
           const raw = localStorage.getItem("transtaste_user_settings");
           if (raw) userSettings = JSON.parse(raw);
         } catch { /* ignore */ }
 
         const res = await fetch("/api/analyze", {
           method: "POST",
-          headers,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             input,
             inputType: type,
@@ -258,8 +255,25 @@ export default function LoadingScanPage() {
         } else {
           // JSON response (mock/cache)
           if (!res.ok) {
-            const errBody = await res.text();
-            throw new Error(errBody || `Server error: ${res.status}`);
+            let parsedError: { error?: string; reason?: string; _debug?: string } = {};
+            try {
+              parsedError = await res.json();
+            } catch {
+              parsedError = {
+                error: "E_FETCH_FAIL",
+                reason: `Server error: ${res.status}`,
+              };
+            }
+            sessionStorage.setItem(
+              "scanError",
+              JSON.stringify({
+                error: parsedError.error || "E_FETCH_FAIL",
+                reason: parsedError.reason,
+                _debug: parsedError._debug,
+              }),
+            );
+            navigateToResults();
+            return;
           }
           const result = await res.json();
           // Deduct credit only on successful analysis
@@ -299,23 +313,54 @@ export default function LoadingScanPage() {
   const subtitleText = menuMeta
     ? `${menuMeta.language || ""} · ${menuMeta.restaurant_type || ""}`.replace(/^ · | · $/g, "")
     : t("loading.identifying");
+  const activeStage = dishes.length > 0 ? 2 : menuMeta ? 1 : 0;
+  const loadingStages = [
+    t("loading.stageReading"),
+    t("loading.stageUnderstanding"),
+    t("loading.stageSafety"),
+  ];
 
   return (
-    <div className="fixed inset-0 bg-cream flex flex-col items-center px-6 overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-cream flex flex-col items-center px-6 overflow-y-auto"
+      aria-busy="true"
+    >
       {/* Top loading section */}
       <div className="flex flex-col items-center pt-16 pb-4 flex-shrink-0">
         <div className="text-6xl mb-6 animate-bounce">
           {FOOD_EMOJIS[emojiIndex]}
         </div>
-        <h2 className="text-lg font-semibold text-brown-dark mb-1">
+        <h2
+          className="text-lg font-semibold text-brown-dark mb-1"
+          aria-live="polite"
+        >
           {statusText}
         </h2>
         <p className="text-sm text-brown-medium mb-4">{subtitleText}</p>
 
         {/* Progress bar (180s animation) */}
-        <div className="w-48 h-1 bg-cream-dark rounded-full overflow-hidden mb-6">
+        <div
+          className="w-48 h-1 bg-cream-dark rounded-full overflow-hidden"
+          role="progressbar"
+          aria-label={statusText}
+        >
           <div className="h-full bg-coral rounded-full animate-progress" />
         </div>
+        <ol className="mt-4 flex items-center gap-2" aria-label={t("loading.progressStages")}>
+          {loadingStages.map((stage, index) => (
+            <li
+              key={stage}
+              className={`rounded-full px-2 py-1 text-[10px] font-medium ${
+                index <= activeStage
+                  ? "bg-coral/10 text-coral"
+                  : "bg-cream-dark text-brown-medium/60"
+              }`}
+              aria-current={index === activeStage ? "step" : undefined}
+            >
+              {stage}
+            </li>
+          ))}
+        </ol>
       </div>
 
       {/* Streaming dish previews */}

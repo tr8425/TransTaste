@@ -9,13 +9,13 @@ import DishRow from "@/components/dish/DishRow";
 import DishCard from "@/components/dish/DishCard";
 import LockedBlock from "@/components/common/LockedBlock";
 import ComboRecommendation from "@/components/paywall/ComboRecommendation";
-import TripPassPaywall from "@/components/paywall/TripPassPaywall";
 import { useCart } from "@/hooks/useCart";
 import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { trackProductEvent } from "@/lib/product-events";
 
 export default function ResultsPage() {
   return (
@@ -30,12 +30,13 @@ function ResultsContent() {
   const searchParams = useSearchParams();
   const [selectedDish, setSelectedDish] = useState<DishLite | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("all");
-  const [showPaywall, setShowPaywall] = useState(false);
+  const [decisionFilter, setDecisionFilter] = useState<"all" | "safer" | "check" | "avoid">("all");
+  const [dietaryBeliefs, setDietaryBeliefs] = useState<string[]>([]);
   const [showCombo, setShowCombo] = useState(false);
   const credits = useCredits();
   const { isPhase2Free } = credits;
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [paymentBanner, setPaymentBanner] = useState<"success" | "cancelled" | null>(null);
+  const [paymentBanner, setPaymentBanner] = useState<"cancelled" | null>(null);
   const comboRef = useRef<HTMLDivElement>(null);
   const [scanError, setScanError] = useState<{ code: string; reason: string; _debug?: string } | null>(null);
   const [menuInput, setMenuInput] = useState<StoredMenuInput | null>(null);
@@ -48,6 +49,8 @@ function ResultsContent() {
     name_translated: dish.translation.english,
     price: dish.price ? parseFloat(dish.price) || undefined : undefined,
     currency: dish.currency || "\u20A9",
+    allergen_risk: dish.allergen_risk,
+    allergens: dish.allergens,
   });
 
   const isDishInCart = (dish: DishLite) =>
@@ -63,19 +66,10 @@ function ResultsContent() {
   // Handle payment redirect (Stripe success/cancel)
   useEffect(() => {
     const payment = searchParams.get("payment");
-    const plan = searchParams.get("plan");
-    if (payment === "success" && plan) {
-      if (plan === "pass_7d" || plan === "pass_30d") {
-        credits.purchasePass(plan === "pass_7d" ? "7d" : "30d");
-      } else if (plan === "credits_50") {
-        credits.purchaseCredits(50);
-      }
-      setIsUnlocked(true);
-      setPaymentBanner("success");
-      // Clear query params without reload
+    if (payment === "success") {
+      // A query parameter is not proof of payment. Entitlements must come from
+      // a verified server-side record after Stripe/Supabase are connected.
       window.history.replaceState({}, "", "/results");
-      const timer = setTimeout(() => setPaymentBanner(null), 4000);
-      return () => clearTimeout(timer);
     } else if (payment === "cancelled") {
       setPaymentBanner("cancelled");
       window.history.replaceState({}, "", "/results");
@@ -86,6 +80,20 @@ function ResultsContent() {
   }, []);
 
   useEffect(() => {
+    try {
+      const rawSettings = localStorage.getItem("transtaste_user_settings");
+      if (rawSettings) {
+        const settings = JSON.parse(rawSettings) as { dietary_beliefs?: string[] };
+        setDietaryBeliefs(
+          Array.isArray(settings.dietary_beliefs)
+            ? settings.dietary_beliefs
+            : [],
+        );
+      }
+    } catch {
+      // Ignore malformed legacy settings.
+    }
+
     const errorStr = sessionStorage.getItem("scanError");
     let resultStr = sessionStorage.getItem("scanResult");
 
@@ -128,6 +136,10 @@ function ResultsContent() {
       try {
         const parsed = JSON.parse(resultStr) as MenuAnalysisResult;
         setData(parsed);
+        trackProductEvent("analysis_completed", {
+          dish_count: parsed.dishes.length,
+          demo: Boolean(parsed.demo),
+        });
 
         // Connect scan metadata to cart context
         const lang = parsed.menu_language || parsed.menu_meta?.language || "";
@@ -202,11 +214,76 @@ function ResultsContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only: parse sessionStorage once
   }, []);
 
+  const riskRank: Record<DishLite["allergen_risk"], number> = {
+    danger: 0,
+    warning: 1,
+    check: 2,
+    safe: 3,
+  };
+  const riskAdjustedDishes = data
+    ? data.dishes.map((dish): DishLite => {
+        const conflicts = dietaryBeliefs.filter((belief) => {
+          if (belief === "vegan") return !dish.dietary.vegan;
+          if (belief === "vegetarian") {
+            return !dish.dietary.vegetarian && !dish.dietary.vegan;
+          }
+          if (belief === "halal") return dish.dietary.halal === false;
+          return false;
+        });
+        const needsHalalCheck =
+          dietaryBeliefs.includes("halal") && dish.dietary.halal == null;
+        const derivedRisk = conflicts.length > 0
+          ? "danger"
+          : needsHalalCheck && riskRank[dish.allergen_risk] > riskRank.check
+            ? "check"
+            : dish.allergen_risk;
+
+        return {
+          ...dish,
+          allergen_risk: derivedRisk,
+          dietary_conflicts: conflicts,
+        };
+      })
+    : [];
+  const adjustedRiskByName = new Map(
+    riskAdjustedDishes.map((dish) => [dish.original, dish.allergen_risk]),
+  );
+  const decisionDishes = riskAdjustedDishes.map((dish) => ({
+    ...dish,
+    alternative_dishes: dish.alternative_dishes?.filter((alternative) => {
+      const alternativeRisk = adjustedRiskByName.get(alternative);
+      return alternativeRisk != null &&
+        riskRank[alternativeRisk] > riskRank[dish.allergen_risk];
+    }),
+  }));
+  const riskCounts = data
+    ? decisionDishes.reduce(
+        (counts, dish) => {
+          if (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") {
+            counts.avoid += 1;
+          } else if (dish.allergen_risk === "check") {
+            counts.check += 1;
+          } else {
+            counts.safer += 1;
+          }
+          return counts;
+        },
+        { avoid: 0, check: 0, safer: 0 },
+      )
+    : { avoid: 0, check: 0, safer: 0 };
   const filteredDishes = !data
     ? []
-    : activeFilter === "all"
-      ? data.dishes
-      : data.dishes.filter((d) => d.category === activeFilter);
+    : [...decisionDishes]
+        .sort((a, b) => riskRank[a.allergen_risk] - riskRank[b.allergen_risk])
+        .filter((dish) => activeFilter === "all" || dish.category === activeFilter)
+        .filter((dish) => {
+          if (decisionFilter === "all") return true;
+          if (decisionFilter === "avoid") {
+            return dish.allergen_risk === "danger" || dish.allergen_risk === "warning";
+          }
+          if (decisionFilter === "check") return dish.allergen_risk === "check";
+          return dish.allergen_risk === "safe";
+        });
 
   useEffect(() => {
     if (isPhase2Free) setIsUnlocked(true);
@@ -223,39 +300,32 @@ function ResultsContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, exchange.homeCurrency]);
 
-  const handleUnlock = () => setShowPaywall(true);
-
-  const handlePurchase = async (planId: string) => {
-    // Map UI plan IDs to Stripe product IDs
-    const stripeProductId =
-      planId === "7d" ? "pass_7d" :
-      planId === "30d" ? "pass_30d" :
-      planId;
-
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: stripeProductId }),
-      });
-
-      if (res.ok) {
-        const { url } = await res.json();
-        if (url) {
-          window.location.href = url;
-          return;
-        }
-      }
-    } catch {
-      // Stripe unavailable — fall through to local purchase
-    }
-
-    // Fallback: local unlock (dev/demo mode)
-    setIsUnlocked(true);
-    setShowPaywall(false);
+  const handleUnlock = () => {
+    window.location.href = "/pricing";
   };
 
-  // No credits state — soft paywall with inline pricing
+  const retryLastAnalysis = () => {
+    try {
+      const raw = sessionStorage.getItem("menuInputForDetail");
+      if (!raw) {
+        window.location.href = "/camera";
+        return;
+      }
+      const previous = JSON.parse(raw) as StoredMenuInput;
+      sessionStorage.setItem("scanInputType", previous.inputType);
+      if (previous.inputType === "text") {
+        sessionStorage.setItem("scanText", previous.input);
+      } else {
+        sessionStorage.setItem("scanImage", previous.input);
+      }
+      sessionStorage.removeItem("scanError");
+      window.location.href = "/loading-scan";
+    } catch {
+      window.location.href = "/camera";
+    }
+  };
+
+  // No credits state — product validation only; checkout is not available.
   if (scanError?.code === "E_NO_CREDITS") {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
@@ -272,39 +342,18 @@ function ResultsContent() {
             </p>
           </div>
 
-          {/* Inline pricing options */}
-          <div className="space-y-2.5 mb-4">
-            <Link
-              href="/profile"
-              className="flex items-center justify-between w-full p-3.5 bg-coral/5 border-2 border-coral rounded-xl hover:bg-coral/10 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-brown-dark">{t("paywall.pass7d")}</p>
-                <p className="text-xs text-brown-medium">{t("paywall.unlimitedScans")}</p>
-              </div>
-              <span className="text-lg font-bold text-coral">$2.99</span>
-            </Link>
-            <Link
-              href="/profile"
-              className="flex items-center justify-between w-full p-3.5 bg-cream-dark border border-brown-light/20 rounded-xl hover:border-coral/30 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-brown-dark">{t("paywall.credits50")}</p>
-                <p className="text-xs text-brown-medium">{t("paywall.credits50Desc")}</p>
-              </div>
-              <span className="text-base font-bold text-brown-dark">$1.99</span>
-            </Link>
-            <Link
-              href="/profile"
-              className="flex items-center justify-between w-full p-3.5 bg-cream-dark border border-brown-light/20 rounded-xl hover:border-coral/30 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-brown-dark">{t("paywall.pass30d")}</p>
-                <p className="text-xs text-brown-medium">{t("paywall.pass30dDesc")}</p>
-              </div>
-              <span className="text-base font-bold text-brown-dark">$5.99</span>
-            </Link>
-          </div>
+          <Link
+            href="/pricing"
+            className="mb-3 block w-full rounded-xl bg-coral py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+          >
+            {t("pricing.seeOptions")}
+          </Link>
+          <Link
+            href="/?input=text"
+            className="mb-1 block w-full rounded-xl border border-brown-light/20 bg-cream-dark py-3 text-center text-sm font-medium text-brown-dark"
+          >
+            {t("home.sampleCta")}
+          </Link>
 
           <Link
             href="/"
@@ -327,6 +376,7 @@ function ResultsContent() {
       E_RATE_LIMIT: t("errors.rateLimited"),
       E_BAD_REQUEST: t("errors.unexpected"),
       E_AUTH: t("errors.authFailed"),
+      E_SERVICE_UNAVAILABLE: t("errors.serviceUnavailable"),
       E_NOT_MENU: t("errors.notMenu"),
       E_OCR_FAIL: t("errors.ocrFailed"),
       E_NO_TEXT: t("errors.noText"),
@@ -377,15 +427,30 @@ function ResultsContent() {
           <p className="text-[10px] text-brown-medium/40 mb-6 font-mono select-all">
             {scanError.code}{scanError._debug ? ` · ${scanError._debug}` : ''}
           </p>
-          <Link
-            href="/camera"
-            className="inline-block w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors text-center"
+          <button
+            type="button"
+            onClick={retryLastAnalysis}
+            className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors text-center"
           >
             {t("common.tryAgain")}
-          </Link>
+          </button>
+          <div className="mt-3 flex items-center justify-center gap-4">
+            <Link
+              href="/camera"
+              className="text-sm text-brown-medium hover:text-coral transition-colors"
+            >
+              {t("camera.chooseFromGallery")}
+            </Link>
+            <Link
+              href="/?input=text"
+              className="text-sm text-brown-medium hover:text-coral transition-colors"
+            >
+              {t("errorScreen.typeDishNames")}
+            </Link>
+          </div>
           <Link
             href="/"
-            className="inline-block mt-3 text-sm text-brown-medium hover:text-coral transition-colors"
+            className="inline-block mt-4 text-sm text-brown-medium/70 hover:text-coral transition-colors"
           >
             {t("common.backToHome")}
           </Link>
@@ -423,10 +488,8 @@ function ResultsContent() {
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Payment banner */}
       {paymentBanner && (
-        <div className={`fixed top-0 left-0 right-0 z-50 py-3 px-5 text-center text-sm font-semibold ${
-          paymentBanner === "success" ? "bg-green-500 text-white" : "bg-amber-500 text-white"
-        }`}>
-          {paymentBanner === "success" ? t("payment.success") : t("payment.cancelled")}
+        <div className="fixed left-0 right-0 top-0 z-50 bg-amber-500 px-5 py-3 text-center text-sm font-semibold text-white">
+          {t("payment.cancelled")}
         </div>
       )}
       {/* Header */}
@@ -470,6 +533,38 @@ function ResultsContent() {
         </div>
       )}
 
+      <section className="mx-5 mb-3 rounded-2xl border border-brown-light/10 bg-white/70 p-4" aria-labelledby="decision-summary">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-coral">
+          {t("results.decisionEyebrow")}
+        </p>
+        <h2 id="decision-summary" className="mt-1 text-base font-bold text-brown-dark">
+          {t("results.decisionTitle")}
+        </h2>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {[
+            { key: "avoid" as const, count: riskCounts.avoid, label: t("results.avoid"), style: "bg-danger/10 text-danger" },
+            { key: "check" as const, count: riskCounts.check, label: t("results.askStaff"), style: "bg-amber-brand/10 text-amber-brand" },
+            { key: "safer" as const, count: riskCounts.safer, label: t("results.safer"), style: "bg-success/10 text-success" },
+          ].map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setDecisionFilter((current) => current === item.key ? "all" : item.key)}
+              aria-pressed={decisionFilter === item.key}
+              className={`min-h-16 rounded-xl px-2 py-2 text-center transition ring-offset-2 ring-offset-cream ${
+                item.style
+              } ${decisionFilter === item.key ? "ring-2 ring-current" : ""}`}
+            >
+              <span className="block text-lg font-bold">{item.count}</span>
+              <span className="block text-[10px] font-semibold leading-4">{item.label}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-[10px] leading-4 text-brown-medium">
+          {t("results.decisionSafety")}
+        </p>
+      </section>
+
       {/* Exchange rate toggle */}
       {exchange.homeCurrency && exchange.rateData && exchange.rateData.rate !== 1 && (
         <div className="px-5 pb-2">
@@ -491,6 +586,17 @@ function ResultsContent() {
           </button>
         </div>
       )}
+
+      {riskCounts.avoid + riskCounts.check > 0 ? (
+        <div className="mx-5 mb-2 flex items-center justify-between rounded-xl bg-amber-brand/10 px-3 py-2.5">
+          <p className="pr-3 text-xs font-medium leading-5 text-brown-dark">
+            {t("results.confirmWithStaff")}
+          </p>
+          <Link href="/phrases" className="flex-none text-xs font-bold text-coral underline underline-offset-2">
+            {t("results.openPhrases")}
+          </Link>
+        </div>
+      ) : null}
 
       {/* Category filters — sticky so they remain accessible while scrolling */}
       <div className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm px-5 py-3 border-b border-brown-light/10">
@@ -526,8 +632,14 @@ function ResultsContent() {
               <DishRow
                 key={i}
                 dish={d}
-                onClick={() => setSelectedDish(d)}
-                onAddToCart={() => cart.addItem(dishToCartItem(d))}
+                onClick={() => {
+                  trackProductEvent("dish_opened", { risk: d.allergen_risk });
+                  setSelectedDish(d);
+                }}
+                onAddToCart={() => {
+                  trackProductEvent("dish_added_to_order", { risk: d.allergen_risk });
+                  cart.addItem(dishToCartItem(d));
+                }}
                 isInCart={isDishInCart(d)}
                 convertedPrice={converted}
               />
@@ -556,6 +668,20 @@ function ResultsContent() {
           )}
         </div>
       )}
+
+      <section className="mx-5 mb-5 rounded-2xl bg-brown-dark p-4 text-cream">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-coral-light">
+          {t("pricing.eyebrow")}
+        </p>
+        <h2 className="mt-1 text-base font-bold">{t("pricing.resultsTitle")}</h2>
+        <p className="mt-1 text-xs leading-5 text-cream/70">{t("pricing.resultsDesc")}</p>
+        <Link
+          href="/pricing"
+          className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-xs font-bold text-brown-dark"
+        >
+          {t("pricing.seeOptions")}
+        </Link>
+      </section>
 
       {/* Bottom bar */}
       <div className="sticky bottom-[72px] px-5 py-4 bg-cream/90 backdrop-blur-sm border-t border-brown-light/10">
@@ -598,12 +724,6 @@ function ResultsContent() {
         isInCart={selectedDish ? isDishInCart(selectedDish) : false}
       />
 
-      {/* Paywall */}
-      <TripPassPaywall
-        isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        onPurchase={handlePurchase}
-      />
     </div>
   );
 }

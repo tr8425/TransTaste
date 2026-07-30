@@ -2,16 +2,21 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) return null;
+  if (
+    process.env.ENABLE_STRIPE_CHECKOUT !== 'true' ||
+    !process.env.STRIPE_SECRET_KEY
+  ) {
+    return null;
+  }
   return new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2026-03-25.dahlia',
   });
 }
 
 const PRODUCTS: Record<string, { name: string; amount: number }> = {
-  'pass_7d': { name: '7-Day Trip Pass', amount: 299 },
-  'pass_30d': { name: '30-Day Trip Pass', amount: 599 },
-  'credits_50': { name: '50 Scan Credits', amount: 199 },
+  'pass_3d': { name: '3-Day Short Trip Pass', amount: 199 },
+  'pass_7d': { name: '7-Day Trip Pass', amount: 399 },
+  'pass_30d': { name: '30-Day Trip Pass', amount: 999 },
 };
 
 export async function POST(req: Request) {
@@ -52,8 +57,13 @@ export async function POST(req: Request) {
     }
 
     // No Stripe key — redirect to success directly (dev/demo mode)
-    console.warn('[TransTaste] Stripe not configured — using demo checkout');
-    return NextResponse.json({ url: successUrl });
+    return NextResponse.json(
+      {
+        error: 'E_SERVICE_UNAVAILABLE',
+        reason: 'Checkout is not configured.',
+      },
+      { status: 503 },
+    );
   } catch (err) {
     console.error('Stripe checkout error:', err);
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });

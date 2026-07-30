@@ -3,14 +3,23 @@ import Stripe from 'stripe';
 import { createServerClient } from '@/lib/supabase/server';
 
 function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) return null;
+  if (
+    process.env.ENABLE_STRIPE_CHECKOUT !== 'true' ||
+    !process.env.STRIPE_SECRET_KEY
+  ) {
+    return null;
+  }
   return new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2026-03-25.dahlia',
   });
 }
 
 export async function POST(req: Request) {
-  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+  if (
+    process.env.ENABLE_STRIPE_CHECKOUT !== 'true' ||
+    !process.env.STRIPE_SECRET_KEY ||
+    !process.env.STRIPE_WEBHOOK_SECRET
+  ) {
     return NextResponse.json({ error: 'Not configured' }, { status: 503 });
   }
 
@@ -43,25 +52,19 @@ export async function POST(req: Request) {
       stripe_session_id: session.id,
     });
 
-    // Apply purchase
-    if (productId === 'credits_50') {
-      // Add 50 credits
-      const { data: user } = await supabase
-        .from('users')
-        .select('credits_remaining')
-        .eq('id', userId)
-        .single();
-      await supabase
-        .from('users')
-        .update({ credits_remaining: (user?.credits_remaining || 0) + 50 })
-        .eq('id', userId);
-    } else if (productId === 'pass_7d' || productId === 'pass_30d') {
-      const days = productId === 'pass_7d' ? 7 : 30;
+    // Apply a server-verified trip pass.
+    if (
+      productId === 'pass_3d' ||
+      productId === 'pass_7d' ||
+      productId === 'pass_30d'
+    ) {
+      const days =
+        productId === 'pass_3d' ? 3 : productId === 'pass_7d' ? 7 : 30;
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + days);
       await supabase.from('passes').insert({
         user_id: userId,
-        type: productId === 'pass_7d' ? '7d' : '30d',
+        type: `${days}d`,
         expires_at: expiresAt.toISOString(),
       });
     }

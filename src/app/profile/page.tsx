@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCredits } from "@/hooks/useCredits";
-import TripPassPaywall from "@/components/paywall/TripPassPaywall";
 import { useTranslation } from "@/lib/i18n";
 
 /* ─── Constants ─── */
@@ -112,18 +111,16 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const { t, locale, setLocale } = useTranslation();
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
-  const [paywallOpen, setPaywallOpen] = useState(false);
   const [dislikedInput, setDislikedInput] = useState("");
   const [showAllergenGrid, setShowAllergenGrid] = useState(false);
   const [showDietaryGrid, setShowDietaryGrid] = useState(false);
-  const [paymentBanner, setPaymentBanner] = useState<"success" | "cancelled" | null>(null);
-  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [paymentBanner, setPaymentBanner] = useState<"cancelled" | null>(null);
 
   // Handle payment redirect query params — delay timer until after first paint
   useEffect(() => {
     const payment = searchParams.get("payment");
-    if (payment === "success" || payment === "cancelled") {
-      setPaymentBanner(payment);
+    if (payment === "cancelled") {
+      setPaymentBanner("cancelled");
       const rafId = requestAnimationFrame(() => {
         timer = setTimeout(() => setPaymentBanner(null), 6000);
       });
@@ -132,6 +129,8 @@ function ProfileContent() {
         cancelAnimationFrame(rafId);
         clearTimeout(timer);
       };
+    } else if (payment === "success") {
+      window.history.replaceState({}, "", "/profile");
     }
   }, [searchParams]);
 
@@ -145,9 +144,6 @@ function ProfileContent() {
     } catch {
       // Ignore parse errors
     }
-    try {
-      setApiKeyInput(localStorage.getItem("transtaste_api_key") || "");
-    } catch { /* ignore */ }
   }, []);
 
   // Persist helper
@@ -174,40 +170,6 @@ function ProfileContent() {
     save({ ...settings, dietary_beliefs: next });
   };
 
-  const handlePurchase = async (planId: string) => {
-    // Map UI plan IDs to Stripe product IDs
-    const stripeProductId =
-      planId === "7d" ? "pass_7d" :
-      planId === "30d" ? "pass_30d" :
-      planId;
-
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: stripeProductId }),
-      });
-
-      if (res.ok) {
-        const { url } = await res.json();
-        if (url) {
-          window.location.href = url;
-          return;
-        }
-      }
-    } catch {
-      // Stripe unavailable — fall through to local purchase
-    }
-
-    // Fallback: local credit management (dev/demo mode)
-    if (planId === "7d" || planId === "30d") {
-      credits.purchasePass(planId);
-    } else if (planId === "credits_50") {
-      credits.purchaseCredits(50);
-    }
-    setPaywallOpen(false);
-  };
-
   // Format pass expiry — locale-aware
   const dateLocale = locale === "ko" ? "ko-KR" : "en-US";
   const passExpiry = credits.passExpiresAt
@@ -226,18 +188,8 @@ function ProfileContent() {
 
       {/* Payment feedback banner */}
       {paymentBanner && (
-        <div
-          className={`mx-5 mb-2 px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between ${
-            paymentBanner === "success"
-              ? "bg-success/15 text-success"
-              : "bg-amber-brand/15 text-amber-brand"
-          }`}
-        >
-          <span>
-            {paymentBanner === "success"
-              ? t("payment.success")
-              : t("payment.cancelled")}
-          </span>
+        <div className="mx-5 mb-2 flex items-center justify-between rounded-xl bg-amber-brand/15 px-4 py-3 text-sm font-medium text-amber-brand">
+          <span>{t("payment.cancelled")}</span>
           <button
             onClick={() => setPaymentBanner(null)}
             className="ml-2 text-current opacity-60 hover:opacity-100"
@@ -247,10 +199,32 @@ function ProfileContent() {
         </div>
       )}
 
+      <nav
+        aria-label={t("profile.sectionNavigation")}
+        className="sticky top-0 z-20 border-y border-brown-light/10 bg-cream/95 px-5 py-2 backdrop-blur"
+      >
+        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {[
+            ["profile-usage", t("profile.sectionUsage")],
+            ["profile-language", t("profile.language")],
+            ["profile-dietary", t("profile.sectionDietary")],
+            ["profile-account", t("profile.account")],
+          ].map(([id, label]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className="shrink-0 rounded-full bg-cream-dark px-3 py-1.5 text-xs font-medium text-brown-medium transition-colors hover:bg-coral/10 hover:text-coral focus:outline-none focus:ring-2 focus:ring-coral/40"
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+      </nav>
+
       {/* Content */}
-      <div className="flex-1 px-5 pb-28 space-y-4">
+      <div className="flex-1 px-5 pt-4 pb-28 space-y-4">
         {/* ── Credits & Pass ── */}
-        <div className="bg-cream-dark rounded-xl p-4">
+        <div id="profile-usage" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <svg
@@ -283,16 +257,16 @@ function ProfileContent() {
               {t("profile.expires", { date: passExpiry || "" })}
             </p>
           )}
-          <button
-            onClick={() => setPaywallOpen(true)}
-            className="mt-3 w-full py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors active:scale-[0.98]"
+          <Link
+            href="/pricing"
+            className="mt-3 block w-full rounded-xl bg-coral py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-coral-dark active:scale-[0.98]"
           >
             {t("profile.getMoreScans")}
-          </button>
+          </Link>
         </div>
 
         {/* ── Language Settings ── */}
-        <div className="bg-cream-dark rounded-xl p-4">
+        <div id="profile-language" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
             {t("profile.language")}
           </h2>
@@ -363,7 +337,7 @@ function ProfileContent() {
         </div>
 
         {/* ── Allergy & Dietary ── */}
-        <div className="bg-cream-dark rounded-xl p-4">
+        <div id="profile-dietary" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
           {/* Allergens */}
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
             {t("profile.allergies")}
@@ -552,61 +526,8 @@ function ProfileContent() {
           </div>
         </div>
 
-        {/* ── Advanced / Developer (collapsed by default) ── */}
-        <details className="group bg-cream-dark rounded-xl">
-          <summary className="flex items-center justify-between p-4 cursor-pointer list-none select-none">
-            <div>
-              <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider">
-                {t("profile.advancedSettings")}
-              </h2>
-              <p className="text-xs text-brown-medium/60 mt-0.5">
-                {t("profile.advancedSettingsDesc")}
-              </p>
-            </div>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#A1825F"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="flex-shrink-0 transition-transform group-open:rotate-180"
-              aria-hidden="true"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </summary>
-          <div className="px-4 pb-4 pt-1 border-t border-brown-light/10">
-            <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mt-3 mb-1">
-              {t("profile.apiKey")}
-            </h3>
-            <p className="text-xs text-brown-medium/60 mb-2">
-              {t("profile.apiKeyDesc")}
-            </p>
-            <input
-              type="password"
-              placeholder="sk-ant-api03-..."
-              value={apiKeyInput}
-              onChange={(e) => {
-                const v = e.target.value;
-                setApiKeyInput(v);
-                try {
-                  if (v.trim()) localStorage.setItem("transtaste_api_key", v.trim());
-                  else localStorage.removeItem("transtaste_api_key");
-                } catch { /* ignore */ }
-              }}
-              className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30 font-mono"
-            />
-            <p className="text-[10px] text-brown-medium/40 mt-1.5">
-              {t("profile.apiKeyNote")}
-            </p>
-          </div>
-        </details>
-
         {/* ── Account ── */}
-        <div className="bg-cream-dark rounded-xl p-4">
+        <div id="profile-account" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
           <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
             {t("profile.account")}
           </h2>
@@ -651,12 +572,6 @@ function ProfileContent() {
         </div>
       </div>
 
-      {/* Paywall Modal */}
-      <TripPassPaywall
-        isOpen={paywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        onPurchase={handlePurchase}
-      />
     </div>
   );
 }

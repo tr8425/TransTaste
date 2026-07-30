@@ -27,7 +27,7 @@
     "getStarted": "시작하기",
     "skipForNow": "나중에 하기",
     "saveAndStart": "저장하고 스캔 시작",
-    "freeScans": "무료 스캔 10회 포함",
+    "freeScans": "베타 메뉴 스캔 제공",
     "iSpeak": "내가 사용하는 언어...",
     "anyAllergies": "알레르기가 있으세요?",
     "allergySubtitle": "매번 스캔할 때 알려드릴게요",
@@ -48,9 +48,50 @@
     "homeCurrencyHint": "메뉴 가격을 내 통화로 변환해 드려요"
   },
 
+  "quickSetup": {
+    "loading": "식이 설정 불러오는 중",
+    "eyebrow": "분석 전 빠른 확인",
+    "title": "주의해서 볼 식재료가 있나요?",
+    "description": "간단히 선택하면 내 식이 조건에 맞춰 메뉴를 정리해 드려요. 나중에 변경할 수 있습니다.",
+    "savedPreferences": "저장된 설정을 불러왔어요. 확인하거나 그대로 진행하세요.",
+    "dietLegend": "식이 조건",
+    "none": "해당 없음",
+    "vegetarian": "채식",
+    "vegan": "비건",
+    "halal": "할랄",
+    "avoidLabel": "피하고 싶은 식재료",
+    "avoidHint": "선택 사항입니다. 여러 개라면 쉼표로 구분하세요.",
+    "avoidPlaceholder": "예: 땅콩, 갑각류",
+    "safetyNote": "저장된 알레르기 경고는 그대로 적용됩니다. AI가 재료나 교차 접촉을 놓칠 수 있으니 심각한 알레르기는 반드시 직원에게 확인하세요.",
+    "continue": "저장하고 메뉴 분석",
+    "skip": "이번 스캔은 건너뛰기"
+  },
+
   "home": {
-    "heroTitle": "메뉴판을 찍으면, 모든 요리를 이해합니다",
-    "heroDesc": "외국 메뉴판에 카메라를 가리키면 번역, 알레르기, 재미있는 사실을 즉시 확인하세요",
+    "heroTitle": "먹을 수 있는 메뉴를 찾고, 정확하게 주문하세요.",
+    "heroDesc": "외국 메뉴를 스캔해 요리를 이해하고, 식이 제한을 확인한 뒤 현지어로 주문을 보여주세요.",
+    "positioningBadge": "해외 식이 제한을 위한 주문 도우미",
+    "primaryCta": "메뉴 스캔하기",
+    "sampleCta": "샘플 메뉴로 체험하기",
+    "otherInputs": "다른 방법으로 분석",
+    "proofEyebrow": "메뉴에서 결정까지",
+    "proofTitle": "확인이 필요한 요리를 먼저 보세요",
+    "originalMenu": "원본 메뉴",
+    "demoAvoid": "피하는 것이 좋아요",
+    "demoAvoidDetail": "새우튀김에는 갑각류, 달걀, 밀이 흔히 포함됩니다.",
+    "demoCheck": "직원에게 확인하세요",
+    "demoCheckDetail": "가라아게 양념에는 콩이나 밀이 들어갈 수 있습니다.",
+    "demoClear": "명시된 위험 없음",
+    "demoClearDetail": "메뉴 설명에서 선택한 제한 재료가 발견되지 않았습니다.",
+    "showServerTitle": "주문할 때도 바로 사용할 수 있어요",
+    "showServerDesc": "주문을 담은 뒤 원문 요리명과 식이 요청 문장을 식당의 언어로 보여주세요.",
+    "trustLanguagesValue": "8",
+    "trustLanguages": "주문 지원 언어",
+    "trustAllergensValue": "14",
+    "trustAllergens": "알레르기 항목",
+    "trustNoSignupValue": "0",
+    "trustNoSignup": "체험 전 가입",
+    "safetyNote": "AI 안내는 재료나 교차오염을 놓칠 수 있습니다. 식이 제한은 반드시 식당 직원에게 다시 확인하세요.",
     "scanMenu": "메뉴 스캔",
     "gallery": "갤러리",
     "url": "URL",
@@ -75,6 +116,10 @@
   },
 
   "loading": {
+    "progressStages": "분석 진행 단계",
+    "stageReading": "메뉴 읽기",
+    "stageUnderstanding": "요리 파악",
+    "stageSafety": "안전 확인",
     "analyzing": "메뉴를 분석하고 있어요...",
     "identifying": "요리, 맛, 알레르기를 확인하는 중",
     "scanning": "{type} 스캔 중...",
@@ -96,9 +141,17 @@
     "addToOrder": "주문에 추가",
     "added": "추가됨 ✓",
     "noScans": "스캔 횟수가 없습니다",
-    "noScansDesc": "무료 스캔을 모두 사용했습니다. 계속 사용하려면:",
+    "noScansDesc": "현재 베타 무료 사용량을 모두 사용했습니다. 아직 결제는 제공하지 않지만 제안된 여행 패스를 검토하거나 샘플 흐름을 계속 이용할 수 있습니다.",
     "somethingWrong": "문제가 발생했습니다",
-    "demoBanner": "API 키가 설정되지 않아 예시 데이터를 표시하고 있습니다. 실제 메뉴 분석을 사용하려면 프로필에서 API 키를 설정하세요."
+    "demoBanner": "명확히 표시된 예시 데이터를 보여드리고 있습니다. 실제 AI 분석은 허용된 테스트 환경에서만 사용할 수 있습니다.",
+    "decisionEyebrow": "내 조건으로 한눈에 보기",
+    "decisionTitle": "주의가 필요한 메뉴부터 확인하세요",
+    "avoid": "피하는 편이 좋음",
+    "askStaff": "직원 확인 필요",
+    "safer": "명시된 우려 없음",
+    "decisionSafety": "‘명시된 우려 없음’은 메뉴 설명에서 선택한 문제가 발견되지 않았다는 뜻이며, 안전을 보장하지 않습니다.",
+    "confirmWithStaff": "재료나 조리법을 직원에게 확인해야 하는 메뉴가 있습니다.",
+    "openPhrases": "현지어로 질문하기"
   },
 
   "dish": {
@@ -117,6 +170,7 @@
     "couldNotLoad": "상세 정보를 불러올 수 없습니다",
     "tapToRetry": "탭하여 다시 시도",
     "dislikedWarning": "선호하지 않는 재료 포함: {items}.",
+    "dietaryMismatch": "선택한 식이 조건과 맞지 않음: {items}",
     "calorieEstimate": "~{kcal} kcal",
     "calorieDisclaimer": "칼로리는 AI 추정치이며 실제와 다를 수 있습니다."
   },
@@ -139,13 +193,40 @@
     "tipSuggestion": "팁 추천",
     "orderDone": "주문을 마치셨나요?",
     "clearCart": "주문 비우기",
-    "keepOrder": "유지"
+    "keepOrder": "유지",
+    "confirmBeforeOrdering": "선택한 메뉴 {count}개는 확인이 필요합니다",
+    "confirmBeforeOrderingDesc": "주문하기 전에 재료와 조리법을 직원에게 확인하세요.",
+    "showToServerHint": "메뉴 언어로 된 고대비 주문 카드를 엽니다."
   },
 
   "present": {
     "noItems": "주문 항목이 없습니다",
     "goBack": "돌아가기",
+    "showThisScreen": "이 화면을 식당 직원에게 보여주세요",
+    "screenAwake": "이 화면을 보는 동안 화면 꺼짐을 방지합니다",
     "disclaimer": "이 주문서는 AI(TransTaste)가 생성했습니다. 식당 직원에게 항목을 확인해주세요. 알레르기 정보는 참고용이며 실제 조리 방식과 다를 수 있습니다."
+  },
+
+  "pricing": {
+    "eyebrow": "상품성 검증",
+    "title": "여행 중 이 서비스에 비용을 지불할 의향이 있나요?",
+    "description": "실제로 고려할 옵션을 선택해 주세요. 관심만 기록하며 결제나 청구는 발생하지 않습니다.",
+    "hypothesisNote": "시장 조사를 바탕으로 제안한 테스트 가격이며 실제 출시 가격은 아닙니다.",
+    "pass3d": "3일 단기 여행 패스",
+    "pass3dDesc": "주말여행이나 한 도시를 여행할 때 사용하는 옵션입니다.",
+    "pass7d": "7일 여행 패스",
+    "pass7dDesc": "일반적인 일주일 여행을 위한 추천 테스트 옵션입니다.",
+    "pass30d": "30일 여행 패스",
+    "pass30dDesc": "장기 여행이나 여러 목적지를 위한 옵션입니다.",
+    "bestForTrip": "추천",
+    "interested": "이 가격을 고려할 수 있어요",
+    "interestRecorded": "관심이 기록됐어요 ✓",
+    "validationOnly": "결제되지 않습니다",
+    "validationOnlyDesc": "이 실험은 익명 클릭만 현재 브라우저에 저장합니다. 이메일, 메뉴 원문, 결제 정보는 수집하지 않습니다.",
+    "resultsTitle": "TransTaste의 유료 제품 가능성을 검증해 주세요",
+    "resultsDesc": "메뉴 흐름을 체험한 뒤 제안된 여행 패스 가격을 검토할 수 있습니다.",
+    "seeOptions": "제안 가격 확인하기",
+    "exportData": "이 브라우저의 검증 데이터 내보내기"
   },
 
   "travel": {
@@ -161,7 +242,7 @@
     "travelTip": "여행 팁",
     "quickWater": "물 주세요",
     "quickCheck": "계산서 주세요",
-    "quickNoSpicy": "매운 거 빼주세요",
+    "quickNoSpicy": "이거 매워요?",
     "quickAllergy": "알레르기가 있어요...",
     "tipJa": "일본에서는 식사 전에 \"이타다키마스\"라고 말하세요 — 음식에 대한 감사를 표현하는 것입니다.",
     "tipKo": "한국에서는 어른이 먼저 수저를 드신 후에 식사를 시작하세요.",
@@ -267,7 +348,7 @@
     "active": "활성",
     "scansLeft": "남은 스캔 {count}회",
     "expires": "{date} 만료",
-    "getMoreScans": "스캔 추가 구매",
+    "getMoreScans": "제안된 패스 검토",
     "language": "언어",
     "iSpeak": "내가 사용하는 언어",
     "menuLanguage": "메뉴 언어",
@@ -277,11 +358,6 @@
     "noDietary": "선택된 식이 선호도 없음",
     "tipGuide": "팁 가이드",
     "tipGuideDesc": "팁이 필요 없는 국가 방문 시 알림 표시",
-    "advancedSettings": "고급 설정",
-    "advancedSettingsDesc": "개발자 옵션",
-    "apiKey": "API 키",
-    "apiKeyDesc": "내 Anthropic API 키로 무제한 스캔",
-    "apiKeyNote": "기기에만 저장되며 서버로 전송되지 않습니다.",
     "account": "계정",
     "notSignedIn": "로그인되지 않음",
     "signIn": "로그인",
@@ -302,22 +378,10 @@
     "menuLangFr": "프랑스어",
     "homeCurrency": "홈 통화",
     "homeCurrencyDesc": "결과 화면에서 가격 변환에 사용",
-    "noCurrency": "설정 안 됨"
-  },
-
-  "paywall": {
-    "title": "더 알아보고 싶으세요?",
-    "subtitle": "맛 프로필, 재미있는 사실, 먹는 방법 잠금 해제",
-    "skip": "건너뛰기",
-    "reassurance": "일회성 결제 · 구독 없음 · 즉시 이용",
-    "pass7d": "7일 트립 패스",
-    "pass7dDesc": "일주일 여행에 딱",
-    "pass7dBadge": "여행자 픽",
-    "pass30d": "30일 트립 패스",
-    "pass30dDesc": "장기 여행자를 위한",
-    "credits50": "50 크레딧",
-    "credits50Desc": "쓰는 만큼만 결제",
-    "unlimitedScans": "여행 기간 무제한 스캔"
+    "noCurrency": "설정 안 됨",
+    "sectionNavigation": "프로필 섹션",
+    "sectionUsage": "이용 현황·패스",
+    "sectionDietary": "음식 선호"
   },
 
   "payment": {
@@ -336,6 +400,8 @@
   },
 
   "camera": {
+    "turnFlashOn": "플래시 켜기",
+    "turnFlashOff": "플래시 끄기",
     "takePhoto": "사진 찍기",
     "chooseFromGallery": "갤러리에서 선택",
     "cameraNotAvailable": "카메라를 사용할 수 없습니다",
@@ -421,10 +487,10 @@
   },
 
   "risk": {
-    "danger": "알레르기",
+    "danger": "피하는 편이 좋음",
     "warning": "확인 필요",
     "check": "직원 문의",
-    "safe": "안전"
+    "safe": "명시된 우려 없음"
   },
 
   "errorScreen": {
@@ -536,6 +602,7 @@
     "unexpected": "오류가 발생했습니다. 다시 시도해주세요.",
     "rateLimited": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
     "authFailed": "API 키가 유효하지 않거나 만료되었습니다. 설정을 확인해주세요.",
+    "serviceUnavailable": "현재 메뉴 분석을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.",
     "notMenu": "음식 메뉴가 아닌 것 같습니다. 메뉴판을 촬영해주세요.",
     "ocrFailed": "메뉴를 읽을 수 없습니다. 더 선명하고 밝은 사진으로 다시 시도해주세요.",
     "noText": "메뉴 항목을 찾을 수 없습니다. 메뉴 텍스트가 보이는지 확인해주세요.",

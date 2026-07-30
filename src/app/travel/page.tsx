@@ -35,15 +35,14 @@ const TOOLS: readonly Tool[] = [
     emoji: "\u{1F4CB}",
     labelKey: "travel.order",
     descKey: "travel.orderDesc",
-    comingSoon: true,
   },
 ] as const;
 
 const QUICK_PHRASES = [
-  { key: "travel.quickWater", emoji: "\u{1F4A7}" },
-  { key: "travel.quickCheck", emoji: "\u{1F4B3}" },
-  { key: "travel.quickNoSpicy", emoji: "\u{1F336}\uFE0F" },
-  { key: "travel.quickAllergy", emoji: "\u{26A0}\uFE0F" },
+  { key: "travel.quickWater", phraseKey: "water_please", emoji: "\u{1F4A7}" },
+  { key: "travel.quickCheck", phraseKey: "check_please", emoji: "\u{1F4B3}" },
+  { key: "travel.quickNoSpicy", phraseKey: "is_spicy", emoji: "\u{1F336}\uFE0F" },
+  { key: "travel.quickAllergy", phraseKey: "allergen_check", emoji: "\u{26A0}\uFE0F" },
 ];
 
 const TIPS_PER_GROUP = 4;
@@ -72,6 +71,17 @@ export default function TravelPage() {
     lastCountry === "ja" || lastCountry === "ko" || lastCountry === "th"
       ? lastCountry
       : "default";
+  const phraseLanguage =
+    lastCountry === "ja" ||
+    lastCountry === "zh" ||
+    lastCountry === "th" ||
+    lastCountry === "vi" ||
+    lastCountry === "es" ||
+    lastCountry === "fr" ||
+    lastCountry === "it" ||
+    lastCountry === "en"
+      ? lastCountry
+      : "ja";
 
   return (
     <main className="min-h-screen bg-cream pb-28">
@@ -89,7 +99,7 @@ export default function TravelPage() {
           {QUICK_PHRASES.map((p) => (
             <Link
               key={p.key}
-              href="/phrases"
+              href={`/phrases?key=${p.phraseKey}&lang=${phraseLanguage}`}
               className="flex-shrink-0 snap-start flex items-center gap-1.5 bg-coral/10 text-coral px-3.5 py-2 rounded-full text-xs font-semibold hover:bg-coral/20 transition-colors"
             >
               <span>{p.emoji}</span>

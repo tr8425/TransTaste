@@ -133,15 +133,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Resolve API key: user-provided (x-api-key header) > server env
-    const userApiKey = request.headers.get("x-api-key");
-    const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
-
-    // If no API key at all, return mock data for development
-    if (!apiKey) {
-      return NextResponse.json({ ...MOCK_RESULT, demo: true }, { headers: corsHeaders });
-    }
-
     // Parse request body
     let body: {
       input?: string;
@@ -175,6 +166,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "E_BAD_REQUEST", reason: `Invalid inputType: ${body.inputType}. Must be one of: ${VALID_INPUT_TYPES.join(', ')}` },
         { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Resolve API key only after the request contract has been validated.
+    // Mock analysis is opt-in so a missing production secret cannot silently
+    // turn real user scans into example results.
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const demoModeEnabled = process.env.ENABLE_DEMO_ANALYSIS === "true";
+
+    if (!apiKey) {
+      if (demoModeEnabled) {
+        return NextResponse.json(
+          { ...MOCK_RESULT, demo: true },
+          { headers: corsHeaders },
+        );
+      }
+
+      return NextResponse.json(
+        {
+          error: "E_SERVICE_UNAVAILABLE",
+          reason: "Menu analysis is not configured.",
+        },
+        { status: 503, headers: corsHeaders },
       );
     }
 

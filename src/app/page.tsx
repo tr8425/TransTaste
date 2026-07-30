@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import CreditBadge from "@/components/common/CreditBadge";
 import RecentHistory from "@/components/common/RecentHistory";
 import { useCredits } from "@/hooks/useCredits";
-import { RecentScan } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
+import type { RecentScan } from "@/lib/types";
+import { trackProductEvent } from "@/lib/product-events";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -29,320 +30,321 @@ function isValidHttpUrl(value: string): boolean {
   }
 }
 
+interface InputModalProps {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+function InputModal({ title, onClose, children }: InputModalProps) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-md rounded-t-3xl bg-cream px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-6 shadow-2xl animate-slide-up max-h-[90dvh] overflow-y-auto">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-brown-dark">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid min-h-11 min-w-11 place-items-center rounded-full text-brown-medium transition-colors hover:bg-cream-dark hover:text-brown-dark"
+            aria-label="Close"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const SAMPLE_MENU = [
+  "唐揚げ 780円",
+  "海老フライ 980円",
+  "麻婆豆腐 850円",
+  "揚げ出し豆腐 580円",
+].join("\n");
+
 export default function HomePage() {
   const { t } = useTranslation();
   const credits = useCredits();
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null!);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showOtherInputs, setShowOtherInputs] = useState(false);
   const [showUrlModal, setShowUrlModal] = useState(false);
   const [showTextModal, setShowTextModal] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [textInput, setTextInput] = useState("");
   const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
 
-  // Auto-redirect to onboarding on first launch
   useEffect(() => {
-    const hasOnboarded = localStorage.getItem("transtaste_user_settings");
-    const skippedOnboarding = localStorage.getItem("transtaste_onboarding_done");
-    if (!hasOnboarded && !skippedOnboarding) {
-      router.push("/onboarding");
+    trackProductEvent("home_view");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("input") === "text") {
+      setShowOtherInputs(true);
+      setShowTextModal(true);
+      window.history.replaceState({}, "", "/");
     }
     try {
       const raw = localStorage.getItem("transtaste_scan_history");
       if (raw) setRecentScans(JSON.parse(raw));
-    } catch { /* ignore */ }
-  }, [router]);
+    } catch {
+      // Ignore malformed legacy history.
+    }
+  }, []);
 
-  const handleGallery = () => {
-    fileInputRef.current?.click();
+  const startTextAnalysis = (input: string) => {
+    trackProductEvent("scan_cta_click", { method: input === SAMPLE_MENU ? "sample" : "text" });
+    sessionStorage.setItem("scanText", input);
+    sessionStorage.setItem("scanInputType", "text");
+    router.push("/scan-setup");
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const base64 = await blobToBase64(file);
-      sessionStorage.setItem("scanImage", base64);
-      sessionStorage.setItem("scanInputType", "image");
-      router.push("/loading-scan");
-    }
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    trackProductEvent("scan_cta_click", { method: "gallery" });
+    const base64 = await blobToBase64(file);
+    sessionStorage.setItem("scanImage", base64);
+    sessionStorage.setItem("scanInputType", "image");
+    router.push("/scan-setup");
   };
 
   const handleUrlSubmit = () => {
     const trimmed = urlInput.trim();
     if (!isValidHttpUrl(trimmed)) return;
+    trackProductEvent("scan_cta_click", { method: "url" });
     sessionStorage.setItem("scanImage", trimmed);
     sessionStorage.setItem("scanInputType", "url");
     setShowUrlModal(false);
     setUrlInput("");
-    router.push("/loading-scan");
+    router.push("/scan-setup");
   };
 
   const handleTextSubmit = () => {
     const trimmed = textInput.trim();
     if (!trimmed) return;
-    sessionStorage.setItem("scanText", trimmed);
-    sessionStorage.setItem("scanInputType", "text");
     setShowTextModal(false);
     setTextInput("");
-    router.push("/loading-scan");
+    startTextAnalysis(trimmed);
   };
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col">
-      {/* Nav bar */}
-      <nav className="flex items-center justify-between px-5 pt-12 pb-4">
-        <p className="text-xl font-bold text-brown-dark tracking-tight" aria-label="TransTaste">
+    <main className="min-h-screen bg-cream pb-28">
+      <nav className="flex items-center justify-between px-5 pb-3 pt-10">
+        <p className="text-xl font-bold tracking-tight text-brown-dark" aria-label="TransTaste">
           Trans<span className="text-coral">Taste</span>
         </p>
         <CreditBadge credits={credits.remaining} hasPass={credits.hasPass} />
       </nav>
 
-      {/* Hero — compact */}
-      <div className="flex flex-col items-center px-6 pt-4">
-        <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-coral/10 via-cream-dark to-amber-brand/10 flex items-center justify-center mb-5">
-          <span className="text-5xl">🍽️</span>
+      <section className="px-5 pb-8 pt-5">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1.5 text-[11px] font-semibold text-coral">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.5 7.5 9.5 4.4-2 7.5-4.9 7.5-9.5V6L12 3Z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          {t("home.positioningBadge")}
         </div>
 
-        <h1 className="text-lg font-semibold text-brown-dark text-center mb-1">
+        <h1 className="max-w-[350px] text-[32px] font-bold leading-[1.12] tracking-[-0.03em] text-brown-dark">
           {t("home.heroTitle")}
         </h1>
-        <p className="text-sm text-brown-medium text-center mb-6 max-w-[280px]">
+        <p className="mt-3 max-w-[345px] text-[15px] leading-6 text-brown-medium">
           {t("home.heroDesc")}
         </p>
 
-        {/* Camera CTA */}
-        <Link
-          href="/camera"
-          className="w-[72px] h-[72px] rounded-full bg-coral shadow-lg shadow-coral/30 flex items-center justify-center hover:bg-coral-dark transition-colors active:scale-95 mb-4"
+        <div className="mt-6 space-y-3">
+          <Link
+            href="/camera"
+            className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-coral px-5 text-base font-semibold text-white shadow-lg shadow-coral/20 transition hover:bg-coral-dark active:scale-[0.99]"
+          >
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="M20 19H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z" />
+              <circle cx="12" cy="12" r="4" />
+            </svg>
+            {t("home.primaryCta")}
+          </Link>
+          <button
+            type="button"
+            onClick={() => startTextAnalysis(SAMPLE_MENU)}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-brown-light/20 bg-white/60 px-5 text-sm font-semibold text-brown-dark transition hover:border-coral/30 hover:bg-white active:scale-[0.99]"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+            {t("home.sampleCta")}
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowOtherInputs((visible) => !visible)}
+          className="mx-auto mt-3 flex min-h-11 items-center gap-1.5 px-3 text-xs font-medium text-brown-medium transition hover:text-coral"
+          aria-expanded={showOtherInputs}
+          aria-controls="other-input-methods"
         >
+          {t("home.otherInputs")}
           <svg
-            width="28"
-            height="28"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="currentColor"
             strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            className={`transition-transform ${showOtherInputs ? "rotate-180" : ""}`}
+            aria-hidden
           >
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
+            <path d="m6 9 6 6 6-6" />
           </svg>
-        </Link>
+        </button>
 
-        {/* Input row: Gallery | URL | Text */}
-        <div className="flex gap-3 mb-6">
-          {/* Gallery button */}
-          <button
-            onClick={handleGallery}
-            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="M21 15l-5-5L5 21" />
-            </svg>
-            {t("home.gallery")}
-          </button>
+        {showOtherInputs ? (
+          <div id="other-input-methods" className="grid grid-cols-3 gap-2">
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
+              {t("home.gallery")}
+            </button>
+            <button type="button" onClick={() => setShowUrlModal(true)} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
+              {t("home.url")}
+            </button>
+            <button type="button" onClick={() => setShowTextModal(true)} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
+              {t("home.text")}
+            </button>
+          </div>
+        ) : null}
 
-          {/* URL button */}
-          <button
-            onClick={() => setShowUrlModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
-            {t("home.url")}
-          </button>
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+      </section>
 
-          {/* Text button */}
-          <button
-            onClick={() => setShowTextModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-cream-dark text-brown-medium text-sm font-medium hover:bg-brown-light/20 transition-colors"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-            </svg>
-            {t("home.text")}
-          </button>
-        </div>
+      <section className="px-5 pb-8" aria-labelledby="proof-heading">
+        <div className="overflow-hidden rounded-3xl border border-brown-light/15 bg-white/70 shadow-sm">
+          <div className="border-b border-brown-light/10 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-coral">{t("home.proofEyebrow")}</p>
+            <h2 id="proof-heading" className="mt-1 text-lg font-bold text-brown-dark">{t("home.proofTitle")}</h2>
+          </div>
 
-        {/* Hidden file input for gallery */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileSelect}
-        />
-      </div>
-
-      {/* Recent scans */}
-      <div className="px-5 pt-2 pb-2">
-        <RecentHistory items={recentScans} />
-      </div>
-
-      {/* Quick access — Travel Tools */}
-      <div className="px-5 pt-4 pb-2">
-        <Link
-          href="/travel"
-          className="flex items-center justify-between bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors active:scale-[0.98]"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-coral/10 flex items-center justify-center">
-              <span className="text-lg">{"\u{1F30D}"}</span>
+          <div className="grid grid-cols-[0.82fr_1.18fr]">
+            <div className="border-r border-brown-light/10 bg-[#F3E8D7] p-4">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-brown-medium">{t("home.originalMenu")}</p>
+              <div className="-rotate-1 rounded-lg bg-[#FFFDF8] p-3 text-brown-dark shadow-sm">
+                <p className="border-b border-dashed border-brown-light/30 pb-2 text-sm font-bold">おすすめ</p>
+                <div className="space-y-2.5 pt-3 text-[11px]">
+                  <p className="flex justify-between"><span>唐揚げ</span><span>¥780</span></p>
+                  <p className="flex justify-between"><span>海老フライ</span><span>¥980</span></p>
+                  <p className="flex justify-between"><span>揚げ出し豆腐</span><span>¥580</span></p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-brown-dark">{t("home.travelTools")}</p>
-              <p className="text-xs text-brown-medium">{t("home.travelToolsDesc")}</p>
+
+            <div className="space-y-2 p-3">
+              {[
+                { icon: "!", tone: "bg-danger/10 text-danger", title: t("home.demoAvoid"), detail: t("home.demoAvoidDetail") },
+                { icon: "?", tone: "bg-amber-brand/10 text-amber-brand", title: t("home.demoCheck"), detail: t("home.demoCheckDetail") },
+                { icon: "i", tone: "bg-success/10 text-success", title: t("home.demoClear"), detail: t("home.demoClearDetail") },
+              ].map((item) => (
+                <div key={item.title} className="flex gap-2.5 rounded-xl border border-brown-light/10 bg-cream p-2.5">
+                  <span className={`grid h-6 w-6 flex-none place-items-center rounded-full text-xs font-bold ${item.tone}`}>{item.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-brown-dark">{item.title}</p>
+                    <p className="mt-0.5 text-[10px] leading-4 text-brown-medium">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4A882" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </Link>
-      </div>
+        </div>
+      </section>
 
-      {/* Trending dishes section */}
-      <div className="px-5 pt-4 pb-28">
-        <h3 className="text-xs font-medium text-brown-medium mb-3 px-1 uppercase tracking-wider">
-          {t("home.popularDishes")}
-        </h3>
-        <div className="grid grid-cols-2 gap-2.5">
+      <section className="px-5 pb-7">
+        <div className="rounded-2xl bg-brown-dark p-4 text-cream">
+          <div className="flex items-start gap-3">
+            <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-white/10 text-sm font-bold" aria-hidden>文</span>
+            <div>
+              <h2 className="text-sm font-semibold">{t("home.showServerTitle")}</h2>
+              <p className="mt-1 text-xs leading-5 text-cream/70">{t("home.showServerDesc")}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {recentScans.length > 0 ? (
+        <section className="px-5 pb-6">
+          <RecentHistory items={recentScans} />
+        </section>
+      ) : null}
+
+      <section className="px-5 pb-7">
+        <div className="grid grid-cols-3 gap-2 text-center">
           {[
-            { emoji: "🍜", name: "Pho Bo", originKey: "vietnamese" },
-            { emoji: "🍣", name: "Omakase", originKey: "japanese" },
-            { emoji: "🥘", name: "Tom Yum", originKey: "thai" },
-            { emoji: "🥟", name: "Xiao Long Bao", originKey: "chinese" },
-          ].map((dish) => (
-            <button
-              key={dish.name}
-              onClick={() => {
-                sessionStorage.setItem("scanText", dish.name);
-                sessionStorage.setItem("scanInputType", "text");
-                router.push("/loading-scan");
-              }}
-              className="bg-cream-dark rounded-xl p-3 flex items-center gap-2.5 hover:bg-brown-light/10 transition-colors cursor-pointer text-left"
-            >
-              <span className="text-2xl">{dish.emoji}</span>
-              <div>
-                <p className="text-sm font-medium text-brown-dark leading-tight">
-                  {dish.name}
-                </p>
-                <p className="text-[11px] text-brown-medium">{t(`home.cuisine.${dish.originKey}`)}</p>
-              </div>
-            </button>
+            [t("home.trustLanguagesValue"), t("home.trustLanguages")],
+            [t("home.trustAllergensValue"), t("home.trustAllergens")],
+            [t("home.trustNoSignupValue"), t("home.trustNoSignup")],
+          ].map(([value, label]) => (
+            <div key={label} className="rounded-2xl bg-cream-dark px-2 py-3">
+              <p className="text-base font-bold text-brown-dark">{value}</p>
+              <p className="mt-0.5 text-[10px] leading-4 text-brown-medium">{label}</p>
+            </div>
           ))}
         </div>
-      </div>
+        <p className="mt-3 text-center text-[10px] leading-4 text-brown-medium/70">{t("home.safetyNote")}</p>
+      </section>
 
-      {/* URL Modal */}
-      {showUrlModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] animate-slide-up max-h-[90dvh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-brown-dark flex items-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D85A30" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-                {t("home.urlModalTitle")}
-              </h3>
-              <button
-                onClick={() => { setShowUrlModal(false); setUrlInput(""); }}
-                className="text-brown-medium hover:text-brown-dark p-1"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <input
-              type="url"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="https://example.com/menu.jpg"
-              className="w-full px-4 py-3 rounded-xl bg-cream-dark text-brown-dark text-sm placeholder:text-brown-medium/50 border border-brown-light/20 focus:outline-none focus:border-coral mb-4"
-              autoFocus
-              onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
-            />
-            <p className="text-[11px] text-brown-medium/60 mb-3 -mt-2">
-              {t("home.urlHint")}
-            </p>
-            <button
-              onClick={handleUrlSubmit}
-              disabled={!isValidHttpUrl(urlInput)}
-              className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {t("home.fetchAndAnalyze")}
-            </button>
+      <section className="px-5">
+        <Link href="/travel" className="flex min-h-14 items-center justify-between rounded-2xl bg-cream-dark px-4 transition hover:bg-brown-light/10">
+          <div>
+            <p className="text-sm font-semibold text-brown-dark">{t("home.travelTools")}</p>
+            <p className="text-xs text-brown-medium">{t("home.travelToolsDesc")}</p>
           </div>
-        </div>
-      )}
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brown-light" aria-hidden>
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </Link>
+      </section>
 
-      {/* Text Modal */}
-      {showTextModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-cream rounded-t-2xl px-5 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] animate-slide-up max-h-[90dvh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-brown-dark">
-                {t("home.textModalTitle")}
-              </h3>
-              <button
-                onClick={() => { setShowTextModal(false); setTextInput(""); }}
-                className="text-brown-medium hover:text-brown-dark p-1"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <textarea
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder={t("home.textPlaceholder")}
-              rows={5}
-              className="w-full px-4 py-3 rounded-xl bg-cream-dark text-brown-dark text-sm placeholder:text-brown-medium/50 border border-brown-light/20 focus:outline-none focus:border-coral mb-4 resize-none"
-              autoFocus
-            />
-            <button
-              onClick={handleTextSubmit}
-              disabled={!textInput.trim()}
-              className="w-full py-3 bg-coral text-white font-semibold rounded-xl hover:bg-coral-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {t("home.analyzeDishes")}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      {showUrlModal ? (
+        <InputModal title={t("home.urlModalTitle")} onClose={() => { setShowUrlModal(false); setUrlInput(""); }}>
+          <input
+            type="url"
+            value={urlInput}
+            onChange={(event) => setUrlInput(event.target.value)}
+            placeholder="https://example.com/menu.jpg"
+            className="mb-2 w-full rounded-xl border border-brown-light/20 bg-cream-dark px-4 py-3 text-sm text-brown-dark outline-none transition placeholder:text-brown-medium/50 focus:border-coral"
+            autoFocus
+            onKeyDown={(event) => {
+              if (event.key === "Enter") handleUrlSubmit();
+            }}
+          />
+          <p className="mb-4 text-[11px] text-brown-medium/70">{t("home.urlHint")}</p>
+          <button type="button" onClick={handleUrlSubmit} disabled={!isValidHttpUrl(urlInput)} className="w-full rounded-xl bg-coral py-3 font-semibold text-white transition hover:bg-coral-dark disabled:cursor-not-allowed disabled:opacity-40">
+            {t("home.fetchAndAnalyze")}
+          </button>
+        </InputModal>
+      ) : null}
+
+      {showTextModal ? (
+        <InputModal title={t("home.textModalTitle")} onClose={() => { setShowTextModal(false); setTextInput(""); }}>
+          <textarea
+            value={textInput}
+            onChange={(event) => setTextInput(event.target.value)}
+            placeholder={t("home.textPlaceholder")}
+            rows={5}
+            className="mb-4 w-full resize-none rounded-xl border border-brown-light/20 bg-cream-dark px-4 py-3 text-sm text-brown-dark outline-none transition placeholder:text-brown-medium/50 focus:border-coral"
+            autoFocus
+          />
+          <button type="button" onClick={handleTextSubmit} disabled={!textInput.trim()} className="w-full rounded-xl bg-coral py-3 font-semibold text-white transition hover:bg-coral-dark disabled:cursor-not-allowed disabled:opacity-40">
+            {t("home.analyzeDishes")}
+          </button>
+        </InputModal>
+      ) : null}
+    </main>
   );
 }

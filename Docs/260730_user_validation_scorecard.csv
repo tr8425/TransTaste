@@ -1,0 +1,2 @@
+participant_id,segment,tool_order,scan_started_seconds,quick_setup_seconds,decision_seconds,risk_accuracy_percent,opened_order,opened_present,confidence_transtaste_1_5,confidence_comparison_1_5,preferred_tool,pricing_plan_clicked,payment_intent_1_5,key_value,key_objection,notes
+P01,,,,,,,,,,,,,,,,,

@@ -14,6 +14,7 @@ import {
   normalizeMenuLang,
 } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
+import { trackProductEvent } from "@/lib/product-events";
 
 interface UserSettings {
   allergen_preset?: string[];
@@ -60,6 +61,7 @@ export default function PresentPage() {
   // Hydrate allergens from localStorage
   useEffect(() => {
     setMounted(true);
+    trackProductEvent("present_mode_opened", { item_count: items.length });
     const settings = loadUserSettings();
     if (settings.allergen_preset) {
       setAllergens(settings.allergen_preset);
@@ -67,7 +69,7 @@ export default function PresentPage() {
     if (settings.dietary_beliefs) {
       setDietaryBeliefs(settings.dietary_beliefs);
     }
-  }, []);
+  }, [items.length]);
 
   // Wake Lock to prevent screen dimming
   useEffect(() => {
@@ -115,8 +117,24 @@ export default function PresentPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-white">
       <div className="max-w-mobile mx-auto px-5 py-6">
+        <div className="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
+          <button
+            type="button"
+            onClick={() => router.push("/order")}
+            aria-label={t("common.back")}
+            className="grid h-11 w-11 place-items-center rounded-full bg-gray-100 text-gray-700"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <div className="text-right">
+            <p className="text-xs font-semibold text-gray-900">{t("present.showThisScreen")}</p>
+            <p className="mt-0.5 text-[10px] text-gray-500">{t("present.screenAwake")}</p>
+          </div>
+        </div>
         {/* Allergy banner — in menu language, large */}
         {allergens.length > 0 && (
           <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
@@ -156,7 +174,7 @@ export default function PresentPage() {
         )}
 
         {/* Order header in menu language */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        <h1 className="mb-6 text-3xl font-bold text-gray-900">
           {ORDER_HEADERS[lang] ?? ORDER_HEADERS.en}
         </h1>
 
@@ -170,7 +188,7 @@ export default function PresentPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   {/* Original name — extra large, menu language, server-readable */}
-                  <p className="text-[40px] font-bold text-gray-900 leading-tight">
+                  <p className="break-words text-[36px] font-bold leading-tight text-gray-900">
                     {item.name_original}
                   </p>
                   {/* Translated name — medium, for server context */}

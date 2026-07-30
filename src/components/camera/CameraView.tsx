@@ -59,7 +59,9 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
         {/* Back button */}
         {onBack && (
           <button
+            type="button"
             onClick={onBack}
+            aria-label={t("common.back")}
             className="absolute top-12 left-4 z-10 w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -138,7 +140,9 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
       <div className="bg-black px-6 py-6 pb-10 flex items-center justify-between">
         {/* Gallery */}
         <button
+          type="button"
           onClick={onGallery}
+          aria-label={t("home.gallery")}
           className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center"
         >
           <svg
@@ -171,7 +175,10 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
 
         {/* Flash toggle */}
         <button
+          type="button"
           onClick={toggleFlash}
+          aria-label={t(isFlashOn ? "camera.turnFlashOff" : "camera.turnFlashOn")}
+          aria-pressed={isFlashOn}
           className={`w-12 h-12 rounded-xl flex items-center justify-center ${
             isFlashOn ? "bg-amber-brand/30" : "bg-white/10"
           }`}

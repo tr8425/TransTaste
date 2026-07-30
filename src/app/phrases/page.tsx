@@ -38,12 +38,14 @@ function PhraseCard({
   targetLang,
   userLang,
   isFavorite,
+  isHighlighted,
   onToggleFavorite,
 }: {
   phrase: Phrase;
   targetLang: LangCode;
   userLang: string;
   isFavorite: boolean;
+  isHighlighted: boolean;
   onToggleFavorite: (key: string) => void;
 }) {
   const { t } = useTranslation();
@@ -59,7 +61,15 @@ function PhraseCard({
   if (!translation) return null;
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm">
+    <article
+      id={`phrase-${phrase.key}`}
+      tabIndex={-1}
+      className={`rounded-xl bg-white p-4 shadow-sm outline-none transition ${
+        isHighlighted
+          ? "ring-2 ring-coral ring-offset-2 ring-offset-cream"
+          : ""
+      }`}
+    >
       {/* User language */}
       <p className="text-sm text-brown-dark mb-1">{userText}</p>
 
@@ -117,7 +127,7 @@ function PhraseCard({
           </svg>
         </button>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -128,6 +138,7 @@ export default function PhrasesPage() {
   const [userLang, setUserLang] = useState("en");
   const [allergenPreset, setAllergenPreset] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [highlightedKey, setHighlightedKey] = useState<string | null>(null);
 
   // Read user settings + favorites from localStorage
   useEffect(() => {
@@ -142,6 +153,19 @@ export default function PhrasesPage() {
       // ignore
     }
     setFavorites(loadFavorites());
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedLanguage = params.get("lang");
+    if (LANGUAGES.some((language) => language.code === requestedLanguage)) {
+      setSelectedLanguage(requestedLanguage as LangCode);
+    }
+
+    const requestedKey = params.get("key");
+    const requestedPhrase = PHRASES.find((phrase) => phrase.key === requestedKey);
+    if (requestedPhrase) {
+      setSelectedCategory(requestedPhrase.category);
+      setHighlightedKey(requestedPhrase.key);
+    }
   }, []);
 
   const toggleFavorite = (key: string) => {
@@ -187,6 +211,16 @@ export default function PhrasesPage() {
     }
     return expanded;
   }, [selectedCategory, allergenPreset, favorites]);
+
+  useEffect(() => {
+    if (!highlightedKey) return;
+    const frame = requestAnimationFrame(() => {
+      const target = document.getElementById(`phrase-${highlightedKey}`);
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [highlightedKey, filteredPhrases]);
 
   return (
     <main className="min-h-screen bg-cream pb-28">
@@ -262,6 +296,7 @@ export default function PhrasesPage() {
             targetLang={selectedLanguage}
             userLang={userLang}
             isFavorite={favorites.has(phrase.key)}
+            isHighlighted={highlightedKey === phrase.key}
             onToggleFavorite={toggleFavorite}
           />
         ))}

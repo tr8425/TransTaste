@@ -4,8 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import { CreditState } from "@/lib/types";
 
 const STORAGE_KEY = "transtaste_credits";
+const configuredFreeScanLimit = Number.parseInt(
+  process.env.NEXT_PUBLIC_FREE_SCAN_LIMIT || "",
+  10,
+);
+export const DEFAULT_FREE_SCAN_LIMIT =
+  Number.isFinite(configuredFreeScanLimit) && configuredFreeScanLimit > 0
+    ? configuredFreeScanLimit
+    : 3;
+
 const DEFAULT_STATE: CreditState = {
-  remaining: 10,
+  remaining: DEFAULT_FREE_SCAN_LIMIT,
   hasPass: false,
 };
 

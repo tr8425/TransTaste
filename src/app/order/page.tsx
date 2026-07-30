@@ -72,6 +72,12 @@ export default function OrderPage() {
   const tipAmount =
     tipInfo && tipInfo.percent > 0 ? totalPrice * (tipInfo.percent / 100) : 0;
   const grandTotal = totalPrice + tipAmount;
+  const itemsNeedingConfirmation = items.filter(
+    (item) =>
+      item.allergen_risk === "danger" ||
+      item.allergen_risk === "warning" ||
+      item.allergen_risk === "check",
+  );
 
   // Empty state
   if (items.length === 0) {
@@ -167,6 +173,17 @@ export default function OrderPage() {
         </div>
       )}
 
+      {itemsNeedingConfirmation.length > 0 ? (
+        <div className="mx-4 mt-4 rounded-xl border border-amber-brand/25 bg-amber-brand/10 p-3">
+          <p className="text-sm font-semibold text-brown-dark">
+            {t("order.confirmBeforeOrdering", { count: itemsNeedingConfirmation.length })}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-brown-medium">
+            {t("order.confirmBeforeOrderingDesc")}
+          </p>
+        </div>
+      ) : null}
+
       {/* Order items */}
       <div className="px-4 mt-4 space-y-3">
         {items.map((item) => (
@@ -187,6 +204,22 @@ export default function OrderPage() {
                     {formatPrice(item.price, item.currency)}
                   </p>
                 )}
+                {item.allergen_risk && item.allergen_risk !== "safe" ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-1">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      item.allergen_risk === "danger"
+                        ? "bg-danger/10 text-danger"
+                        : "bg-amber-brand/10 text-amber-brand"
+                    }`}>
+                      {t(`risk.${item.allergen_risk}`)}
+                    </span>
+                    {item.allergens?.slice(0, 3).map((allergen) => (
+                      <span key={allergen} className="text-[10px] text-brown-medium">
+                        {allergen}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               {/* Quantity stepper + remove */}
@@ -308,10 +341,13 @@ export default function OrderPage() {
       <div className="px-4 mt-6 space-y-3">
         <Link
           href="/order/present"
-          className="block w-full py-3.5 bg-coral text-white text-center rounded-full font-semibold text-base hover:bg-coral-dark transition-colors active:scale-[0.98]"
+          className="block w-full rounded-2xl bg-coral py-4 text-center text-base font-semibold text-white shadow-lg shadow-coral/20 transition-colors hover:bg-coral-dark active:scale-[0.98]"
         >
           {t("order.showToServer")}
         </Link>
+        <p className="text-center text-[11px] leading-4 text-brown-medium">
+          {t("order.showToServerHint")}
+        </p>
         <Link
           href="/phrases"
           className="block w-full py-2 text-center text-sm font-medium text-brown-medium hover:text-brown-dark transition-colors"

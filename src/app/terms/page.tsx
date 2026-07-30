@@ -175,7 +175,7 @@ export default function TermsPage() {
   const { t, locale } = useTranslation();
 
   return (
-    <main className="min-h-screen bg-cream pb-28">
+    <main id="page-top" className="min-h-screen bg-cream pb-28">
       <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
         <h1 className="text-2xl font-bold text-brown-dark mb-6">{t("legal.termsTitle")}</h1>
         <p className="text-xs text-brown-medium mb-8">{t("legal.lastUpdated")}</p>
@@ -188,6 +188,9 @@ export default function TermsPage() {
           <Link href="/privacy" className="text-sm text-coral hover:underline">
             {t("legal.linkToPrivacy")}
           </Link>
+          <a href="#page-top" className="float-right text-sm text-coral hover:underline">
+            {locale === "ko" ? "맨 위로" : "Back to top"}
+          </a>
         </div>
       </div>
     </main>

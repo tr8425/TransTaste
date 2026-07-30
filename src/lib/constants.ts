@@ -40,33 +40,6 @@ export const FLAVOR_AXES = [
 ] as const;
 
 
-export const PASS_OPTIONS = [
-  {
-    id: "7d" as const,
-    label: "7-Day Trip Pass",
-    price: "$2.99",
-    featured: true,
-    badge: "Traveler Pick",
-    description: "Perfect for a week-long trip",
-  },
-  {
-    id: "30d" as const,
-    label: "30-Day Trip Pass",
-    price: "$5.99",
-    featured: false,
-    badge: null,
-    description: "For the extended explorer",
-  },
-  {
-    id: "credits_50" as const,
-    label: "50 Credits",
-    price: "$1.99",
-    featured: false,
-    badge: null,
-    description: "Pay as you go",
-  },
-];
-
 export const CATEGORY_FILTERS = [
   "all",
   "main",

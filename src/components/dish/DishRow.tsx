@@ -35,10 +35,7 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
   const riskStyle = dish.allergen_risk ? RISK_STYLE[dish.allergen_risk] : null;
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full text-left flex items-start gap-3 p-3 rounded-xl hover:bg-cream-dark/60 transition-colors active:scale-[0.98]"
-    >
+    <article className="flex w-full items-start gap-3 rounded-xl p-3 transition-colors hover:bg-cream-dark/60">
       {/* Thumbnail placeholder */}
       <div
         className={`w-12 h-12 rounded-lg ${bgColor} flex items-center justify-center flex-shrink-0`}
@@ -59,7 +56,12 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
       </div>
 
       {/* Text content */}
-      <div className="flex-1 min-w-0">
+      <button
+        type="button"
+        onClick={onClick}
+        className="min-w-0 flex-1 text-left active:scale-[0.99]"
+        aria-label={`${dish.original}, ${dish.translation.english}, ${t(`risk.${dish.allergen_risk}`)}`}
+      >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="font-semibold text-brown-dark text-sm tracking-tight truncate">
@@ -94,13 +96,13 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
         </div>
 
         {/* Allergen risk badge + tags */}
-        {dish.allergens?.length > 0 && (
+        {dish.allergen_risk && (
           <div className="flex flex-wrap items-center gap-1 mt-1.5">
-            {riskStyle && dish.allergen_risk && (
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${riskStyle}`}>
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+              riskStyle || "bg-success/10 text-success"
+            }`}>
                 {t(`risk.${dish.allergen_risk}`)}
-              </span>
-            )}
+            </span>
             {dish.allergens?.map((allergen) => (
               <AllergyTag key={allergen} allergen={allergen} />
             ))}
@@ -125,23 +127,27 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
             </span>
           </div>
         )}
-      </div>
+
+        {dish.dietary_conflicts && dish.dietary_conflicts.length > 0 ? (
+          <p className="mt-1 text-[10px] font-semibold leading-4 text-danger">
+            {t("dish.dietaryMismatch", {
+              items: dish.dietary_conflicts
+                .map((belief) => t(`quickSetup.${belief}`))
+                .join(", "),
+            })}
+          </p>
+        ) : null}
+      </button>
 
       {/* Add to cart button */}
       {onAddToCart && (
-        <div
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart();
           }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.stopPropagation();
-              onAddToCart();
-            }
-          }}
+          aria-label={isInCart ? t("results.added") : t("results.addToOrder")}
           className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 self-center transition-colors ${
             isInCart
               ? "bg-coral border-coral"
@@ -155,8 +161,8 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
           ) : (
             <span className="text-coral text-lg font-medium leading-none">+</span>
           )}
-        </div>
+        </button>
       )}
-    </button>
+    </article>
   );
 }

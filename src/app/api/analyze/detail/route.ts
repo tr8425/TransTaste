@@ -6,6 +6,25 @@ import { buildCacheKey, getCached, setCache } from "@/lib/cache";
 import { createHash } from "crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
 
+const DEMO_DETAIL: DishDetail = {
+  flavor_profile: {
+    sweet: 2,
+    salty: 4,
+    spicy: 1,
+    sour: 1,
+    umami: 5,
+    rich: 3,
+  },
+  ingredients: {
+    core: [],
+    common_additions: [],
+    allergens: [],
+  },
+  fun_fact: null,
+  how_to_eat: null,
+  warning: null,
+};
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -41,15 +60,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Resolve API key: user-provided > server env
-    const userApiKey = request.headers.get("x-api-key");
-    const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
+    // API credentials are server-managed and never accepted from the browser.
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const demoModeEnabled = process.env.ENABLE_DEMO_ANALYSIS === "true";
 
     // Mock mode — no key at all
-    if (!apiKey) {
+    if (!apiKey && !demoModeEnabled) {
       return NextResponse.json(
-        { error: "E_AUTH", reason: "No API key configured (mock mode)" },
-        { status: 422, headers: corsHeaders }
+        {
+          error: "E_SERVICE_UNAVAILABLE",
+          reason: "Dish detail analysis is not configured.",
+        },
+        { status: 503, headers: corsHeaders }
       );
     }
 
@@ -76,6 +98,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "E_BAD_REQUEST", reason: "Missing input or dishOriginal" },
         { status: 400, headers: corsHeaders }
+      );
+    }
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { ...DEMO_DETAIL, demo: true },
+        { headers: corsHeaders },
       );
     }
 

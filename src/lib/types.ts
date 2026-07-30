@@ -146,6 +146,8 @@ export interface DishLite {
   };
   allergens: string[]; // flattened from ingredients.allergens
   allergen_risk: 'danger' | 'warning' | 'check' | 'safe';
+  /** User dietary beliefs that this dish does not satisfy. Derived client-side for decision UI. */
+  dietary_conflicts?: string[];
   alternative_dishes?: string[];
   disliked_ingredients?: string[];
   estimated_calories?: number | null;
