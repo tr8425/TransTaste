@@ -16,8 +16,9 @@ export const metadata: Metadata = {
 export default function GuideIndexPage() {
   return (
     <main className="min-h-screen bg-cream pb-28">
-      <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
-        <h1 className="text-2xl font-bold text-brown-dark mb-2">{t("guide.title")}</h1>
+      <div className="mx-auto max-w-prose px-5 pb-8 pt-12">
+        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Atlas · 20+ tables</p>
+        <h1 className="mb-2 text-3xl font-bold text-brown-dark">{t("guide.title")}</h1>
         <p className="text-sm text-brown-medium mb-8">
           {t("guide.subtitle")}
         </p>
@@ -27,7 +28,7 @@ export default function GuideIndexPage() {
             <Link
               key={country.code}
               href={`/guide/${country.code.toLowerCase()}`}
-              className="bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors text-center"
+              className="border border-brown-dark bg-cream-dark p-4 text-center shadow-[3px_3px_0_rgba(23,23,18,.12)] transition hover:-translate-y-1"
             >
               <span className="text-2xl block mb-1">{country.flag}</span>
               <p className="text-sm font-semibold text-brown-dark">{t(`country.${country.code}.name`)}</p>

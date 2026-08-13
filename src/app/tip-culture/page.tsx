@@ -176,7 +176,8 @@ export default function TipCulturePage() {
     <div className="min-h-screen bg-cream flex flex-col pb-28">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
-        <h1 className="text-xl font-bold text-brown-dark">{t("tipCulture.title")}</h1>
+        <p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Table manners · atlas</p>
+        <h1 className="text-2xl font-bold text-brown-dark">{t("tipCulture.title")}</h1>
         {detectedCountry && (
           <p className="text-xs text-brown-medium mt-1">
             {t("tipCulture.basedOnScan", { flag: detectedCountry.flag, country: t(`country.${detectedCountry.code}.name`) })}

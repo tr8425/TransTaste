@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#D85A30",
+  themeColor: "#ff6b2c",
 };
 
 export default function RootLayout({
@@ -89,7 +89,7 @@ export default function RootLayout({
         <HtmlLangSync />
         <CartProvider>
           <div className="mobile-container">
-            {children}
+            <div className="app-shell">{children}</div>
             <BottomNav />
           </div>
         </CartProvider>

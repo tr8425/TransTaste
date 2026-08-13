@@ -18,8 +18,9 @@ export default function FoodsIndexPage() {
 
   return (
     <main className="min-h-screen bg-cream pb-28">
-      <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
-        <h1 className="text-2xl font-bold text-brown-dark mb-2">{t("foods.title")}</h1>
+      <div className="mx-auto max-w-prose px-5 pb-8 pt-12">
+        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Index · dishes</p>
+        <h1 className="mb-2 text-3xl font-bold text-brown-dark">{t("foods.title")}</h1>
         <p className="text-sm text-brown-medium mb-8">
           {t("foods.subtitle")}
         </p>
@@ -29,7 +30,7 @@ export default function FoodsIndexPage() {
             <Link
               key={food.slug}
               href={`/foods/${food.slug}`}
-              className="flex items-center gap-4 bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors"
+              className="flex items-center gap-4 border border-brown-dark bg-cream-dark p-4 shadow-[4px_4px_0_rgba(23,23,18,.12)] transition hover:translate-x-1"
             >
               <div className="flex-1 min-w-0">
                 <p className="text-base font-semibold text-brown-dark">{food.english}</p>

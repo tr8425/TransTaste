@@ -10,18 +10,18 @@ const config: Config = {
     extend: {
       colors: {
         coral: {
-          DEFAULT: "#D85A30",
-          light: "#E8764D",
-          dark: "#B84A28",
+          DEFAULT: "#ff6b2c",
+          light: "#ff8757",
+          dark: "#dc4d12",
         },
         cream: {
-          DEFAULT: "#FDFAF5",
-          dark: "#F8F6F2",
+          DEFAULT: "#f3efe7",
+          dark: "#e9e3d9",
         },
         brown: {
-          dark: "#2C1A0E",
-          medium: "#8B6A50",
-          light: "#C4A882",
+          dark: "#171712",
+          medium: "#655f55",
+          light: "#9e978b",
         },
         amber: {
           brand: "#BA7517",

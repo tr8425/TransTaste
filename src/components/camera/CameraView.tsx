@@ -53,7 +53,7 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
   };
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col">
+    <div className="fixed inset-0 flex flex-col bg-[#11110e]">
       {/* Viewfinder */}
       <div className="flex-1 relative overflow-hidden">
         {/* Back button */}
@@ -62,7 +62,7 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
             type="button"
             onClick={onBack}
             aria-label={t("common.back")}
-            className="absolute top-12 left-4 z-10 w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"
+            className="absolute left-4 top-12 z-10 flex h-11 w-11 items-center justify-center border border-white/40 bg-black/60"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -81,21 +81,21 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
 
         {/* Corner guides */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="relative w-[80%] aspect-[3/4]">
+          <div className="relative aspect-[3/4] w-[82%] border border-white/25">
             {/* Top-left */}
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-lg" />
+            <div className="absolute left-0 top-0 h-10 w-10 border-l-4 border-t-4 border-coral" />
             {/* Top-right */}
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-lg" />
+            <div className="absolute right-0 top-0 h-10 w-10 border-r-4 border-t-4 border-coral" />
             {/* Bottom-left */}
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-lg" />
+            <div className="absolute bottom-0 left-0 h-10 w-10 border-b-4 border-l-4 border-coral" />
             {/* Bottom-right */}
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white rounded-br-lg" />
+            <div className="absolute bottom-0 right-0 h-10 w-10 border-b-4 border-r-4 border-coral" />
           </div>
         </div>
 
         {/* Guide text */}
         <div className="absolute bottom-8 left-0 right-0 text-center pointer-events-none">
-          <span className="text-white/70 text-sm bg-black/30 px-4 py-1.5 rounded-full">
+          <span className="border border-white/30 bg-black/65 px-4 py-2 text-xs font-bold uppercase tracking-[.12em] text-white">
             {t("camera.placeMenu")}
           </span>
         </div>
@@ -137,13 +137,13 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
       </div>
 
       {/* Bottom bar */}
-      <div className="bg-black px-6 py-6 pb-10 flex items-center justify-between">
+      <div className="flex items-center justify-between border-t border-white/20 bg-[#11110e] px-6 py-6 pb-10">
         {/* Gallery */}
         <button
           type="button"
           onClick={onGallery}
           aria-label={t("home.gallery")}
-          className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center"
+          className="flex h-12 w-12 items-center justify-center border border-white/30 bg-white/10"
         >
           <svg
             width="24"
@@ -179,7 +179,7 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
           onClick={toggleFlash}
           aria-label={t(isFlashOn ? "camera.turnFlashOff" : "camera.turnFlashOn")}
           aria-pressed={isFlashOn}
-          className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+          className={`flex h-12 w-12 items-center justify-center border border-white/30 ${
             isFlashOn ? "bg-amber-brand/30" : "bg-white/10"
           }`}
         >

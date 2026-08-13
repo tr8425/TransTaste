@@ -231,7 +231,8 @@ export default function PrivacyPage() {
   return (
     <main id="page-top" className="min-h-screen bg-cream pb-28">
       <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
-        <h1 className="text-2xl font-bold text-brown-dark mb-6">{t("legal.privacyTitle")}</h1>
+        <p className="mengto-kicker mb-2 text-[9px] font-extrabold text-coral">Document · privacy</p>
+        <h1 className="mb-6 text-3xl font-bold text-brown-dark">{t("legal.privacyTitle")}</h1>
         <p className="text-xs text-brown-medium mb-8">{t("legal.lastUpdated")}</p>
 
         <div className="prose-sm text-brown-dark space-y-6 text-sm leading-relaxed">

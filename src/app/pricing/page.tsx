@@ -58,10 +58,10 @@ export default function PricingPage() {
           ← {t("common.back")}
         </button>
 
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-coral">
+        <p className="mengto-kicker mt-5 text-[10px] font-extrabold text-coral">
           {t("pricing.eyebrow")}
         </p>
-        <h1 className="mt-2 text-3xl font-bold leading-tight tracking-[-0.03em] text-brown-dark">
+        <h1 className="mt-2 text-4xl font-bold leading-none tracking-[-0.04em] text-brown-dark">
           {t("pricing.title")}
         </h1>
         <p className="mt-3 text-sm leading-6 text-brown-medium">
@@ -75,8 +75,8 @@ export default function PricingPage() {
           {PRICING_EXPERIMENT_PLANS.map((plan) => (
             <section
               key={plan.id}
-              className={`rounded-2xl border bg-white/70 p-4 ${
-                plan.featured ? "border-coral/40 shadow-sm" : "border-brown-light/15"
+              className={`border bg-white/70 p-5 ${
+                plan.featured ? "border-brown-dark shadow-[6px_6px_0_#ff6b2c]" : "border-brown-dark/25"
               }`}
             >
               {plan.featured ? (

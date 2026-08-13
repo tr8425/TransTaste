@@ -139,16 +139,16 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-cream pb-28">
-      <nav className="flex items-center justify-between px-5 pb-3 pt-10">
-        <p className="text-xl font-bold tracking-tight text-brown-dark" aria-label="TransTaste">
-          Trans<span className="text-coral">Taste</span>
+    <main className="mengto-home min-h-screen bg-cream pb-28">
+      <nav className="flex items-center justify-between border-b border-brown-dark/15 px-5 pb-4 pt-8">
+        <p className="mengto-display text-lg tracking-[-0.05em] text-brown-dark" aria-label="TransTaste">
+          Trans<span className="text-coral">/Taste</span>
         </p>
         <CreditBadge credits={credits.remaining} hasPass={credits.hasPass} />
       </nav>
 
-      <section className="px-5 pb-8 pt-5">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1.5 text-[11px] font-semibold text-coral">
+      <section className="mengto-hero px-5 pb-10 pt-7">
+        <div className="mengto-enter mengto-kicker mb-5 inline-flex items-center gap-2 border border-brown-dark bg-cream px-3 py-2 text-[10px] font-extrabold text-brown-dark">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.5 7.5 9.5 4.4-2 7.5-4.9 7.5-9.5V6L12 3Z" />
             <path d="m9 12 2 2 4-4" />
@@ -156,17 +156,17 @@ export default function HomePage() {
           {t("home.positioningBadge")}
         </div>
 
-        <h1 className="max-w-[350px] text-[32px] font-bold leading-[1.12] tracking-[-0.03em] text-brown-dark">
+        <h1 className="mengto-enter mengto-display relative z-10 max-w-[380px] text-[42px] leading-[.96] tracking-[-0.055em] text-brown-dark">
           {t("home.heroTitle")}
         </h1>
-        <p className="mt-3 max-w-[345px] text-[15px] leading-6 text-brown-medium">
+        <p className="mengto-enter relative z-10 mt-5 max-w-[330px] text-[14px] font-medium leading-6 text-brown-medium">
           {t("home.heroDesc")}
         </p>
 
-        <div className="mt-6 space-y-3">
+        <div className="relative z-10 mt-7 space-y-3">
           <Link
             href="/camera"
-            className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-coral px-5 text-base font-semibold text-white shadow-lg shadow-coral/20 transition hover:bg-coral-dark active:scale-[0.99]"
+            className="flex min-h-16 w-full items-center justify-between gap-2 bg-coral px-5 text-sm font-extrabold uppercase tracking-[.08em] text-brown-dark shadow-[6px_6px_0_#171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#171712] active:translate-y-1 active:shadow-none"
           >
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="M20 19H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z" />
@@ -177,7 +177,7 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => startTextAnalysis(SAMPLE_MENU)}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-brown-light/20 bg-white/60 px-5 text-sm font-semibold text-brown-dark transition hover:border-coral/30 hover:bg-white active:scale-[0.99]"
+            className="flex min-h-12 w-full items-center justify-center gap-2 border border-brown-dark/30 bg-cream px-5 text-xs font-bold uppercase tracking-[.08em] text-brown-dark transition hover:bg-brown-dark hover:text-cream"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="m9 18 6-6-6-6" />
@@ -226,10 +226,10 @@ export default function HomePage() {
       </section>
 
       <section className="px-5 pb-8" aria-labelledby="proof-heading">
-        <div className="overflow-hidden rounded-3xl border border-brown-light/15 bg-white/70 shadow-sm">
+        <div className="mengto-proof overflow-hidden border border-brown-dark bg-cream">
           <div className="border-b border-brown-light/10 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-coral">{t("home.proofEyebrow")}</p>
-            <h2 id="proof-heading" className="mt-1 text-lg font-bold text-brown-dark">{t("home.proofTitle")}</h2>
+            <p className="mengto-kicker text-[10px] font-extrabold text-coral">{t("home.proofEyebrow")}</p>
+            <h2 id="proof-heading" className="mengto-display mt-2 text-xl leading-tight text-brown-dark">{t("home.proofTitle")}</h2>
           </div>
 
           <div className="grid grid-cols-[0.82fr_1.18fr]">
@@ -265,7 +265,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-5 pb-7">
-        <div className="rounded-2xl bg-brown-dark p-4 text-cream">
+        <div className="border-l-4 border-coral bg-brown-dark p-5 text-cream">
           <div className="flex items-start gap-3">
             <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-white/10 text-sm font-bold" aria-hidden>文</span>
             <div>

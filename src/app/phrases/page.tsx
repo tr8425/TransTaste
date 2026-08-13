@@ -225,8 +225,9 @@ export default function PhrasesPage() {
   return (
     <main className="min-h-screen bg-cream pb-28">
       {/* Header */}
-      <header className="px-5 pt-14 pb-4">
-        <h1 className="text-2xl font-bold text-brown-dark">{t("phrases.title")}</h1>
+      <header className="border-b border-brown-dark/20 px-5 pb-5 pt-12">
+        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Say it clearly · 05 languages</p>
+        <h1 className="text-3xl font-bold text-brown-dark">{t("phrases.title")}</h1>
         <p className="text-sm text-brown-medium mt-0.5">
           {t("phrases.subtitle")}
         </p>

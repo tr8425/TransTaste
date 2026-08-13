@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap");
 
 :root {
-  --color-coral: #D85A30;
-  --color-cream: #FDFAF5;
-  --color-surface: #F8F6F2;
-  --color-text: #2C1A0E;
-  --color-text-secondary: #8B6A50;
-  --color-accent: #BA7517;
+  --color-coral: #ff6b2c;
+  --color-cream: #f3efe7;
+  --color-surface: #e9e3d9;
+  --color-text: #171712;
+  --color-text-secondary: #655f55;
+  --color-accent: #ff6b2c;
   --color-success: #639922;
   --color-danger: #E24B4A;
 }
@@ -18,9 +18,123 @@
 body {
   color: var(--color-text);
   background: var(--color-cream);
-  font-family: "Inter", "DM Sans", "Noto Sans KR", "Noto Sans JP", "Noto Sans SC", sans-serif;
+  font-family: "Manrope", "Noto Sans KR", "Noto Sans JP", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: #ff6b2c; color: #171712; }
+
+.mobile-container {
+  isolation: isolate;
+  box-shadow: 0 0 0 1px rgba(23, 23, 18, .08), 0 40px 100px rgba(23, 23, 18, .12);
+}
+
+.mengto-home {
+  background:
+    linear-gradient(rgba(23,23,18,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,23,18,.055) 1px, transparent 1px),
+    #f3efe7;
+  background-size: 32px 32px;
+}
+
+.mengto-hero { position: relative; overflow: hidden; }
+.mengto-hero::after {
+  content: "";
+  position: absolute; inset: 11rem -7rem auto auto; width: 17rem; height: 17rem;
+  border: 1px solid rgba(23,23,18,.18); border-radius: 50%; pointer-events: none;
+}
+.mengto-display { font-family: "Archivo Black", "Arial Black", sans-serif; text-transform: uppercase; }
+.mengto-proof { box-shadow: 10px 10px 0 #171712; }
+.mengto-kicker { letter-spacing: .18em; text-transform: uppercase; }
+
+@keyframes mengto-enter {
+  from { opacity: 1; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mengto-enter { animation: mengto-enter .72s cubic-bezier(.2,.8,.2,1) both; }
+.mengto-enter:nth-child(2) { animation-delay: .08s; }
+
+/* TransTaste field-guide system — shared by every product route */
+.app-shell { min-height: 100vh; }
+.app-shell > main:not(.mengto-home),
+.app-shell > div:not([role="dialog"]) {
+  background-color: #f3efe7;
+  background-image:
+    linear-gradient(rgba(23,23,18,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,23,18,.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.app-shell h1,
+.app-shell h2 { letter-spacing: -.035em; }
+.app-shell h1 {
+  font-family: "Archivo Black", "Arial Black", sans-serif;
+  font-size: clamp(1.8rem, 8vw, 2.35rem);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.app-shell .mengto-home h1 { font-size: clamp(2.15rem, 9vw, 2.45rem); }
+.app-shell main:not(.mengto-home) > header,
+.app-shell main:not(.mengto-home) > div:first-child {
+  border-bottom-color: rgba(23,23,18,.18);
+}
+
+.app-shell .bg-cream-dark {
+  border: 1px solid rgba(23,23,18,.24);
+  background-color: rgba(243,239,231,.92);
+}
+.app-shell .bg-white,
+.app-shell .bg-white\/70,
+.app-shell .bg-white\/60 {
+  border-color: rgba(23,23,18,.18);
+}
+
+.app-shell a,
+.app-shell button,
+.app-shell input,
+.app-shell textarea,
+.app-shell select { outline-offset: 3px; }
+.app-shell :focus-visible { outline: 3px solid #ff6b2c !important; box-shadow: none !important; }
+.app-shell button:disabled,
+.app-shell [aria-disabled="true"] { filter: saturate(.45); }
+
+.app-shell .bg-coral {
+  color: #171712;
+  border-color: #171712;
+  box-shadow: 3px 3px 0 #171712;
+}
+.app-shell .bg-coral:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #171712; }
+.app-shell .text-white.bg-coral,
+.app-shell .bg-coral.text-white { color: #171712; }
+
+.app-shell section > .bg-cream-dark,
+.app-shell section > .bg-white,
+.app-shell section > .bg-white\/70,
+.app-shell main > .bg-cream-dark {
+  box-shadow: 5px 5px 0 rgba(23,23,18,.12);
+}
+
+.app-shell details { border-radius: 0 !important; }
+.app-shell details[open] { box-shadow: 4px 4px 0 rgba(23,23,18,.15); }
+.app-shell table { border-collapse: collapse; }
+.app-shell hr { border-color: rgba(23,23,18,.2); }
+
+/* Full-screen task surfaces keep their own dark camera/loading treatment. */
+.app-shell .bg-black,
+.app-shell .bg-gray-900 { background-image: none; }
+
+@media (hover: hover) {
+  .app-shell a:hover,
+  .app-shell button:hover { transition-duration: 160ms; }
+}
+
+@media (max-width: 430px) {
+  .mobile-container { box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
 
 /* Mobile container */

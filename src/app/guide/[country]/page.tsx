@@ -54,7 +54,8 @@ export default function CountryGuidePage({ params }: Props) {
         </nav>
 
         {/* Header */}
-        <h1 className="text-3xl font-bold text-brown-dark mb-2">
+        <p className="mengto-kicker mb-2 text-[9px] font-extrabold text-coral">Country field note</p>
+        <h1 className="mb-2 text-4xl font-bold text-brown-dark">
           {country.flag} {t("guide.restaurantGuide", { country: t(`country.${country.code}.name`) })}
         </h1>
         <p className="text-sm text-brown-medium mb-8">

@@ -322,16 +322,16 @@ export default function LoadingScanPage() {
 
   return (
     <div
-      className="fixed inset-0 bg-cream flex flex-col items-center px-6 overflow-y-auto"
+      className="fixed inset-0 flex flex-col items-center overflow-y-auto bg-cream px-6 [background-image:linear-gradient(rgba(23,23,18,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(23,23,18,.05)_1px,transparent_1px)] [background-size:32px_32px]"
       aria-busy="true"
     >
       {/* Top loading section */}
       <div className="flex flex-col items-center pt-16 pb-4 flex-shrink-0">
-        <div className="text-6xl mb-6 animate-bounce">
+        <div className="mb-6 border border-brown-dark bg-cream-dark p-5 text-6xl shadow-[6px_6px_0_#171712] animate-bounce">
           {FOOD_EMOJIS[emojiIndex]}
         </div>
         <h2
-          className="text-lg font-semibold text-brown-dark mb-1"
+          className="mengto-display mb-2 text-center text-xl leading-tight text-brown-dark"
           aria-live="polite"
         >
           {statusText}
@@ -340,11 +340,11 @@ export default function LoadingScanPage() {
 
         {/* Progress bar (180s animation) */}
         <div
-          className="w-48 h-1 bg-cream-dark rounded-full overflow-hidden"
+          className="h-2 w-56 overflow-hidden border border-brown-dark bg-cream-dark"
           role="progressbar"
           aria-label={statusText}
         >
-          <div className="h-full bg-coral rounded-full animate-progress" />
+          <div className="h-full bg-coral animate-progress" />
         </div>
         <ol className="mt-4 flex items-center gap-2" aria-label={t("loading.progressStages")}>
           {loadingStages.map((stage, index) => (

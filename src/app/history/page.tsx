@@ -83,7 +83,7 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="px-5 pt-12 pb-4 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-brown-dark">{t("history.title")}</h1>
+          <div><p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Archive · scans</p><h1 className="text-2xl font-bold text-brown-dark">{t("history.title")}</h1></div>
           <p className="text-xs text-brown-medium mt-0.5">
             {t("history.subtitle")}
           </p>
@@ -144,7 +144,7 @@ export default function HistoryPage() {
               return (
                 <div
                   key={scan.resultKey || i}
-                  className="group relative w-full flex items-center gap-3 p-3.5 bg-cream-dark rounded-xl hover:bg-brown-light/10 transition-colors"
+                  className="group relative flex w-full items-center gap-3 border border-brown-dark bg-cream-dark p-3.5 shadow-[3px_3px_0_rgba(23,23,18,.1)] transition hover:translate-x-1"
                 >
                   <button
                     onClick={() => handleClick(scan)}

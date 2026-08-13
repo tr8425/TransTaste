@@ -127,7 +127,7 @@ export default function BottomNav() {
   if (!mounted) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex justify-center" aria-hidden>
-        <div className="w-full max-w-mobile bg-cream/95 backdrop-blur-md border-t border-brown-light/10 px-3 pb-6 pt-2">
+        <div className="w-full max-w-mobile border-t border-brown-dark bg-cream/95 px-3 pb-6 pt-2 backdrop-blur-md">
           <div className="flex items-center justify-around h-[52px]" />
         </div>
       </nav>
@@ -136,7 +136,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
-      <div className="w-full max-w-mobile bg-cream/95 backdrop-blur-md border-t border-brown-light/10 px-3 pb-6 pt-2">
+      <div className="w-full max-w-mobile border-t border-brown-dark bg-cream/95 px-3 pb-6 pt-2 backdrop-blur-md">
         <div className="flex items-center justify-around">
           {TABS.map((tab) => {
             const isActive = pathname === tab.href;
@@ -147,7 +147,7 @@ export default function BottomNav() {
                   key={tab.href}
                   href={tab.href}
                   aria-label={t(tab.labelKey)}
-                  className="w-14 h-14 -mt-5 rounded-full bg-coral shadow-lg shadow-coral/25 flex items-center justify-center hover:bg-coral-dark transition-colors active:scale-95"
+                  className="-mt-5 flex h-14 w-14 rotate-3 items-center justify-center bg-coral shadow-[4px_4px_0_#171712] transition-transform hover:-rotate-2 active:translate-y-1 active:shadow-none"
                 >
                   {tab.icon(false)}
                 </Link>

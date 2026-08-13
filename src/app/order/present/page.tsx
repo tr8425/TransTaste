@@ -104,7 +104,7 @@ export default function PresentPage() {
   // If somehow landed here with no items, go back
   if (items.length === 0) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cream">
         <p className="text-lg text-gray-500 mb-4">{t("present.noItems")}</p>
         <button
           onClick={() => router.push("/order")}
@@ -117,22 +117,22 @@ export default function PresentPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-white">
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-cream">
       <div className="max-w-mobile mx-auto px-5 py-6">
-        <div className="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
+        <div className="mb-7 flex items-center justify-between border-b-2 border-brown-dark pb-4">
           <button
             type="button"
             onClick={() => router.push("/order")}
             aria-label={t("common.back")}
-            className="grid h-11 w-11 place-items-center rounded-full bg-gray-100 text-gray-700"
+            className="grid h-11 w-11 place-items-center border border-brown-dark bg-cream-dark text-brown-dark"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="m15 18-6-6 6-6" />
             </svg>
           </button>
           <div className="text-right">
-            <p className="text-xs font-semibold text-gray-900">{t("present.showThisScreen")}</p>
-            <p className="mt-0.5 text-[10px] text-gray-500">{t("present.screenAwake")}</p>
+            <p className="text-xs font-bold uppercase tracking-[.08em] text-brown-dark">{t("present.showThisScreen")}</p>
+            <p className="mt-0.5 text-[10px] text-brown-medium">{t("present.screenAwake")}</p>
           </div>
         </div>
         {/* Allergy banner — in menu language, large */}
@@ -174,7 +174,7 @@ export default function PresentPage() {
         )}
 
         {/* Order header in menu language */}
-        <h1 className="mb-6 text-3xl font-bold text-gray-900">
+        <h1 className="mb-6 border-l-4 border-coral pl-4 text-3xl font-bold text-brown-dark">
           {ORDER_HEADERS[lang] ?? ORDER_HEADERS.en}
         </h1>
 
@@ -183,25 +183,25 @@ export default function PresentPage() {
           {items.map((item) => (
             <div
               key={item.dish_hash}
-              className="border-b border-gray-100 pb-4"
+              className="border-b border-brown-dark/20 bg-cream-dark p-4 shadow-[4px_4px_0_rgba(23,23,18,.12)]"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   {/* Original name — extra large, menu language, server-readable */}
-                  <p className="break-words text-[36px] font-bold leading-tight text-gray-900">
+                  <p className="break-words text-[36px] font-extrabold leading-tight text-brown-dark">
                     {item.name_original}
                   </p>
                   {/* Translated name — medium, for server context */}
-                  <p className="text-lg text-gray-500 mt-1">
+                  <p className="mt-1 text-lg text-brown-medium">
                     {item.name_translated}
                   </p>
                 </div>
                 <div className="text-right shrink-0 ml-2">
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-bold text-brown-dark">
                     ×{item.quantity}
                   </p>
                   {item.price != null && (
-                    <p className="text-lg text-gray-600 mt-1">
+                    <p className="mt-1 text-lg text-brown-medium">
                       {formatPrice(item.price * item.quantity, item.currency)}
                     </p>
                   )}
@@ -212,11 +212,11 @@ export default function PresentPage() {
         </div>
 
         {/* Total in menu language */}
-        <div className="mt-6 pt-4 border-t-2 border-gray-200 flex justify-between items-center">
-          <span className="text-2xl font-bold text-gray-900">
+        <div className="mt-6 flex items-center justify-between border-t-2 border-brown-dark pt-4">
+          <span className="text-2xl font-bold text-brown-dark">
             {TOTAL_LABELS[lang] ?? TOTAL_LABELS.en}
           </span>
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="text-2xl font-bold text-brown-dark">
             {formatPrice(totalPrice, currency)}
           </span>
         </div>
@@ -233,7 +233,7 @@ export default function PresentPage() {
               sessionStorage.setItem("order_confirmed", "1");
               router.push("/order");
             }}
-            className="w-full py-4 bg-coral text-white text-xl font-bold rounded-full hover:bg-coral-dark transition-colors active:scale-[0.98]"
+            className="w-full border border-brown-dark bg-coral py-4 text-xl font-extrabold uppercase tracking-[.06em] text-brown-dark shadow-[5px_5px_0_#171712] transition active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
             {CONFIRM_LABELS[lang] ?? CONFIRM_LABELS.en}
           </button>

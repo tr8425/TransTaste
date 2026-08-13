@@ -183,7 +183,7 @@ function ProfileContent() {
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
-        <h1 className="text-xl font-bold text-brown-dark">{t("profile.title")}</h1>
+        <div><p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Preferences · local</p><h1 className="text-2xl font-bold text-brown-dark">{t("profile.title")}</h1></div>
       </div>
 
       {/* Payment feedback banner */}

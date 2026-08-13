@@ -10,6 +10,7 @@ export default function ScanSetupPage() {
 
   return (
     <main className="min-h-screen bg-cream px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8">
+      <p className="mengto-kicker mb-4 text-[10px] font-extrabold text-coral">Scan setup · 01</p>
       <div className="mx-auto w-full max-w-md">
         <button
           type="button"

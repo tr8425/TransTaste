@@ -515,7 +515,8 @@ function ResultsContent() {
             {data.restaurant_type}
           </span>
         </div>
-        <h1 className="text-lg font-bold text-brown-dark">
+        <p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Scan report · live</p>
+        <h1 className="text-2xl font-bold text-brown-dark">
           {t("results.menuResults")}
         </h1>
         <p className="text-xs text-brown-medium">
@@ -533,7 +534,7 @@ function ResultsContent() {
         </div>
       )}
 
-      <section className="mx-5 mb-3 rounded-2xl border border-brown-light/10 bg-white/70 p-4" aria-labelledby="decision-summary">
+      <section className="mx-5 mb-4 border border-brown-dark bg-white/70 p-4 shadow-[5px_5px_0_rgba(23,23,18,.14)]" aria-labelledby="decision-summary">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-coral">
           {t("results.decisionEyebrow")}
         </p>
@@ -551,7 +552,7 @@ function ResultsContent() {
               type="button"
               onClick={() => setDecisionFilter((current) => current === item.key ? "all" : item.key)}
               aria-pressed={decisionFilter === item.key}
-              className={`min-h-16 rounded-xl px-2 py-2 text-center transition ring-offset-2 ring-offset-cream ${
+              className={`min-h-16 border border-current/20 px-2 py-2 text-center transition ring-offset-2 ring-offset-cream ${
                 item.style
               } ${decisionFilter === item.key ? "ring-2 ring-current" : ""}`}
             >
@@ -669,7 +670,7 @@ function ResultsContent() {
         </div>
       )}
 
-      <section className="mx-5 mb-5 rounded-2xl bg-brown-dark p-4 text-cream">
+      <section className="mx-5 mb-5 border-l-4 border-coral bg-brown-dark p-5 text-cream">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-coral-light">
           {t("pricing.eyebrow")}
         </p>

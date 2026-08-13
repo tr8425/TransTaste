@@ -117,9 +117,9 @@ export default function OrderPage() {
   return (
     <div className="min-h-screen bg-cream pb-28">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-cream/95 backdrop-blur-md border-b border-brown-light/10 px-5 py-4">
+      <div className="sticky top-0 z-20 border-b border-brown-dark bg-cream/95 px-5 py-4 backdrop-blur-md">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-brown-dark">{t("order.yourOrder")}</h1>
+          <div><p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Order sheet · review</p><h1 className="text-2xl font-bold text-brown-dark">{t("order.yourOrder")}</h1></div>
           <span className="bg-coral text-white text-xs font-bold px-2.5 py-1 rounded-full">
             {totalItems}
           </span>
@@ -189,7 +189,7 @@ export default function OrderPage() {
         {items.map((item) => (
           <div
             key={item.dish_hash}
-            className="bg-white rounded-xl p-4 shadow-sm border border-brown-light/5"
+            className="border border-brown-dark bg-white p-4 shadow-[4px_4px_0_rgba(23,23,18,.12)]"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
@@ -312,7 +312,7 @@ export default function OrderPage() {
       </div>
 
       {/* Summary */}
-      <div className="mx-4 mt-4 bg-white rounded-xl p-4 shadow-sm border border-brown-light/5">
+        <div className="mx-4 mt-4 border border-brown-dark bg-white p-4 shadow-[4px_4px_0_rgba(23,23,18,.12)]">
         <div className="flex justify-between text-sm text-brown-dark mb-2">
           <span>{t("order.subtotal")}</span>
           <span className="font-medium">

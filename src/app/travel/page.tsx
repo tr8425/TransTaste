@@ -86,8 +86,9 @@ export default function TravelPage() {
   return (
     <main className="min-h-screen bg-cream pb-28">
       {/* Header */}
-      <header className="px-5 pt-14 pb-2">
-        <h1 className="text-2xl font-bold text-brown-dark">{t("travel.title")}</h1>
+      <header className="border-b border-brown-dark/20 px-5 pb-5 pt-12">
+        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Field notes · travel</p>
+        <h1 className="text-3xl font-bold text-brown-dark">{t("travel.title")}</h1>
         <p className="text-sm text-brown-medium mt-0.5">
           {t("travel.subtitle")}
         </p>
@@ -164,7 +165,7 @@ export default function TravelPage() {
             <Link
               key={tool.id}
               href={tool.href}
-              className="flex items-center gap-4 bg-cream-dark rounded-xl p-4 hover:bg-brown-light/10 transition-colors active:scale-[0.98]"
+              className="flex items-center gap-4 border border-brown-dark bg-cream-dark p-4 shadow-[4px_4px_0_rgba(23,23,18,.14)] transition hover:-translate-y-0.5 active:translate-y-0"
             >
               {cardContent}
             </Link>

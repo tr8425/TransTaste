@@ -99,14 +99,14 @@ export default function FlavorRadar({ profile, size = 120 }: FlavorRadarProps) {
       <polygon
         points={dataPath}
         fill="rgba(216, 90, 48, 0.25)"
-        stroke="#D85A30"
+        stroke="#ff6b2c"
         strokeWidth={1.5}
         strokeLinejoin="round"
       />
 
       {/* Data points */}
       {dataPoints.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r={2.5} fill="#D85A30" />
+        <circle key={i} cx={x} cy={y} r={2.5} fill="#ff6b2c" />
       ))}
 
       {/* Axis labels */}
