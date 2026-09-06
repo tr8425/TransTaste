@@ -176,8 +176,8 @@ OCR + 번역 + 재료 분석 + Fun Fact + 조합 추천을 **하나의 API 호�
 ```bash
 cd transtaste-poc
 npm install
-ANTHROPIC_API_KEY=sk-ant-... node test-menu.mjs           # 텍스트 5종
-ANTHROPIC_API_KEY=sk-ant-... node test-menu.mjs ./menu.jpg # 이미지 테스트
+ANTHROPIC_API_KEY=sk-ant-your-key-here node test-menu.mjs           # 텍스트 5종
+ANTHROPIC_API_KEY=sk-ant-your-key-here node test-menu.mjs ./menu.jpg # 이미지 테스트
 ```
 
 ### 7.4 다음 판단 기준

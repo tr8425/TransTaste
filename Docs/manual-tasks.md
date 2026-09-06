@@ -8,8 +8,8 @@
 | # | 작업 | 방법 |
 |---|---|---|
 | 0-1 | Anthropic API 키 발급 | https://console.anthropic.com → API Keys |
-| 0-2 | `.env.local` 파일 생성 | 프로젝트 루트에 `ANTHROPIC_API_KEY=sk-ant-...` 추가 |
-| 0-3 | POC 테스트 실행 | `cd poc && ANTHROPIC_API_KEY=sk-ant-... node test-menu.mjs` |
+| 0-2 | `.env.local` 파일 생성 | 프로젝트 루트에 `ANTHROPIC_API_KEY=sk-ant-your-key-here` 추가 |
+| 0-3 | POC 테스트 실행 | `cd poc && ANTHROPIC_API_KEY=sk-ant-your-key-here node test-menu.mjs` |
 
 ---
 
@@ -71,7 +71,7 @@
 
 ```bash
 # Phase 0 — AI
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=sk-ant-your-key-here
 
 # Phase 2 — Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co

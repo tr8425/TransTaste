@@ -12,17 +12,17 @@ npm install
 
 ### 1. 텍스트 테스트 (한/중/일/태/혼합 메뉴 5종 자동 실행)
 ```bash
-ANTHROPIC_API_KEY=sk-ant-... node test-menu.mjs
+ANTHROPIC_API_KEY=sk-ant-your-key-here node test-menu.mjs
 ```
 
 ### 2. 이미지 파일 테스트
 ```bash
-ANTHROPIC_API_KEY=sk-ant-... node test-menu.mjs ./menu.jpg
+ANTHROPIC_API_KEY=sk-ant-your-key-here node test-menu.mjs ./menu.jpg
 ```
 
 ### 3. 이미지 URL 테스트
 ```bash
-ANTHROPIC_API_KEY=sk-ant-... node test-menu.mjs https://example.com/menu.jpg
+ANTHROPIC_API_KEY=sk-ant-your-key-here node test-menu.mjs https://example.com/menu.jpg
 ```
 
 ## 검증 포인트

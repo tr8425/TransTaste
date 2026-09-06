@@ -3,3 +3,13 @@
 # but disable it when Codex is started from this repository.
 [mcp_servers.unityMCP]
 enabled = false
+
+[mcp_servers.playwright]
+command = "npx"
+args = [
+    "-y",
+    "@playwright/mcp@latest",
+]
+
+[mcp_servers.playwright.env]
+NODE_OPTIONS = "--use-system-ca"

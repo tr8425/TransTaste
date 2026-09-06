@@ -6,15 +6,45 @@ const baseUrl = process.env.QA_BASE_URL || "http://127.0.0.1:3001";
 const edge = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 const profile = path.resolve("output/qa-edge-profile");
 const port = 9333;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const children = new Set();
+function track(child) {
+  children.add(child);
+  child.once("exit", () => children.delete(child));
+  return child;
+}
+process.once("exit", () => {
+  for (const child of children) child.kill();
+});
+
+async function isReachable(url) {
+  try {
+    const response = await fetch(url);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+let appServer;
+if (!(await isReachable(baseUrl))) {
+  if (process.env.QA_BASE_URL) throw new Error(`QA_BASE_URL is unreachable: ${baseUrl}`);
+  appServer = track(spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", "3001"], {
+    stdio: "ignore",
+    windowsHide: true,
+  }));
+  for (let i = 0; i < 60 && !(await isReachable(baseUrl)); i++) await sleep(250);
+  if (!(await isReachable(baseUrl))) throw new Error(`Next server unavailable: ${baseUrl}. Run npm run build first.`);
+}
+
 await rm(profile, { recursive: true, force: true });
 await mkdir(profile, { recursive: true });
 
-const browser = spawn(edge, [
+const browser = track(spawn(edge, [
   "--headless=new", "--disable-gpu", "--no-first-run", "--disable-background-networking",
   `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, "--window-size=480,932", "about:blank",
-], { stdio: "ignore" });
+], { stdio: "ignore", windowsHide: true }));
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function waitForJson(url) {
   for (let i = 0; i < 50; i++) {
     try { return await (await fetch(url)).json(); } catch { await sleep(100); }
@@ -172,6 +202,7 @@ console.log(`SUMMARY | ${results.length - failed.length}/${results.length} passe
 
 socket.close();
 browser.kill();
+appServer?.kill();
 await sleep(500);
 try { await rm(profile, { recursive: true, force: true, maxRetries: 4, retryDelay: 250 }); } catch { /* Edge may release dictionaries after process exit. */ }
 process.exitCode = failed.length ? 1 : 0;

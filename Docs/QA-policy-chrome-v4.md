@@ -66,7 +66,7 @@ Mock 모드에서 대부분 검증 가능. API 키 입력 기능 검증 시 1회
 
 - [ ] 프로필(`/profile`) → "API Key" 섹션 표시
 - [ ] "Use your own Anthropic API key for unlimited scans" 안내 텍스트
-- [ ] 비밀번호 입력 필드 (type=password, placeholder: sk-ant-api03-...)
+- [ ] 비밀번호 입력 필드 (type=password, placeholder: sk-ant-your-key-here)
 - [ ] "Stored locally on your device only. Never sent to our servers." 안내
 - [ ] 키 입력 후 localStorage `transtaste_api_key`에 저장 확인
 
