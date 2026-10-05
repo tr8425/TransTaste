@@ -102,7 +102,14 @@ export function useTranslation() {
   const [locale, setLocale] = useState("en");
 
   useEffect(() => {
-    setLocale(getUILocale());
+    const syncLocale = () => setLocale(getUILocale());
+    syncLocale();
+    window.addEventListener("storage", syncLocale);
+    window.addEventListener("transtaste:settings-changed", syncLocale);
+    return () => {
+      window.removeEventListener("storage", syncLocale);
+      window.removeEventListener("transtaste:settings-changed", syncLocale);
+    };
   }, []);
 
   const translate = (

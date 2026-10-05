@@ -18,6 +18,7 @@ export interface CartContextType {
   menuLanguage: string;
   userLanguage: string;
   countryDetected: string;
+  sourceResultKey: string;
   addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (dish_hash: string) => void;
   updateQuantity: (dish_hash: string, quantity: number) => void;
@@ -25,6 +26,7 @@ export interface CartContextType {
   setMenuLanguage: (lang: string) => void;
   setUserLanguage: (lang: string) => void;
   setCountryDetected: (country: string) => void;
+  setSourceResultKey: (key: string) => void;
   totalItems: number;
   totalPrice: number;
 }
@@ -36,9 +38,10 @@ function loadFromSession(): {
   menuLanguage: string;
   userLanguage: string;
   countryDetected: string;
+  sourceResultKey: string;
 } {
   if (typeof window === "undefined") {
-    return { items: [], menuLanguage: "en", userLanguage: "en", countryDetected: "" };
+    return { items: [], menuLanguage: "en", userLanguage: "en", countryDetected: "", sourceResultKey: "" };
   }
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -46,7 +49,7 @@ function loadFromSession(): {
   } catch {
     /* ignore */
   }
-  return { items: [], menuLanguage: "en", userLanguage: "en", countryDetected: "" };
+  return { items: [], menuLanguage: "en", userLanguage: "en", countryDetected: "", sourceResultKey: "" };
 }
 
 export const CartContext = createContext<CartContextType | null>(null);
@@ -56,6 +59,7 @@ export function useCartProvider() {
   const [menuLanguage, setMenuLanguage] = useState("en");
   const [userLanguage, setUserLanguage] = useState("en");
   const [countryDetected, setCountryDetected] = useState("");
+  const [sourceResultKey, setSourceResultKey] = useState("");
   const [hydrated, setHydrated] = useState(false);
 
   // Hydrate from sessionStorage on mount
@@ -65,6 +69,7 @@ export function useCartProvider() {
     setMenuLanguage(saved.menuLanguage);
     setUserLanguage(saved.userLanguage);
     setCountryDetected(saved.countryDetected);
+    setSourceResultKey(saved.sourceResultKey || "");
     setHydrated(true);
   }, []);
 
@@ -74,12 +79,12 @@ export function useCartProvider() {
     try {
       sessionStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ items, menuLanguage, userLanguage, countryDetected })
+        JSON.stringify({ items, menuLanguage, userLanguage, countryDetected, sourceResultKey })
       );
     } catch {
       /* ignore */
     }
-  }, [items, menuLanguage, userLanguage, countryDetected, hydrated]);
+  }, [items, menuLanguage, userLanguage, countryDetected, sourceResultKey, hydrated]);
 
   const addItem = useCallback((item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
@@ -129,6 +134,7 @@ export function useCartProvider() {
       menuLanguage,
       userLanguage,
       countryDetected,
+      sourceResultKey,
       addItem,
       removeItem,
       updateQuantity,
@@ -136,6 +142,7 @@ export function useCartProvider() {
       setMenuLanguage,
       setUserLanguage,
       setCountryDetected,
+      setSourceResultKey,
       totalItems,
       totalPrice,
     }),
@@ -144,6 +151,7 @@ export function useCartProvider() {
       menuLanguage,
       userLanguage,
       countryDetected,
+      sourceResultKey,
       addItem,
       removeItem,
       updateQuantity,

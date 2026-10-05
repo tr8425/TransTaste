@@ -151,6 +151,7 @@ function ProfileContent() {
     setSettings(next);
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+      window.dispatchEvent(new Event("transtaste:settings-changed"));
     } catch {
       // Ignore storage errors
     }

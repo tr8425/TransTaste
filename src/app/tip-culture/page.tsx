@@ -31,6 +31,10 @@ function TipCalculator({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, p
   const [billAmount, setBillAmount] = useState("");
   const [tipPercent, setTipPercent] = useState(tip.range_min || 15);
 
+  useEffect(() => {
+    setTipPercent(tip.range_min || (tip.type === "expected" ? 15 : 5));
+  }, [tip]);
+
   const presets = tip.type === "expected"
     ? [15, 18, 20]
     : [5, 10, 15];

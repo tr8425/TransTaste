@@ -45,6 +45,7 @@ export default function OrderPage() {
     totalPrice,
     countryDetected,
     menuLanguage,
+    sourceResultKey,
   } = useCart();
 
   const { t } = useTranslation();
@@ -293,7 +294,7 @@ export default function OrderPage() {
       {/* Add more */}
       <div className="px-4 mt-3">
         <Link
-          href="/results"
+          href={sourceResultKey ? `/results?id=${encodeURIComponent(sourceResultKey)}` : "/results"}
           className="flex items-center justify-center gap-1.5 py-3 text-sm font-medium text-coral hover:text-coral-dark transition-colors"
         >
           <svg

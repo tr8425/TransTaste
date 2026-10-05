@@ -146,6 +146,19 @@ await sleep(100);
 check("URL modal closes with Escape", !(await evaluate("Boolean(document.querySelector('[role=dialog]'))")));
 
 await navigate("/");
+await evaluate(`(() => {
+  const other=[...document.querySelectorAll('button')].find((el)=>el.textContent.includes('Other ways'));
+  other?.click();
+})()`);
+await sleep(100);
+action = await evaluate(`(() => { const b=[...document.querySelectorAll('#other-input-methods button')].find((el)=>el.textContent.trim()==='Text'); b?.click(); return Boolean(b); })()`);
+await sleep(100);
+await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
+await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
+await sleep(100);
+check("text modal closes with Escape", action && !(await evaluate("Boolean(document.querySelector('[role=dialog]'))")));
+
+await navigate("/");
 await evaluate(`[...document.querySelectorAll('button')].find((el)=>el.textContent.includes('sample menu'))?.click()`);
 await sleep(350);
 check("sample menu navigates to setup", await evaluate("location.pathname === '/scan-setup'"), await evaluate("location.pathname"));
@@ -168,6 +181,21 @@ await evaluate(`document.querySelector('a[href="#profile-language"]')?.click()`)
 await sleep(100);
 check("profile section navigation updates hash", await evaluate("location.hash === '#profile-language'"), await evaluate("location.hash"));
 
+state = await evaluate(`(() => {
+  const select=document.querySelector('select');
+  const setter=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;
+  setter.call(select,'ko'); select.dispatchEvent(new Event('change',{bubbles:true}));
+  return Boolean(select);
+})()`);
+await sleep(150);
+check("language change updates bottom navigation immediately", state && await evaluate(`document.querySelector('nav.fixed')?.innerText.includes('홈')`));
+await evaluate(`(() => {
+  const select=document.querySelector('select');
+  const setter=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;
+  setter.call(select,'en'); select.dispatchEvent(new Event('change',{bubbles:true}));
+})()`);
+await sleep(100);
+
 await navigate("/faq");
 state = await evaluate(`(() => { const d=document.querySelector('details'); d?.querySelector('summary')?.click(); return d?.open; })()`);
 check("FAQ disclosure opens", state === true, String(state));
@@ -176,6 +204,40 @@ await navigate("/tip-culture");
 state = await evaluate(`(() => { const b=[...document.querySelectorAll('button')].find((el)=>el.textContent.includes('Korea')); b?.click(); return Boolean(b); })()`);
 await sleep(100);
 check("country selector changes active country", state && await evaluate(`([...document.querySelectorAll('button')].find((el)=>el.textContent.includes('Korea'))?.className.includes('bg-coral'))`));
+
+await evaluate(`([...document.querySelectorAll('button')].find((el)=>el.textContent.includes('USA'))?.click())`);
+await sleep(100);
+await evaluate(`(() => {
+  const input=document.querySelector('input[type="number"]');
+  const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
+  setter.call(input,'100'); input.dispatchEvent(new Event('input',{bubbles:true}));
+  [...document.querySelectorAll('button')].find((el)=>el.textContent.trim()==='20%')?.click();
+})()`);
+await sleep(100);
+await evaluate(`([...document.querySelectorAll('button')].find((el)=>el.textContent.includes('UK'))?.click())`);
+await sleep(100);
+state = await evaluate(`({
+  active:[...document.querySelectorAll('button')].find((el)=>el.textContent.trim()==='10%')?.className.includes('bg-coral'),
+  text:document.body.innerText
+})`);
+check("tip calculator resets when country changes", state.active && state.text.includes('$10.00') && state.text.includes('$110.00'));
+
+await evaluate(`sessionStorage.setItem('transtaste_cart', JSON.stringify({
+  items:[{dish_hash:'qa-dish',name_original:'QA Dish',name_translated:'QA Dish',price:100,currency:'USD',quantity:1}],
+  menuLanguage:'en',userLanguage:'en',countryDetected:'US',sourceResultKey:'scan_qa_source'
+}))`);
+await navigate("/order");
+check("order add-from-menu preserves source scan id", await evaluate(`document.querySelector('a[href="/results?id=scan_qa_source"]')?.getAttribute('href') === '/results?id=scan_qa_source'`));
+
+const originalScannedAt = "2026-01-02T03:04:05.000Z";
+await evaluate(`(() => {
+  localStorage.setItem('transtaste_scan_history', JSON.stringify([{original:'QA Menu',english:'QA Menu',scannedAt:'${originalScannedAt}',resultKey:'scan_qa_history',dishCount:0}]));
+  localStorage.setItem('transtaste_cached_results', JSON.stringify({scan_qa_history:{dishes:[],menu_language:'ja',menu_meta:{language:'ja',country_detected:'JP',restaurant_type:'restaurant',items_found:0},restaurant_type:'restaurant',demo:true}}));
+})()`);
+await navigate("/results?id=scan_qa_history");
+await sleep(250);
+state = await evaluate(`JSON.parse(localStorage.getItem('transtaste_scan_history')||'[]').find((item)=>item.resultKey==='scan_qa_history')?.scannedAt`);
+check("reopening scan preserves original timestamp", state === originalScannedAt, String(state));
 
 await navigate("/");
 await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab" });

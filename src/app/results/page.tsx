@@ -153,6 +153,7 @@ function ResultsContent() {
         // duplicating history entries).
         const cachedId = searchParams.get("id");
         const resultKey = cachedId || `scan_${Date.now()}`;
+        cart.setSourceResultKey(resultKey);
         try {
           // Determine output language to render preview text in the user's language
           let outputLang = "en";
@@ -171,11 +172,13 @@ function ResultsContent() {
             translated: previewText(d),
           }));
 
+          const prev: RecentScan[] = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
+          const existingEntry = prev.find((scan) => scan.resultKey === resultKey);
           const firstDish = parsed.dishes[0];
           const newEntry: RecentScan = {
             original: firstDish?.original || "Menu",
             english: firstDish?.translation?.english || firstDish?.original || "Menu",
-            scannedAt: new Date().toISOString(),
+            scannedAt: existingEntry?.scannedAt || new Date().toISOString(),
             resultKey,
             dishCount: parsed.dishes.length,
             language: parsed.menu_meta?.language || parsed.menu_language,
@@ -194,7 +197,6 @@ function ResultsContent() {
 
           // Save history: 1 scan = 1 entry. Dedupe by resultKey to prevent
           // re-renders or revisits from accumulating duplicate rows.
-          const prev: RecentScan[] = JSON.parse(localStorage.getItem("transtaste_scan_history") || "[]");
           const deduped = prev.filter((s) => s.resultKey !== resultKey);
           const merged = [newEntry, ...deduped].slice(0, 20);
           localStorage.setItem("transtaste_scan_history", JSON.stringify(merged));
