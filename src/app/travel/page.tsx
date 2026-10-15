@@ -87,7 +87,7 @@ export default function TravelPage() {
     <main className="min-h-screen bg-cream pb-28">
       {/* Header */}
       <header className="border-b border-brown-dark/20 px-5 pb-5 pt-12">
-        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Field notes · travel</p>
+        <p className="mengto-kicker mb-2 text-coral">Field notes · travel</p>
         <h1 className="text-3xl font-bold text-brown-dark">{t("travel.title")}</h1>
         <p className="text-sm text-brown-medium mt-0.5">
           {t("travel.subtitle")}
@@ -124,7 +124,7 @@ export default function TravelPage() {
                     {t(tool.labelKey)}
                   </p>
                   {tool.comingSoon && (
-                    <span className="text-[10px] font-bold text-amber-brand bg-amber-brand/15 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="text-micro font-bold text-amber-brand bg-amber-brand/15 px-1.5 py-0.5 rounded-full uppercase tracking-caps">
                       {t("travel.comingSoon")}
                     </span>
                   )}

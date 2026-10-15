@@ -30,14 +30,24 @@ const config: Config = {
         danger: "#E24B4A",
       },
       fontFamily: {
+        // Fonts are self-hosted via next/font in src/app/layout.tsx
         sans: [
-          "Inter",
-          "DM Sans",
-          "Noto Sans KR",
-          "Noto Sans JP",
+          "var(--font-manrope)",
+          "var(--font-noto-kr)",
+          "var(--font-noto-jp)",
           "Noto Sans SC",
           "sans-serif",
         ],
+        display: ["var(--font-archivo-black)", "Arial Black", "sans-serif"],
+      },
+      fontSize: {
+        // Small UI roles below text-xs; line-height stays inherited
+        micro: "10px",
+        caption: "11px",
+      },
+      letterSpacing: {
+        // Uppercase labels at 10-14px
+        caps: "0.08em",
       },
       maxWidth: {
         mobile: "430px",

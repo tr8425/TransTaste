@@ -184,7 +184,7 @@ function ProfileContent() {
     <div className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
-        <div><p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Preferences · local</p><h1 className="text-2xl font-bold text-brown-dark">{t("profile.title")}</h1></div>
+        <div><p className="mengto-kicker mb-1 text-coral">Preferences · local</p><h1 className="text-2xl font-bold text-brown-dark">{t("profile.title")}</h1></div>
       </div>
 
       {/* Payment feedback banner */}
@@ -242,7 +242,7 @@ function ProfileContent() {
                   <span className="text-sm font-semibold text-brown-dark">
                     {t("profile.tripPassActive")}
                   </span>
-                  <span className="text-[10px] font-bold text-success bg-success/15 px-2 py-0.5 rounded-full">
+                  <span className="text-micro font-bold text-success bg-success/15 px-2 py-0.5 rounded-full">
                     {t("profile.active")}
                   </span>
                 </div>
@@ -268,7 +268,7 @@ function ProfileContent() {
 
         {/* ── Language Settings ── */}
         <div id="profile-language" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
-          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-caps mb-2">
             {t("profile.language")}
           </h2>
 
@@ -331,7 +331,7 @@ function ProfileContent() {
                 </option>
               ))}
             </select>
-            <p className="text-[10px] text-brown-medium/50 mt-1">
+            <p className="text-micro text-brown-medium/50 mt-1">
               {t("profile.homeCurrencyDesc")}
             </p>
           </label>
@@ -340,7 +340,7 @@ function ProfileContent() {
         {/* ── Allergy & Dietary ── */}
         <div id="profile-dietary" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
           {/* Allergens */}
-          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-caps mb-2">
             {t("profile.allergies")}
           </h2>
           {settings.allergen_preset.length > 0 ? (
@@ -393,7 +393,7 @@ function ProfileContent() {
 
           {/* Dietary */}
           <div className="mt-4 pt-4 border-t border-brown-light/10">
-            <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+            <h2 className="text-sm font-medium text-brown-medium uppercase tracking-caps mb-2">
               {t("profile.dietaryPrefs")}
             </h2>
             {settings.dietary_beliefs.length > 0 ? (
@@ -446,7 +446,7 @@ function ProfileContent() {
 
         {/* ── Disliked Ingredients ── */}
         <div className="bg-cream-dark rounded-xl p-4">
-          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-caps mb-2">
             {t("profile.dislikedIngredients")}
           </h2>
           <p className="text-xs text-brown-medium/60 mb-2">
@@ -503,7 +503,7 @@ function ProfileContent() {
 
         {/* ── Tip Guide Settings ── */}
         <div className="bg-cream-dark rounded-xl p-4">
-          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-caps mb-2">
             {t("profile.tipGuide")}
           </h2>
           <div className="flex items-center justify-between">
@@ -529,7 +529,7 @@ function ProfileContent() {
 
         {/* ── Account ── */}
         <div id="profile-account" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
-          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-wider mb-2">
+          <h2 className="text-sm font-medium text-brown-medium uppercase tracking-caps mb-2">
             {t("profile.account")}
           </h2>
           {settings.email ? (

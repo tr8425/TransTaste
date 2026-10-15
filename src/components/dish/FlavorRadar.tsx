@@ -118,7 +118,7 @@ export default function FlavorRadar({ profile, size = 120 }: FlavorRadarProps) {
           textAnchor="middle"
           dominantBaseline="middle"
           className="fill-brown-medium"
-          style={{ fontSize: "9px", fontFamily: "Inter, sans-serif" }}
+          style={{ fontSize: "9px", fontFamily: "inherit" }}
         >
           {label}
         </text>

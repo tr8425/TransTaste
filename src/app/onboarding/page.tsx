@@ -371,7 +371,7 @@ export default function OnboardingPage() {
           </section>
 
           {/* Disclaimer */}
-          <p className="text-[10px] text-brown-medium/50 leading-relaxed mb-6">
+          <p className="text-micro text-brown-medium/50 leading-relaxed mb-6">
             {t("disclaimer.onboarding")}
           </p>
 

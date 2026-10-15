@@ -84,9 +84,9 @@ function TipCalculator({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, p
       {bill > 0 && (
         <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-coral/5">
           <div className="text-xs text-brown-medium">
-            {t("tipCulture.tipLabel")} <span className="font-semibold text-brown-dark">${tipAmount.toFixed(2)}</span>
+            {t("tipCulture.tipLabel")} <span className="font-semibold tabular-nums text-brown-dark">${tipAmount.toFixed(2)}</span>
           </div>
-          <div className="text-sm font-bold text-coral">
+          <div className="text-sm font-bold tabular-nums text-coral">
             {t("tipCulture.totalLabel")} ${total.toFixed(2)}
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function TipCulturePage() {
     <div className="min-h-screen bg-cream flex flex-col pb-28">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
-        <p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Table manners · atlas</p>
+        <p className="mengto-kicker mb-1 text-coral">Table manners · atlas</p>
         <h1 className="text-2xl font-bold text-brown-dark">{t("tipCulture.title")}</h1>
         {detectedCountry && (
           <p className="text-xs text-brown-medium mt-1">
@@ -321,7 +321,7 @@ export default function TipCulturePage() {
                 <ul className="space-y-1.5">
                   {selected.culture.notes.map((_, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-[10px] text-coral mt-1 flex-shrink-0">{"\u25CF"}</span>
+                      <span className="text-micro text-coral mt-1 flex-shrink-0">{"\u25CF"}</span>
                       <span className="text-xs text-brown-medium leading-relaxed">{t(`country.${selected.code}.notes.${i}`)}</span>
                     </li>
                   ))}

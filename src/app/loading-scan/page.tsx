@@ -362,7 +362,7 @@ export default function LoadingScanPage() {
           {loadingStages.map((stage, index) => (
             <li
               key={stage}
-              className={`rounded-full px-2 py-1 text-[10px] font-medium ${
+              className={`rounded-full px-2 py-1 text-micro font-medium ${
                 index <= activeStage
                   ? "bg-coral/10 text-coral"
                   : "bg-cream-dark text-brown-medium/60"
@@ -398,19 +398,19 @@ export default function LoadingScanPage() {
                       {dish.original}
                     </p>
                     {dish.translation?.pronunciation && (
-                      <p className="text-[10px] text-brown-medium/60 italic truncate">
+                      <p className="text-micro text-brown-medium/60 italic truncate">
                         {dish.translation.pronunciation}
                       </p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-0.5 ml-2 flex-shrink-0">
                     {dish.price_display || dish.price ? (
-                      <span className="text-xs text-brown-medium">
+                      <span className="text-xs tabular-nums text-brown-medium">
                         {dish.price_display || dish.price}
                       </span>
                     ) : null}
                     {dish.allergen_risk && dish.allergen_risk !== "safe" && (
-                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                      <span className={`text-micro font-bold uppercase tracking-caps px-1.5 py-0.5 rounded-full ${
                         dish.allergen_risk === "danger" ? "bg-danger text-white" :
                         dish.allergen_risk === "warning" ? "bg-amber-500 text-white" :
                         "bg-amber-500/20 text-amber-700"

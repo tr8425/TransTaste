@@ -100,7 +100,7 @@ export default function DishCard({
       <>
         {/* Flavor Radar */}
         <div className="mb-4">
-          <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-3">
             {t("dish.flavorProfile")}
           </h3>
           <div className="flex justify-center">
@@ -111,7 +111,7 @@ export default function DishCard({
         {/* Core ingredients */}
         {detail.ingredients?.core && detail.ingredients.core.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
+            <h3 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-2">
               {t("dish.ingredients")}
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -142,7 +142,7 @@ export default function DishCard({
         {detail.how_to_eat && (
           <div className="mb-4">
             <div className="bg-cream-dark rounded-xl p-4 border-l-4 border-l-coral">
-              <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
+              <h4 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-1">
                 {t("dish.howToEat")}
               </h4>
               <p className="text-sm text-brown-dark leading-relaxed">
@@ -156,7 +156,7 @@ export default function DishCard({
         {detail.disclosure && (
           <div className="mb-4">
             <div className="bg-brown-dark/5 rounded-xl p-4 border-l-4 border-l-brown-medium">
-              <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
+              <h4 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-1">
                 {t("dish.culturalNote")}
               </h4>
               <p className="text-sm text-brown-dark leading-relaxed">
@@ -217,7 +217,7 @@ export default function DishCard({
       {/* Price & category — Phase 1 data */}
       <div className="flex items-center gap-2 mb-4">
         {(dish.price_display || dish.price) && (
-          <span className="text-sm font-semibold text-amber-brand bg-amber-brand/10 px-2.5 py-0.5 rounded-full">
+          <span className="text-sm font-semibold tabular-nums text-amber-brand bg-amber-brand/10 px-2.5 py-0.5 rounded-full">
             {dish.price_display || dish.price}
           </span>
         )}
@@ -236,7 +236,7 @@ export default function DishCard({
 
       {/* Allergens & dietary — Phase 1 data */}
       <div className="mb-4">
-        <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
+        <h3 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-2">
           {t("dish.allergensAndDietary")}
         </h3>
 
@@ -291,7 +291,7 @@ export default function DishCard({
         {dish.alternative_dishes && dish.alternative_dishes.length > 0 &&
           (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") && (
           <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-            <h4 className="text-xs font-medium text-success uppercase tracking-wider mb-2 flex items-center gap-1">
+            <h4 className="text-xs font-medium text-success uppercase tracking-caps mb-2 flex items-center gap-1">
               <span>✅</span> {t("dish.saferAlternatives")}
             </h4>
             <div className="flex flex-wrap gap-1.5">
@@ -317,7 +317,7 @@ export default function DishCard({
           </div>
         )}
 
-        <p className="text-[10px] text-brown-medium/40 mt-2 leading-relaxed">
+        <p className="text-micro text-brown-medium/40 mt-2 leading-relaxed">
           {t("disclaimer.dishCard")}
         </p>
       </div>
@@ -333,7 +333,7 @@ export default function DishCard({
             {detail ? (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
+                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-3">
                     {t("dish.flavorProfile")}
                   </h3>
                   <div className="flex justify-center py-2">
@@ -352,7 +352,7 @@ export default function DishCard({
             ) : (
               <div className="space-y-4 py-2">
                 <div>
-                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-3">
+                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-3">
                     {t("dish.flavorProfile")}
                   </h3>
                   <div className="flex justify-center py-2">
@@ -363,7 +363,7 @@ export default function DishCard({
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-2">
+                  <h3 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-2">
                     {t("dishCard.ingredients")}
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
@@ -377,7 +377,7 @@ export default function DishCard({
                   </div>
                 </div>
                 <div className="bg-cream-dark rounded-xl p-4">
-                  <h4 className="text-xs font-medium text-brown-medium uppercase tracking-wider mb-1">
+                  <h4 className="text-xs font-medium text-brown-medium uppercase tracking-caps mb-1">
                     {t("dishCard.funFact")}
                   </h4>
                   <p className="text-sm text-brown-dark leading-relaxed">

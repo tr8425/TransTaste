@@ -120,7 +120,7 @@ export default function OrderPage() {
       {/* Header */}
       <div className="sticky top-0 z-20 border-b border-brown-dark bg-cream/95 px-5 py-4 backdrop-blur-md">
         <div className="flex items-center justify-between">
-          <div><p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Order sheet · review</p><h1 className="text-2xl font-bold text-brown-dark">{t("order.yourOrder")}</h1></div>
+          <div><p className="mengto-kicker mb-1 text-coral">Order sheet · review</p><h1 className="text-2xl font-bold text-brown-dark">{t("order.yourOrder")}</h1></div>
           <span className="bg-coral text-white text-xs font-bold px-2.5 py-1 rounded-full">
             {totalItems}
           </span>
@@ -201,13 +201,13 @@ export default function OrderPage() {
                   {item.name_original}
                 </p>
                 {item.price != null && (
-                  <p className="text-sm font-medium text-brown-dark mt-1">
+                  <p className="text-sm font-medium tabular-nums text-brown-dark mt-1">
                     {formatPrice(item.price, item.currency)}
                   </p>
                 )}
                 {item.allergen_risk && item.allergen_risk !== "safe" ? (
                   <div className="mt-2 flex flex-wrap items-center gap-1">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    <span className={`rounded-full px-2 py-0.5 text-micro font-bold ${
                       item.allergen_risk === "danger"
                         ? "bg-danger/10 text-danger"
                         : "bg-amber-brand/10 text-amber-brand"
@@ -215,7 +215,7 @@ export default function OrderPage() {
                       {t(`risk.${item.allergen_risk}`)}
                     </span>
                     {item.allergens?.slice(0, 3).map((allergen) => (
-                      <span key={allergen} className="text-[10px] text-brown-medium">
+                      <span key={allergen} className="text-micro text-brown-medium">
                         {allergen}
                       </span>
                     ))}
@@ -313,7 +313,7 @@ export default function OrderPage() {
       </div>
 
       {/* Summary */}
-        <div className="mx-4 mt-4 border border-brown-dark bg-white p-4 shadow-[4px_4px_0_rgba(23,23,18,.12)]">
+        <div className="mx-4 mt-4 border border-brown-dark bg-white p-4 tabular-nums shadow-[4px_4px_0_rgba(23,23,18,.12)]">
         <div className="flex justify-between text-sm text-brown-dark mb-2">
           <span>{t("order.subtotal")}</span>
           <span className="font-medium">
@@ -346,7 +346,7 @@ export default function OrderPage() {
         >
           {t("order.showToServer")}
         </Link>
-        <p className="text-center text-[11px] leading-4 text-brown-medium">
+        <p className="text-center text-caption leading-4 text-brown-medium">
           {t("order.showToServerHint")}
         </p>
         <Link

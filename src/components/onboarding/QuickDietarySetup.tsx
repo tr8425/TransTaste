@@ -113,7 +113,7 @@ export default function QuickDietarySetup() {
       {hasSavedPreferences ? (
         <div className="mb-5 flex items-start gap-2.5 rounded-2xl border border-success/20 bg-success/5 p-3 text-xs leading-5 text-brown-medium">
           <span
-            className="mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full bg-success text-[11px] font-bold text-white"
+            className="mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full bg-success text-caption font-bold text-white"
             aria-hidden
           >
             ✓
@@ -193,7 +193,7 @@ export default function QuickDietarySetup() {
         />
       </div>
 
-      <div className="mt-7 rounded-2xl bg-cream-dark p-3 text-[11px] leading-5 text-brown-medium">
+      <div className="mt-7 rounded-2xl bg-cream-dark p-3 text-caption leading-5 text-brown-medium">
         {t("quickSetup.safetyNote")}
       </div>
 

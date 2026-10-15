@@ -43,7 +43,7 @@ export default function FoodPage({ params }: Props) {
         </nav>
 
         {/* Header */}
-        <p className="mengto-kicker mb-2 text-[9px] font-extrabold text-coral">Dish field note</p>
+        <p className="mengto-kicker mb-2 text-coral">Dish field note</p>
         <h1 className="mb-1 text-4xl font-bold text-brown-dark">{food.english}</h1>
         <p className="text-xl text-brown-medium mb-4">{food.original}</p>
 
@@ -105,7 +105,7 @@ export default function FoodPage({ params }: Props) {
         </section>
 
         {/* Disclaimer */}
-        <p className="mt-6 text-[10px] text-brown-medium/40 leading-relaxed">
+        <p className="mt-6 text-micro text-brown-medium/40 leading-relaxed">
           {t("foods.infoDisclaimer")}
         </p>
       </div>

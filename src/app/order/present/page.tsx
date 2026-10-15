@@ -131,8 +131,8 @@ export default function PresentPage() {
             </svg>
           </button>
           <div className="text-right">
-            <p className="text-xs font-bold uppercase tracking-[.08em] text-brown-dark">{t("present.showThisScreen")}</p>
-            <p className="mt-0.5 text-[10px] text-brown-medium">{t("present.screenAwake")}</p>
+            <p className="text-xs font-bold uppercase tracking-caps text-brown-dark">{t("present.showThisScreen")}</p>
+            <p className="mt-0.5 text-micro text-brown-medium">{t("present.screenAwake")}</p>
           </div>
         </div>
         {/* Allergy banner — in menu language, large */}
@@ -192,7 +192,7 @@ export default function PresentPage() {
                     {item.name_original}
                   </p>
                   {/* Translated name — medium, for server context */}
-                  <p className="mt-1 text-lg text-brown-medium">
+                  <p className="mt-1 text-lg tabular-nums text-brown-medium">
                     {item.name_translated}
                   </p>
                 </div>
@@ -201,7 +201,7 @@ export default function PresentPage() {
                     ×{item.quantity}
                   </p>
                   {item.price != null && (
-                    <p className="mt-1 text-lg text-brown-medium">
+                    <p className="mt-1 text-lg tabular-nums text-brown-medium">
                       {formatPrice(item.price * item.quantity, item.currency)}
                     </p>
                   )}
@@ -216,13 +216,13 @@ export default function PresentPage() {
           <span className="text-2xl font-bold text-brown-dark">
             {TOTAL_LABELS[lang] ?? TOTAL_LABELS.en}
           </span>
-          <span className="text-2xl font-bold text-brown-dark">
+          <span className="text-2xl font-bold tabular-nums text-brown-dark">
             {formatPrice(totalPrice, currency)}
           </span>
         </div>
 
         {/* Disclaimer */}
-        <p className="mt-6 text-[10px] text-gray-400 text-center leading-relaxed">
+        <p className="mt-6 text-micro text-gray-400 text-center leading-relaxed">
           {t("present.disclaimer")}
         </p>
 

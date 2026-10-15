@@ -44,7 +44,7 @@ export default function RecentHistory({ items }: RecentHistoryProps) {
 
   return (
     <div className="w-full">
-      <h3 className="text-xs font-medium text-brown-medium mb-2 px-1 uppercase tracking-wider">
+      <h3 className="text-xs font-medium text-brown-medium mb-2 px-1 uppercase tracking-caps">
         {t("home.recentScans")}
       </h3>
       <HorizontalScroll>
@@ -65,7 +65,7 @@ export default function RecentHistory({ items }: RecentHistoryProps) {
                 {sessionLabel}
               </span>
               {isSession && item.dishCount! > 0 && (
-                <span className="text-[10px] font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full">
+                <span className="text-micro font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full">
                   {item.dishCount}
                 </span>
               )}

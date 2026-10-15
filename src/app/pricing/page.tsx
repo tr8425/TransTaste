@@ -58,7 +58,7 @@ export default function PricingPage() {
           ← {t("common.back")}
         </button>
 
-        <p className="mengto-kicker mt-5 text-[10px] font-extrabold text-coral">
+        <p className="mengto-kicker mt-5 text-coral">
           {t("pricing.eyebrow")}
         </p>
         <h1 className="mt-2 text-4xl font-bold leading-none tracking-[-0.04em] text-brown-dark">
@@ -80,7 +80,7 @@ export default function PricingPage() {
               }`}
             >
               {plan.featured ? (
-                <span className="rounded-full bg-coral/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-coral">
+                <span className="rounded-full bg-coral/10 px-2.5 py-1 text-micro font-bold uppercase tracking-caps text-coral">
                   {t("pricing.bestForTrip")}
                 </span>
               ) : null}
@@ -89,7 +89,7 @@ export default function PricingPage() {
                   <h2 className="text-base font-bold text-brown-dark">{t(plan.titleKey)}</h2>
                   <p className="mt-1 text-xs leading-5 text-brown-medium">{t(plan.descriptionKey)}</p>
                 </div>
-                <p className="flex-none text-xl font-bold text-brown-dark">{plan.price}</p>
+                <p className="flex-none text-xl font-bold tabular-nums text-brown-dark">{plan.price}</p>
               </div>
               <button
                 type="button"

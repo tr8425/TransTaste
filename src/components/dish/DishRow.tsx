@@ -71,23 +71,23 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
               {dish.translation.english}
             </p>
             {dish.translation.pronunciation && (
-              <p className="text-[11px] text-brown-medium/60 italic truncate">
+              <p className="text-caption text-brown-medium/60 italic truncate">
                 {dish.translation.pronunciation}
               </p>
             )}
             {dish.estimated_calories && (
-              <span className="text-[10px] text-brown-medium/50">
+              <span className="text-micro text-brown-medium/50">
                 {t("dish.calorieEstimate", { kcal: dish.estimated_calories })}
               </span>
             )}
           </div>
           {(dish.price_display || dish.price) && (
             <div className="flex flex-col items-end">
-              <span className="text-xs font-medium text-amber-brand whitespace-nowrap">
+              <span className="text-xs font-medium tabular-nums text-amber-brand whitespace-nowrap">
                 {dish.price_display || dish.price}
               </span>
               {convertedPrice && (
-                <span className="text-[10px] text-brown-medium/60 whitespace-nowrap">
+                <span className="text-micro tabular-nums text-brown-medium/60 whitespace-nowrap">
                   ≈ {convertedPrice}
                 </span>
               )}
@@ -98,7 +98,7 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
         {/* Allergen risk badge + tags */}
         {dish.allergen_risk && (
           <div className="flex flex-wrap items-center gap-1 mt-1.5">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-micro font-bold uppercase tracking-caps ${
               riskStyle || "bg-success/10 text-success"
             }`}>
                 {t(`risk.${dish.allergen_risk}`)}
@@ -113,7 +113,7 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
         {dish.alternative_dishes && dish.alternative_dishes.length > 0 &&
           (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") && (
           <div className="flex items-center gap-1 mt-1">
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-green-100 text-green-800">
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-micro font-medium bg-green-100 text-green-800">
               ✅ {t("dish.saferAlternatives")}: {dish.alternative_dishes.slice(0, 2).join(", ")}
             </span>
           </div>
@@ -122,14 +122,14 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
         {/* Disliked ingredients badge */}
         {dish.disliked_ingredients && dish.disliked_ingredients.length > 0 && (
           <div className="flex items-center gap-1 mt-1">
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-brown-medium/15 text-brown-medium">
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-micro font-medium bg-brown-medium/15 text-brown-medium">
               {dish.disliked_ingredients.join(", ")}
             </span>
           </div>
         )}
 
         {dish.dietary_conflicts && dish.dietary_conflicts.length > 0 ? (
-          <p className="mt-1 text-[10px] font-semibold leading-4 text-danger">
+          <p className="mt-1 text-micro font-semibold leading-4 text-danger">
             {t("dish.dietaryMismatch", {
               items: dish.dietary_conflicts
                 .map((belief) => t(`quickSetup.${belief}`))

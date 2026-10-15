@@ -177,7 +177,7 @@ export default function TermsPage() {
   return (
     <main id="page-top" className="min-h-screen bg-cream pb-28">
       <div className="max-w-prose mx-auto px-5 pt-14 pb-8">
-        <p className="mengto-kicker mb-2 text-[9px] font-extrabold text-coral">Document · terms</p>
+        <p className="mengto-kicker mb-2 text-coral">Document · terms</p>
         <h1 className="mb-6 text-3xl font-bold text-brown-dark">{t("legal.termsTitle")}</h1>
         <p className="text-xs text-brown-medium mb-8">{t("legal.lastUpdated")}</p>
 

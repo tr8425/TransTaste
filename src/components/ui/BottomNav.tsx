@@ -164,7 +164,7 @@ export default function BottomNav() {
                 }`}
               >
                 {tab.icon(isActive)}
-                <span className="text-[10px] font-medium">{t(tab.labelKey)}</span>
+                <span className="text-micro font-medium">{t(tab.labelKey)}</span>
               </Link>
             );
           })}

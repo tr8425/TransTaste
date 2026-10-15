@@ -228,7 +228,7 @@ export default function PhrasesPage() {
     <main className="min-h-screen bg-cream pb-28">
       {/* Header */}
       <header className="border-b border-brown-dark/20 px-5 pb-5 pt-12">
-        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Say it clearly · 05 languages</p>
+        <p className="mengto-kicker mb-2 text-coral">Say it clearly · 05 languages</p>
         <h1 className="text-3xl font-bold text-brown-dark">{t("phrases.title")}</h1>
         <p className="text-sm text-brown-medium mt-0.5">
           {t("phrases.subtitle")}
@@ -244,7 +244,7 @@ export default function PhrasesPage() {
               onClick={() => setSelectedLanguage(lang.code)}
               aria-label={t(lang.labelKey)}
               title={t(lang.labelKey)}
-              className={`flex-1 min-w-0 px-1 py-1.5 rounded-full text-[11px] font-semibold transition-colors text-center flex items-center justify-center gap-1 ${
+              className={`flex-1 min-w-0 px-1 py-1.5 rounded-full text-caption font-semibold transition-colors text-center flex items-center justify-center gap-1 ${
                 selectedLanguage === lang.code
                   ? "bg-coral text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"

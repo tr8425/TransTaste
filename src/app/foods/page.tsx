@@ -19,7 +19,7 @@ export default function FoodsIndexPage() {
   return (
     <main className="min-h-screen bg-cream pb-28">
       <div className="mx-auto max-w-prose px-5 pb-8 pt-12">
-        <p className="mengto-kicker mb-2 text-[10px] font-extrabold text-coral">Index · dishes</p>
+        <p className="mengto-kicker mb-2 text-coral">Index · dishes</p>
         <h1 className="mb-2 text-3xl font-bold text-brown-dark">{t("foods.title")}</h1>
         <p className="text-sm text-brown-medium mb-8">
           {t("foods.subtitle")}

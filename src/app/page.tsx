@@ -165,7 +165,7 @@ export default function HomePage() {
       </nav>
 
       <section className="mengto-hero px-5 pb-10 pt-7">
-        <div className="mengto-enter mengto-kicker mb-5 inline-flex items-center gap-2 border border-brown-dark bg-cream px-3 py-2 text-[10px] font-extrabold text-brown-dark">
+        <div className="mengto-enter mengto-kicker mb-5 inline-flex items-center gap-2 border border-brown-dark bg-cream px-3 py-2 text-brown-dark">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.5 7.5 9.5 4.4-2 7.5-4.9 7.5-9.5V6L12 3Z" />
             <path d="m9 12 2 2 4-4" />
@@ -183,7 +183,7 @@ export default function HomePage() {
         <div className="relative z-10 mt-7 space-y-3">
           <Link
             href="/camera"
-            className="flex min-h-16 w-full items-center justify-between gap-2 bg-coral px-5 text-sm font-extrabold uppercase tracking-[.08em] text-brown-dark shadow-[6px_6px_0_#171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#171712] active:translate-y-1 active:shadow-none"
+            className="flex min-h-16 w-full items-center justify-between gap-2 bg-coral px-5 text-sm font-extrabold uppercase tracking-caps text-brown-dark shadow-[6px_6px_0_#171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#171712] active:translate-y-1 active:shadow-none"
           >
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="M20 19H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z" />
@@ -194,7 +194,7 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => startTextAnalysis(SAMPLE_MENU_TEXT)}
-            className="flex min-h-12 w-full items-center justify-center gap-2 border border-brown-dark/30 bg-cream px-5 text-xs font-bold uppercase tracking-[.08em] text-brown-dark transition hover:bg-brown-dark hover:text-cream"
+            className="flex min-h-12 w-full items-center justify-center gap-2 border border-brown-dark/30 bg-cream px-5 text-xs font-bold uppercase tracking-caps text-brown-dark transition hover:bg-brown-dark hover:text-cream"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="m9 18 6-6-6-6" />
@@ -245,16 +245,16 @@ export default function HomePage() {
       <section className="px-5 pb-8" aria-labelledby="proof-heading">
         <div className="mengto-proof overflow-hidden border border-brown-dark bg-cream">
           <div className="border-b border-brown-light/10 px-4 py-3">
-            <p className="mengto-kicker text-[10px] font-extrabold text-coral">{t("home.proofEyebrow")}</p>
+            <p className="mengto-kicker text-coral">{t("home.proofEyebrow")}</p>
             <h2 id="proof-heading" className="mengto-display mt-2 text-xl leading-tight text-brown-dark">{t("home.proofTitle")}</h2>
           </div>
 
           <div className="grid grid-cols-[0.82fr_1.18fr]">
             <div className="border-r border-brown-light/10 bg-[#F3E8D7] p-4">
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-brown-medium">{t("home.originalMenu")}</p>
+              <p className="mb-3 text-micro font-semibold uppercase tracking-caps text-brown-medium">{t("home.originalMenu")}</p>
               <div className="-rotate-1 rounded-lg bg-[#FFFDF8] p-3 text-brown-dark shadow-sm">
                 <p className="border-b border-dashed border-brown-light/30 pb-2 text-sm font-bold">おすすめ</p>
-                <div className="space-y-2.5 pt-3 text-[11px]">
+                <div className="space-y-2.5 pt-3 text-caption">
                   <p className="flex justify-between"><span>唐揚げ</span><span>¥780</span></p>
                   <p className="flex justify-between"><span>海老フライ</span><span>¥980</span></p>
                   <p className="flex justify-between"><span>揚げ出し豆腐</span><span>¥580</span></p>
@@ -272,7 +272,7 @@ export default function HomePage() {
                   <span className={`grid h-6 w-6 flex-none place-items-center rounded-full text-xs font-bold ${item.tone}`}>{item.icon}</span>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-brown-dark">{item.title}</p>
-                    <p className="mt-0.5 text-[10px] leading-4 text-brown-medium">{item.detail}</p>
+                    <p className="mt-0.5 text-micro leading-4 text-brown-medium">{item.detail}</p>
                   </div>
                 </div>
               ))}
@@ -308,11 +308,11 @@ export default function HomePage() {
           ].map(([value, label]) => (
             <div key={label} className="rounded-2xl bg-cream-dark px-2 py-3">
               <p className="text-base font-bold text-brown-dark">{value}</p>
-              <p className="mt-0.5 text-[10px] leading-4 text-brown-medium">{label}</p>
+              <p className="mt-0.5 text-micro leading-4 text-brown-medium">{label}</p>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-center text-[10px] leading-4 text-brown-medium/70">{t("home.safetyNote")}</p>
+        <p className="mt-3 text-center text-micro leading-4 text-brown-medium/70">{t("home.safetyNote")}</p>
       </section>
 
       <section className="px-5">
@@ -340,7 +340,7 @@ export default function HomePage() {
               if (event.key === "Enter") handleUrlSubmit();
             }}
           />
-          <p className="mb-4 text-[11px] text-brown-medium/70">{t("home.urlHint")}</p>
+          <p className="mb-4 text-caption text-brown-medium/70">{t("home.urlHint")}</p>
           <button type="button" onClick={handleUrlSubmit} disabled={!isValidHttpUrl(urlInput)} className="w-full rounded-xl bg-coral py-3 font-semibold text-white transition hover:bg-coral-dark disabled:cursor-not-allowed disabled:opacity-40">
             {t("home.fetchAndAnalyze")}
           </button>

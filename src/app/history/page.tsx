@@ -83,7 +83,7 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="px-5 pt-12 pb-4 flex items-start justify-between gap-3">
         <div>
-          <div><p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Archive · scans</p><h1 className="text-2xl font-bold text-brown-dark">{t("history.title")}</h1></div>
+          <div><p className="mengto-kicker mb-1 text-coral">Archive · scans</p><h1 className="text-2xl font-bold text-brown-dark">{t("history.title")}</h1></div>
           <p className="text-xs text-brown-medium mt-0.5">
             {t("history.subtitle")}
           </p>
@@ -159,7 +159,7 @@ export default function HistoryPage() {
                           {title}
                         </p>
                         {isSession && scan.dishCount! > 0 && (
-                          <span className="text-[10px] font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                          <span className="text-micro font-semibold text-coral bg-coral/10 px-1.5 py-0.5 rounded-full flex-shrink-0">
                             {scan.dishCount}
                           </span>
                         )}
@@ -168,7 +168,7 @@ export default function HistoryPage() {
                         <p className="text-xs text-brown-medium truncate">{subtitle}</p>
                       )}
                     </div>
-                    <span className="text-[11px] text-brown-medium/60 flex-shrink-0">
+                    <span className="text-caption text-brown-medium/60 flex-shrink-0">
                       {formatRelativeTime(scan.scannedAt, locale)}
                     </span>
                   </button>

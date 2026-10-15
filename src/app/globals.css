@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap");
-
 :root {
   --color-coral: #ff6b2c;
   --color-cream: #f3efe7;
@@ -13,17 +11,24 @@
   --color-accent: #ff6b2c;
   --color-success: #639922;
   --color-danger: #E24B4A;
+  --font-body: var(--font-manrope), var(--font-noto-kr), var(--font-noto-jp), sans-serif;
+  --font-display: var(--font-archivo-black), "Arial Black", sans-serif;
 }
 
 body {
   color: var(--color-text);
   background: var(--color-cream);
-  font-family: "Manrope", "Noto Sans KR", "Noto Sans JP", sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection { background: #ff6b2c; color: #171712; }
+
+/* Korean: break between words (eojeol), never mid-word; anywhere keeps long strings from overflowing 375px. */
+html:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
 
 .mobile-container {
   isolation: isolate;
@@ -44,9 +49,9 @@ body {
   position: absolute; inset: 11rem -7rem auto auto; width: 17rem; height: 17rem;
   border: 1px solid rgba(23,23,18,.18); border-radius: 50%; pointer-events: none;
 }
-.mengto-display { font-family: "Archivo Black", "Arial Black", sans-serif; text-transform: uppercase; }
+.mengto-display { font-family: var(--font-display); text-transform: uppercase; }
 .mengto-proof { box-shadow: 10px 10px 0 #171712; }
-.mengto-kicker { letter-spacing: .18em; text-transform: uppercase; }
+.mengto-kicker { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
 
 @keyframes mengto-enter {
   from { opacity: 1; transform: translateY(12px); }
@@ -69,7 +74,7 @@ body {
 .app-shell h1,
 .app-shell h2 { letter-spacing: -.035em; }
 .app-shell h1 {
-  font-family: "Archivo Black", "Arial Black", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 8vw, 2.35rem);
   text-transform: uppercase;
   line-height: 1;
@@ -134,7 +139,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 /* Mobile container */

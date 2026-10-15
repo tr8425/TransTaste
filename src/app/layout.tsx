@@ -1,8 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { Archivo_Black, Manrope, Noto_Sans_JP, Noto_Sans_KR } from "next/font/google";
 import BottomNav from "@/components/ui/BottomNav";
 import CartProvider from "@/components/order/CartProvider";
 import HtmlLangSync from "@/components/common/HtmlLangSync";
 import "./globals.css";
+
+// Self-hosted fonts: no render-blocking Google Fonts request, metric-matched fallbacks.
+const manrope = Manrope({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-manrope" });
+const archivoBlack = Archivo_Black({
+  weight: "400",
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  variable: "--font-archivo-black",
+});
+// CJK faces ship as unicode-range slices; skip preload so only used glyph ranges download.
+const notoKr = Noto_Sans_KR({ subsets: ["latin"], display: "swap", preload: false, variable: "--font-noto-kr" });
+const notoJp = Noto_Sans_JP({ subsets: ["latin"], display: "swap", preload: false, variable: "--font-noto-jp" });
+const fontVars = [manrope.variable, archivoBlack.variable, notoKr.variable, notoJp.variable].join(" ");
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -54,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={fontVars}>
       <head>
         <script
           type="application/ld+json"

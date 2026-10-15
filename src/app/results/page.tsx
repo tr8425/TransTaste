@@ -427,7 +427,7 @@ function ResultsContent() {
             {userMessage}
           </p>
           {/* Error code for debugging */}
-          <p className="text-[10px] text-brown-medium/40 mb-6 font-mono select-all">
+          <p className="text-micro text-brown-medium/40 mb-6 font-mono select-all">
             {scanError.code}{scanError._debug ? ` · ${scanError._debug}` : ''}
           </p>
           <button
@@ -518,7 +518,7 @@ function ResultsContent() {
             {data.restaurant_type}
           </span>
         </div>
-        <p className="mengto-kicker mb-1 text-[9px] font-extrabold text-coral">Scan report · live</p>
+        <p className="mengto-kicker mb-1 text-coral">Scan report · live</p>
         <h1 className="text-2xl font-bold text-brown-dark">
           {t("results.menuResults")}
         </h1>
@@ -538,7 +538,7 @@ function ResultsContent() {
       )}
 
       <section className="mx-5 mb-4 border border-brown-dark bg-white/70 p-4 shadow-[5px_5px_0_rgba(23,23,18,.14)]" aria-labelledby="decision-summary">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-coral">
+        <p className="text-caption font-semibold uppercase tracking-[0.14em] text-coral">
           {t("results.decisionEyebrow")}
         </p>
         <h2 id="decision-summary" className="mt-1 text-base font-bold text-brown-dark">
@@ -560,11 +560,11 @@ function ResultsContent() {
               } ${decisionFilter === item.key ? "ring-2 ring-current" : ""}`}
             >
               <span className="block text-lg font-bold">{item.count}</span>
-              <span className="block text-[10px] font-semibold leading-4">{item.label}</span>
+              <span className="block text-micro font-semibold leading-4">{item.label}</span>
             </button>
           ))}
         </div>
-        <p className="mt-3 text-[10px] leading-4 text-brown-medium">
+        <p className="mt-3 text-micro leading-4 text-brown-medium">
           {t("results.decisionSafety")}
         </p>
       </section>
@@ -674,7 +674,7 @@ function ResultsContent() {
       )}
 
       <section className="mx-5 mb-5 border-l-4 border-coral bg-brown-dark p-5 text-cream">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-coral-light">
+        <p className="text-caption font-semibold uppercase tracking-[0.12em] text-coral-light">
           {t("pricing.eyebrow")}
         </p>
         <h2 className="mt-1 text-base font-bold">{t("pricing.resultsTitle")}</h2>
