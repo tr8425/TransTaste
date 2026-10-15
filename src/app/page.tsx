@@ -9,6 +9,7 @@ import { useCredits } from "@/hooks/useCredits";
 import { useTranslation } from "@/lib/i18n";
 import type { RecentScan } from "@/lib/types";
 import { trackProductEvent } from "@/lib/product-events";
+import { SAMPLE_MENU_TEXT } from "@/lib/sample-menu";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -75,13 +76,6 @@ function InputModal({ title, onClose, children }: InputModalProps) {
   );
 }
 
-const SAMPLE_MENU = [
-  "唐揚げ 780円",
-  "海老フライ 980円",
-  "麻婆豆腐 850円",
-  "揚げ出し豆腐 580円",
-].join("\n");
-
 export default function HomePage() {
   const { t } = useTranslation();
   const credits = useCredits();
@@ -93,6 +87,7 @@ export default function HomePage() {
   const [urlInput, setUrlInput] = useState("");
   const [textInput, setTextInput] = useState("");
   const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
+  const modalReturnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     trackProductEvent("home_view");
@@ -111,10 +106,24 @@ export default function HomePage() {
   }, []);
 
   const startTextAnalysis = (input: string) => {
-    trackProductEvent("scan_cta_click", { method: input === SAMPLE_MENU ? "sample" : "text" });
+    const isSample = input === SAMPLE_MENU_TEXT;
+    trackProductEvent("scan_cta_click", { method: isSample ? "sample" : "text" });
     sessionStorage.setItem("scanText", input);
     sessionStorage.setItem("scanInputType", "text");
+    if (isSample) sessionStorage.setItem("scanIsSample", "1");
+    else sessionStorage.removeItem("scanIsSample");
     router.push("/scan-setup");
+  };
+
+  const closeInputModal = (type: "url" | "text") => {
+    if (type === "url") {
+      setShowUrlModal(false);
+      setUrlInput("");
+    } else {
+      setShowTextModal(false);
+      setTextInput("");
+    }
+    requestAnimationFrame(() => modalReturnFocusRef.current?.focus());
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +193,7 @@ export default function HomePage() {
           </Link>
           <button
             type="button"
-            onClick={() => startTextAnalysis(SAMPLE_MENU)}
+            onClick={() => startTextAnalysis(SAMPLE_MENU_TEXT)}
             className="flex min-h-12 w-full items-center justify-center gap-2 border border-brown-dark/30 bg-cream px-5 text-xs font-bold uppercase tracking-[.08em] text-brown-dark transition hover:bg-brown-dark hover:text-cream"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -221,10 +230,10 @@ export default function HomePage() {
             <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
               {t("home.gallery")}
             </button>
-            <button type="button" onClick={() => setShowUrlModal(true)} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
+            <button type="button" onClick={(event) => { modalReturnFocusRef.current = event.currentTarget; setShowUrlModal(true); }} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
               {t("home.url")}
             </button>
-            <button type="button" onClick={() => setShowTextModal(true)} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
+            <button type="button" onClick={(event) => { modalReturnFocusRef.current = event.currentTarget; setShowTextModal(true); }} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
               {t("home.text")}
             </button>
           </div>
@@ -319,7 +328,7 @@ export default function HomePage() {
       </section>
 
       {showUrlModal ? (
-        <InputModal title={t("home.urlModalTitle")} onClose={() => { setShowUrlModal(false); setUrlInput(""); }}>
+        <InputModal title={t("home.urlModalTitle")} onClose={() => closeInputModal("url")}>
           <input
             type="url"
             value={urlInput}
@@ -339,7 +348,7 @@ export default function HomePage() {
       ) : null}
 
       {showTextModal ? (
-        <InputModal title={t("home.textModalTitle")} onClose={() => { setShowTextModal(false); setTextInput(""); }}>
+        <InputModal title={t("home.textModalTitle")} onClose={() => closeInputModal("text")}>
           <textarea
             value={textInput}
             onChange={(event) => setTextInput(event.target.value)}

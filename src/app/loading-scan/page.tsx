@@ -7,6 +7,7 @@ import { FUN_FACTS_LOADING_COUNT } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
 import { useCredits } from "@/hooks/useCredits";
 import { useTranslation } from "@/lib/i18n";
+import { SAMPLE_MENU_RESULT } from "@/lib/sample-menu";
 
 // Indices into funFacts.0..9 that are thematically relevant to each language.
 // "6" (hottest chili in the world) is generic and rotates in everywhere.
@@ -99,6 +100,7 @@ export default function LoadingScanPage() {
     const inputType = sessionStorage.getItem("scanInputType") as "image" | "url" | "text" | null;
     const imageData = sessionStorage.getItem("scanImage");
     const textData = sessionStorage.getItem("scanText");
+    const isSample = sessionStorage.getItem("scanIsSample") === "1";
 
     let input: string | null = null;
     let type: "image" | "url" | "text" = "image";
@@ -116,6 +118,16 @@ export default function LoadingScanPage() {
 
     if (!input) {
       sessionStorage.setItem("scanError", "E_NO_INPUT");
+      navigateToResults();
+      return;
+    }
+
+    if (isSample) {
+      sessionStorage.setItem("scanResult", JSON.stringify(SAMPLE_MENU_RESULT));
+      sessionStorage.removeItem("scanIsSample");
+      sessionStorage.removeItem("scanImage");
+      sessionStorage.removeItem("scanText");
+      sessionStorage.removeItem("scanInputType");
       navigateToResults();
       return;
     }

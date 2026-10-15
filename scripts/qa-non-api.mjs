@@ -144,6 +144,7 @@ await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Es
 await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
 await sleep(100);
 check("URL modal closes with Escape", !(await evaluate("Boolean(document.querySelector('[role=dialog]'))")));
+check("URL modal restores focus to its trigger", await evaluate("document.activeElement?.textContent.trim() === 'URL'"));
 
 await navigate("/");
 await evaluate(`(() => {
@@ -162,6 +163,25 @@ await navigate("/");
 await evaluate(`[...document.querySelectorAll('button')].find((el)=>el.textContent.includes('sample menu'))?.click()`);
 await sleep(350);
 check("sample menu navigates to setup", await evaluate("location.pathname === '/scan-setup'"), await evaluate("location.pathname"));
+const creditsBeforeSample = await evaluate(`JSON.parse(localStorage.getItem('transtaste_credits') || '{"remaining":10}').remaining`);
+await evaluate(`([...document.querySelectorAll('button')].find((el)=>el.textContent.includes('Skip'))?.click())`);
+for (let i = 0; i < 60 && !(await evaluate("location.pathname === '/results'")); i++) await sleep(100);
+state = await evaluate(`({
+  path: location.pathname,
+  error: sessionStorage.getItem('scanError'),
+  demo: document.body.innerText.includes('example data'),
+  credits: JSON.parse(localStorage.getItem('transtaste_credits') || '{"remaining":10}').remaining
+})`);
+check("sample menu completes without the analysis API", state.path === "/results" && !state.error && state.demo, JSON.stringify(state));
+check("sample menu does not consume a scan credit", state.credits === creditsBeforeSample, JSON.stringify(state));
+await evaluate(`([...document.querySelectorAll('button')].find((el)=>el.textContent.includes('Best to avoid'))?.click())`);
+await sleep(100);
+state = await evaluate(`document.body.innerText`);
+check("avoid filter only shows danger dishes", state.includes('Ebi Fry') && !state.includes('Mapo Tofu'), state.slice(0, 300));
+await evaluate(`([...document.querySelectorAll('button')].find((el)=>el.textContent.includes('Ask staff'))?.click())`);
+await sleep(100);
+state = await evaluate(`document.body.innerText`);
+check("check filter excludes safe and danger dishes", state.includes('Mapo Tofu') && !state.includes('Ebi Fry') && !state.includes('Edamame'), state.slice(0, 300));
 
 await navigate("/travel");
 state = await evaluate(`([...document.querySelectorAll('a')].filter((a)=>['/phrases','/tip-culture','/order'].includes(a.getAttribute('href'))).map((a)=>a.getAttribute('href'))) `);
@@ -189,6 +209,13 @@ state = await evaluate(`(() => {
 })()`);
 await sleep(150);
 check("language change updates bottom navigation immediately", state && await evaluate(`document.querySelector('nav.fixed')?.innerText.includes('홈')`));
+await navigate("/phrases");
+check("Korean phrase cards do not retain English response explanations", await evaluate(`
+  [...document.querySelectorAll('article button')]
+    .filter((button) => button.querySelector('span.text-sm'))
+    .every((button) => button.querySelectorAll('span').length === 1)
+`));
+await navigate("/profile");
 await evaluate(`(() => {
   const select=document.querySelector('select');
   const setter=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;
@@ -221,6 +248,7 @@ state = await evaluate(`({
   text:document.body.innerText
 })`);
 check("tip calculator resets when country changes", state.active && state.text.includes('$10.00') && state.text.includes('$110.00'));
+check("tip amount input has an accessible name", await evaluate(`Boolean(document.querySelector('input[type="number"]')?.labels?.[0]?.textContent.trim())`));
 
 await evaluate(`sessionStorage.setItem('transtaste_cart', JSON.stringify({
   items:[{dish_hash:'qa-dish',name_original:'QA Dish',name_translated:'QA Dish',price:100,currency:'USD',quantity:1}],

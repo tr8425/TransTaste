@@ -254,16 +254,15 @@ function ResultsContent() {
     ...dish,
     alternative_dishes: dish.alternative_dishes?.filter((alternative) => {
       const alternativeRisk = adjustedRiskByName.get(alternative);
-      return alternativeRisk != null &&
-        riskRank[alternativeRisk] > riskRank[dish.allergen_risk];
+      return alternativeRisk === "safe";
     }),
   }));
   const riskCounts = data
     ? decisionDishes.reduce(
         (counts, dish) => {
-          if (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") {
+          if (dish.allergen_risk === "danger") {
             counts.avoid += 1;
-          } else if (dish.allergen_risk === "check") {
+          } else if (dish.allergen_risk === "warning" || dish.allergen_risk === "check") {
             counts.check += 1;
           } else {
             counts.safer += 1;
@@ -281,9 +280,11 @@ function ResultsContent() {
         .filter((dish) => {
           if (decisionFilter === "all") return true;
           if (decisionFilter === "avoid") {
-            return dish.allergen_risk === "danger" || dish.allergen_risk === "warning";
+            return dish.allergen_risk === "danger";
           }
-          if (decisionFilter === "check") return dish.allergen_risk === "check";
+          if (decisionFilter === "check") {
+            return dish.allergen_risk === "warning" || dish.allergen_risk === "check";
+          }
           return dish.allergen_risk === "safe";
         });
 

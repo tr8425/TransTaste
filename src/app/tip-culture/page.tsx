@@ -50,7 +50,11 @@ function TipCalculator({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, p
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-brown-medium">
             $
           </span>
+          <label htmlFor="tip-bill-amount" className="sr-only">
+            {t("tipCulture.billAmount")}
+          </label>
           <input
+            id="tip-bill-amount"
             type="number"
             inputMode="decimal"
             placeholder={t("tipCulture.billAmount")}

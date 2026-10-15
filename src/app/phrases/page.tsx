@@ -99,7 +99,9 @@ function PhraseCard({
                 <span className="text-sm font-medium text-brown-dark block leading-snug">
                   {r.text}
                 </span>
-                <span className="text-xs text-brown-medium">({r.meaning})</span>
+                {userLang === "en" ? (
+                  <span className="text-xs text-brown-medium">({r.meaning})</span>
+                ) : null}
               </button>
             ))}
           </div>
