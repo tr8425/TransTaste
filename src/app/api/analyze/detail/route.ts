@@ -5,6 +5,17 @@ import { InputType, DishDetail } from "@/lib/types";
 import { buildCacheKey, getCached, setCache } from "@/lib/cache";
 import { createHash } from "crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  INPUT_LIMITS,
+  checkLanguage,
+  checkMenuInput,
+  checkString,
+  checkStringList,
+  clientIp,
+  limiterRequired,
+  rejectUntrustedRequest,
+  securityLog,
+} from "@/lib/api-guard";
 
 const DEMO_DETAIL: DishDetail = {
   flavor_profile: {
@@ -25,21 +36,11 @@ const DEMO_DETAIL: DishDetail = {
   warning: null,
 };
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
 function isFreeEventActive(): boolean {
   const until = process.env.FREE_EVENT_UNTIL;
   if (!until) return false;
   const deadline = new Date(until + "T23:59:59");
   return !isNaN(deadline.getTime()) && new Date() <= deadline;
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
 function buildDishCacheKey(phase1Key: string, dishOriginal: string): string {
@@ -48,17 +49,16 @@ function buildDishCacheKey(phase1Key: string, dishOriginal: string): string {
     .digest("hex");
 }
 
+function badRequest(reason: string) {
+  return NextResponse.json({ error: "E_BAD_REQUEST", reason }, { status: 400 });
+}
+
+const VALID_INPUT_TYPES: InputType[] = ["image", "url", "text"];
+
 export async function POST(request: NextRequest) {
   try {
-    // Rate limit by IP — 30 detail requests per hour
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const rl = await checkRateLimit(`detail:${ip}`, 30, 3600);
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
-        { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.reset) } }
-      );
-    }
+    const rejected = rejectUntrustedRequest(request, "detail");
+    if (rejected) return rejected;
 
     // API credentials are server-managed and never accepted from the browser.
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -71,95 +71,104 @@ export async function POST(request: NextRequest) {
           error: "E_SERVICE_UNAVAILABLE",
           reason: "Dish detail analysis is not configured.",
         },
-        { status: 503, headers: corsHeaders }
+        { status: 503 }
       );
     }
 
-    let body: {
-      input?: string;
-      inputType?: string;
-      dishOriginal?: string;
-      dishCategory?: string;
-      outputLanguage?: string;
-      allergenPreset?: string[];
-      dietaryBeliefs?: string[];
-    };
-
+    let body: Record<string, unknown>;
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "E_BAD_REQUEST", reason: "Invalid JSON" },
-        { status: 400, headers: corsHeaders }
-      );
+      return badRequest("Invalid JSON");
     }
-
-    if (!body.input || !body.dishOriginal) {
-      return NextResponse.json(
-        { error: "E_BAD_REQUEST", reason: "Missing input or dishOriginal" },
-        { status: 400, headers: corsHeaders }
-      );
-    }
-
-    if (!apiKey) {
-      return NextResponse.json(
-        { ...DEMO_DETAIL, demo: true },
-        { headers: corsHeaders },
-      );
-    }
+    if (!body || typeof body !== "object") return badRequest("Invalid JSON");
 
     const inputType = (body.inputType || "image") as InputType;
+    if (!VALID_INPUT_TYPES.includes(inputType)) return badRequest("Invalid inputType");
+    const input = checkMenuInput(body.input, inputType);
+    if (!input.ok) return badRequest(input.reason);
+    const dishOriginal = checkString(body.dishOriginal, "dishOriginal", INPUT_LIMITS.dishNameChars, true);
+    if (!dishOriginal.ok || !dishOriginal.value) return badRequest(dishOriginal.ok ? "Missing 'dishOriginal'" : dishOriginal.reason);
+    const dishCategory = checkString(body.dishCategory, "dishCategory", INPUT_LIMITS.categoryChars);
+    if (!dishCategory.ok) return badRequest(dishCategory.reason);
+    const outputLanguage = checkLanguage(body.outputLanguage);
+    if (!outputLanguage.ok) return badRequest(outputLanguage.reason);
+    const allergenPreset = checkStringList(body.allergenPreset, "allergenPreset");
+    if (!allergenPreset.ok) return badRequest(allergenPreset.reason);
+    const dietaryBeliefs = checkStringList(body.dietaryBeliefs, "dietaryBeliefs");
+    if (!dietaryBeliefs.ok) return badRequest(dietaryBeliefs.reason);
+
+    if (!apiKey) {
+      return NextResponse.json({ ...DEMO_DETAIL, demo: true });
+    }
+
+    // Rate limit by IP — 30 detail requests per hour. Only paid calls reach this point.
+    const ip = clientIp(request);
+    const rl = await checkRateLimit(`detail:${ip}`, 30, 3600);
+    if (rl.unavailable && limiterRequired()) {
+      securityLog("rate_limiter_unavailable", { route: "detail" });
+      return NextResponse.json(
+        { error: "E_SERVICE_UNAVAILABLE", reason: "Dish detail analysis is temporarily unavailable." },
+        { status: 503 }
+      );
+    }
+    if (!rl.allowed) {
+      securityLog("rate_limited", { route: "detail", ip });
+      return NextResponse.json(
+        { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
+        { status: 429, headers: { "Retry-After": String(rl.reset) } }
+      );
+    }
 
     // Build cache keys
     const phase1Key = buildCacheKey({
-      input: body.input,
+      input: input.value,
       inputType,
       srcLang: "auto",
-      tgtLang: body.outputLanguage || "en",
+      tgtLang: outputLanguage.value || "en",
+      allergenPreset: allergenPreset.value,
+      dietaryBeliefs: dietaryBeliefs.value,
     });
-    const dishKey = buildDishCacheKey(phase1Key, body.dishOriginal);
+    const dishKey = buildDishCacheKey(phase1Key, dishOriginal.value);
 
     // Check cache
     const cached = await getCached(dishKey);
     if (cached) {
-      return NextResponse.json(cached, { headers: corsHeaders });
+      return NextResponse.json(cached);
     }
 
     // Fetch from Claude
     const menuInput: MenuInput = {
-      input: body.input,
+      input: input.value,
       inputType,
-      outputLanguage: body.outputLanguage,
-      allergenPreset: body.allergenPreset,
-      dietaryBeliefs: body.dietaryBeliefs,
+      outputLanguage: outputLanguage.value,
+      allergenPreset: allergenPreset.value,
+      dietaryBeliefs: dietaryBeliefs.value,
       apiKey,
     };
 
     const result = await fetchDishDetail(
       menuInput,
-      body.dishOriginal,
-      body.dishCategory || "main"
+      dishOriginal.value,
+      dishCategory.value || "main"
     );
 
     if ("error" in result) {
       return NextResponse.json(
-        { error: "E_AI_ERROR", reason: result.error },
-        { status: 422, headers: corsHeaders }
+        { error: "E_AI_ERROR", reason: "Could not analyze this dish. Please try again." },
+        { status: 422 }
       );
     }
 
     // Cache and return
     const freeEvent = isFreeEventActive();
     await setCache(dishKey, result.data as unknown as object);
-    return NextResponse.json(
-      { ...result.data as DishDetail, _freeEvent: freeEvent },
-      { headers: corsHeaders }
-    );
+    return NextResponse.json({ ...result.data as DishDetail, _freeEvent: freeEvent });
   } catch (err) {
     console.error("Detail API error:", err);
     return NextResponse.json(
-      { error: "E_UNKNOWN", reason: err instanceof Error ? err.message : "Internal error", _debug: `detail:POST` },
-      { status: 500, headers: corsHeaders }
+      { error: "E_UNKNOWN", reason: "Internal error" },
+      { status: 500 }
     );
   }
 }

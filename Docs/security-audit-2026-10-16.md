@@ -1,0 +1,123 @@
+# OWASP 보안 점검 (2026-10-16)
+
+- 기준: OWASP Top 10 (2021), OWASP Top 10 for LLM Applications
+- 대상: `tr8425/sample-menu-demo` 브랜치 (`cdceea6` 기준)
+- 범위: API 라우트 6개, Supabase 스키마, 클라이언트 결제 처리, 런타임 의존성, git 이력의 비밀값
+
+## 요약
+
+가장 큰 위험은 API 비용이다. 로그인 없이 누구나 서버의 Anthropic 키로 분석을 돌릴 수 있는데 막는 장치가 약하다. 그다음은 공유 캐시가 사용자별 알레르기 설정을 무시하는 문제로, 알레르기 경고가 핵심 기능인 앱이라 안전 문제로 이어질 수 있다.
+
+## 발견 사항
+
+| # | 등급 | 분류 | 내용 | 상태 |
+|---|---|---|---|---|
+| 1 | 높음 | A04, LLM10 | 분석 API 비용 남용 | 조치 완료 |
+| 2 | 높음 | A04 | 캐시 키에 알레르기·식단 설정 누락 | 조치 완료 |
+| 3 | 높음 | A04, A08 | 결제 웹훅 미동작, 중복 지급 가능 | 조치 완료 |
+| 4 | 높음 | A01 | 크레딧·패스 권한이 클라이언트에 있음 | 일부 조치 (스키마) |
+| 5 | 높음 | A06 | 취약한 의존성 (Next.js critical) | 일부 조치 |
+| 6 | 중간 | A05 | 오류 응답에 내부 정보 노출 | 조치 완료 |
+| 7 | 중간 | A05 | CSP, HSTS 없음 | 조치 완료 |
+| 8 | 중간 | LLM01 | 프롬프트 인젝션 | 일부 조치 |
+| 9 | 낮음 | A05 | checkout 리다이렉트 URL을 `origin` 헤더로 생성 | 조치 완료 |
+| 10 | 낮음 | A01 | `scan_cache` RLS 꺼짐 | 조치 완료 (스키마) |
+| 11 | 낮음 | A09 | 보안 이벤트 로그 없음 | 일부 조치 |
+
+### 1. 분석 API 비용 남용 (A04, LLM10)
+
+- `/api/analyze`, `/api/analyze/detail`은 로그인 없이 호출되고 서버의 `ANTHROPIC_API_KEY`로 과금된다.
+- 요청 제한이 Redis가 없거나 오류가 나면 전부 통과시켰다 (`src/lib/rate-limit.ts`).
+- 서버 쪽 입력 크기 제한이 없었다. 텍스트 길이, `|||`로 이은 이미지 개수, 배열 필드 모두 상한이 없었다.
+- `Access-Control-Allow-Origin: *`라서 다른 사이트의 스크립트가 방문자 브라우저로 API를 부를 수 있었다. `request.json()`은 Content-Type을 보지 않으므로 preflight 없는 `text/plain` 요청도 실행됐다.
+- IP를 `x-forwarded-for` 첫 값에서 읽어서, Vercel 밖에서는 위조할 수 있었다.
+
+조치:
+- `src/lib/api-guard.ts` 추가. 다른 출처의 브라우저 요청을 403으로, JSON이 아닌 요청을 415로 막는다. CORS 헤더는 제거했다 (같은 출처 요청에는 필요 없음).
+- 운영 환경에서 실제 API 키를 쓰는 요청은 요청 제한을 확인할 수 없으면 503으로 막는다 (fail-closed). 키가 없는 데모 모드는 그대로 둔다.
+- 입력 상한: 텍스트 20,000자, 이미지 10장(카메라 화면 상한과 같음), 이미지 1장당 base64 7MB, URL 2,048자(http/https만), 배열 20개·항목 60자, 요리 이름 200자.
+- IP는 `request.ip`, `x-real-ip`, `x-forwarded-for` 순서로 읽는다.
+
+### 2. 캐시 키에 알레르기·식단 설정 누락 (A04)
+
+- 캐시 키가 입력값과 출력 언어로만 만들어져서, 먼저 분석한 사람의 알레르기 기준 결과가 30일 동안 다른 사용자에게 나갔다.
+
+조치: `buildCacheKey`에 `allergenPreset`, `dietaryBeliefs`, `dislikedIngredients`를 정렬해 넣었다. detail 캐시도 같은 키를 쓴다.
+
+### 3. 결제 웹훅 (A04, A08)
+
+- checkout이 metadata에 `userId`를 넣지 않아서 웹훅이 항상 400을 돌려줬다.
+- `passes.type` 제약이 `'7d'`, `'30d'`만 허용해서 3일 패스 insert가 실패했고, 오류를 확인하지 않았다.
+- `stripe_session_id` 중복 방지가 없어서 Stripe가 재전송하면 결제와 패스가 두 번 기록될 수 있었다.
+- service role 키가 없으면 anon 키로 대체되어 RLS에 조용히 막혔다.
+
+조치:
+- checkout은 `Authorization: Bearer <Supabase access token>`을 서버에서 검증하고, 확인된 사용자 id를 `client_reference_id`와 metadata에 넣는다. 토큰이 없으면 401.
+- 웹훅은 `payment_status === 'paid'`인지 확인하고, `stripe_session_id`가 이미 있으면 다시 지급하지 않는다. DB 오류가 나면 500을 돌려줘서 Stripe가 재시도하게 한다.
+- `createServerClient`는 service role 키가 없으면 예외를 던진다 (anon 대체 제거).
+- 스키마: `passes.type`에 `'3d'` 추가, `payments.stripe_session_id`에 unique 제약.
+
+### 4. 크레딧·패스 권한 (A01)
+
+- 크레딧은 localStorage(`transtaste_credits`)에 있어서 사용자가 바꿀 수 있다. 알려진 Phase 1 제약.
+- `users` 테이블 update 정책이 행 전체에 열려 있어서, 로그인을 붙이면 사용자가 자기 `credits_remaining`을 바꿀 수 있었다.
+- `addCredits`, `deductCredit`가 브라우저용 클라이언트에 있었다.
+
+조치:
+- 스키마: `authenticated` 역할의 `users` update 권한을 `email` 컬럼으로 좁혔다.
+- `addCredits`, `deductCredit`를 `queries.ts`에서 제거했다 (호출하는 곳 없음). 크레딧 차감은 서버 API로 옮겨야 한다.
+
+남은 일: 실제 로그인 연결 후 크레딧 차감과 패스 확인을 서버에서 하도록 옮기기.
+
+### 5. 취약한 의존성 (A06)
+
+`npm audit --omit=dev` 결과 critical 1, high 4, moderate 1.
+
+- `next@14.2.35` critical. 수정판이 16.4.2라 메이저 업그레이드(React 19 포함)가 필요하다. Image Optimizer `remotePatterns` 항목은 설정이 없어 해당 없음.
+- `ws`, `nanoid`, `source-map-js`: 호환 범위 안에서 `npm audit fix`로 올렸다 (`package-lock.json`만 변경).
+- Next.js 15부터 `NextRequest.ip`가 없어진다. 업그레이드할 때 `src/lib/api-guard.ts`의 `clientIp`를 `@vercel/functions`의 `ipAddress`로 바꿔야 한다.
+- `postcss`(Next 내부 의존): Next 업그레이드와 함께 해결된다.
+- `@anthropic-ai/sdk@0.80.0`: Memory Tool 관련이라 이 앱에 실제 영향은 낮다.
+
+남은 일: Next.js 16 업그레이드는 별도 브랜치에서 진행.
+
+### 6. 오류 응답 정보 노출 (A05)
+
+- 500 응답에 `err.message`와 스택 한 줄(`_debug`), 429 응답에 요청자 IP, Anthropic 오류 원문이 담겼다.
+
+조치: 스택과 IP가 담긴 `_debug`를 뺐다. 알 수 없는 오류와 AI 서비스 오류는 일반 문구로 바꾸고, 상세 내용은 서버 로그에만 남긴다. HTTP 상태 코드와 토큰 수만 담은 `_debug`는 결과 화면의 오류 표시에 쓰여서 남겼다.
+
+### 7. 보안 헤더 (A05)
+
+조치: `next.config.mjs`에 `Strict-Transport-Security`와 CSP를 추가했다. CSP는 Next.js 인라인 스크립트 때문에 `script-src 'unsafe-inline'`을 허용한다. nonce 방식은 모든 페이지를 동적 렌더링으로 바꿔야 해서 보류했다.
+
+### 8. 프롬프트 인젝션 (LLM01)
+
+- 메뉴 텍스트와 `dislikedIngredients` 같은 사용자 문자열이 프롬프트에 그대로 들어간다.
+- 출력은 React가 텍스트로 렌더링하므로 XSS로 이어지지 않는다.
+
+조치: 배열 필드 길이·개수 제한, `outputLanguage`를 지원 언어 코드로 제한. 캐시 키가 사용자 설정을 포함하게 되어 조작 결과가 다른 설정의 사용자에게 퍼지는 범위가 줄었다.
+
+남은 일: 메뉴 본문은 구조상 자유 입력이라 완전히 막을 수 없다. 결과의 알레르기 판정을 로컬 데이터로 교차 확인하는 방안 검토.
+
+### 9~11. 낮음
+
+- 9: checkout 리다이렉트 URL은 `NEXT_PUBLIC_SITE_URL` 또는 요청 URL의 origin으로 만든다.
+- 10: `scan_cache`에 RLS를 켜고 정책을 두지 않았다 (service role만 접근).
+- 11: 요청 제한 초과, 출처 거부, 웹훅 서명 실패를 `[security]` 접두어로 서버 로그에 남긴다. 알림 연동은 남은 일.
+
+## 문제없음으로 확인한 항목
+
+- git 이력 전체에서 실제 키 없음 (`sk-ant-your-key-here` 같은 예시 문자열만 있음).
+- SQL을 직접 짜는 곳 없음. `dangerouslySetInnerHTML`은 고정 JSON-LD 한 곳.
+- URL 입력은 Anthropic이 직접 가져가므로 서버 SSRF(A10) 없음.
+- Stripe 웹훅 서명 검증 정상. `?payment=success`를 결제 증거로 쓰지 않음.
+
+## 검증
+
+- `tsc`, `next lint`, `npm run build` 통과. `qa:non-api` 57/57 (CSP 적용 상태, 콘솔 오류 없음).
+- API 직접 호출로 확인: 다른 출처 403, `text/plain` 415, 입력 상한 초과 400, 운영 환경에서 Redis 없이 실제 키를 쓰는 요청 503.
+
+## 기존 DB에 적용할 SQL
+
+`supabase/migrations/20261016_security_hardening.sql` 참고. `schema.sql`은 새로 만드는 DB 기준으로 같은 내용을 반영했다.

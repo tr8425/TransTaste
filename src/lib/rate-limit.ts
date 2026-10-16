@@ -15,11 +15,13 @@ interface RateLimitResult {
   allowed: boolean;
   remaining: number;
   reset: number; // seconds until window resets
+  unavailable: boolean; // true when the limiter could not run (no Redis or Redis error)
 }
 
 /**
  * Simple sliding window rate limiter using Upstash Redis.
- * Falls back to allowing all requests if Redis is unavailable.
+ * Falls back to allowing requests if Redis is unavailable and flags the result
+ * as `unavailable`, so callers that spend money can refuse instead (see limiterRequired).
  *
  * @param identifier - IP address or user ID
  * @param limit - max requests per window
@@ -32,8 +34,7 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const r = getRedis();
   if (!r) {
-    // Redis unavailable — allow (fail-open for dev/demo)
-    return { allowed: true, remaining: limit, reset: 0 };
+    return { allowed: true, remaining: limit, reset: 0, unavailable: true };
   }
 
   const key = `rl:${identifier}`;
@@ -54,9 +55,9 @@ export async function checkRateLimit(
       allowed: count <= limit,
       remaining,
       reset: ttl > 0 ? ttl : windowSeconds,
+      unavailable: false,
     };
   } catch {
-    // Redis error — fail-open
-    return { allowed: true, remaining: limit, reset: 0 };
+    return { allowed: true, remaining: limit, reset: 0, unavailable: true };
   }
 }

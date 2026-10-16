@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getUserFromRequest } from '@/lib/supabase/server';
+import { rejectUntrustedRequest } from '@/lib/api-guard';
 
 function getStripe() {
   if (
@@ -19,51 +21,59 @@ const PRODUCTS: Record<string, { name: string; amount: number }> = {
   'pass_30d': { name: '30-Day Trip Pass', amount: 999 },
 };
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const rejected = rejectUntrustedRequest(req, 'checkout');
+    if (rejected) return rejected;
+
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json(
+        {
+          error: 'E_SERVICE_UNAVAILABLE',
+          reason: 'Checkout is not configured.',
+        },
+        { status: 503 },
+      );
+    }
+
     const { productId } = await req.json();
-    const product = PRODUCTS[productId];
+    const product = typeof productId === 'string' ? PRODUCTS[productId] : undefined;
     if (!product) {
       return NextResponse.json({ error: 'Invalid product' }, { status: 400 });
     }
 
-    const origin = req.headers.get('origin') || 'http://localhost:3000';
-    // Determine return page — use referer to return to the page that initiated checkout
-    const referer = req.headers.get('referer') || '';
-    const returnPage = referer.includes('/results') ? '/results' : '/profile';
-    const successUrl = `${origin}${returnPage}?payment=success&plan=${productId}`;
-    const cancelUrl = `${origin}${returnPage}?payment=cancelled`;
-
-    // If Stripe key is configured, create real checkout session
-    const stripe = getStripe();
-    if (stripe) {
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [{
-          price_data: {
-            currency: 'usd',
-            product_data: { name: product.name },
-            unit_amount: product.amount,
-          },
-          quantity: 1,
-        }],
-        mode: 'payment',
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        metadata: { productId },
-      });
-
-      return NextResponse.json({ url: session.url });
+    // The webhook grants the pass to this id, so it must come from a verified session.
+    const user = await getUserFromRequest(req);
+    if (!user) {
+      return NextResponse.json({ error: 'E_AUTH', reason: 'Sign in to buy a pass.' }, { status: 401 });
     }
 
-    // No Stripe key — redirect to success directly (dev/demo mode)
-    return NextResponse.json(
-      {
-        error: 'E_SERVICE_UNAVAILABLE',
-        reason: 'Checkout is not configured.',
-      },
-      { status: 503 },
-    );
+    // Never build redirect targets from client-supplied headers.
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
+    const referer = req.headers.get('referer') || '';
+    const returnPage = referer.includes('/results') ? '/results' : '/profile';
+    const successUrl = `${siteUrl}${returnPage}?payment=success&plan=${productId}`;
+    const cancelUrl = `${siteUrl}${returnPage}?payment=cancelled`;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: { name: product.name },
+          unit_amount: product.amount,
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      client_reference_id: user.id,
+      metadata: { productId, userId: user.id },
+    });
+
+    return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error('Stripe checkout error:', err);
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });

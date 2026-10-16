@@ -5,6 +5,15 @@ import { createMenuAnalysisStream } from "@/lib/ai/claude";
 import { isAnalysisError, InputType, MenuAnalysisResult } from "@/lib/types";
 import { buildCacheKey, getCached, setCache } from "@/lib/cache";
 import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  checkLanguage,
+  checkMenuInput,
+  checkStringList,
+  clientIp,
+  limiterRequired,
+  rejectUntrustedRequest,
+  securityLog,
+} from "@/lib/api-guard";
 
 const VALID_INPUT_TYPES: InputType[] = ['image', 'url', 'text'];
 
@@ -111,63 +120,38 @@ const MOCK_RESULT: MenuAnalysisResult = {
   },
 } satisfies MenuAnalysisResult;
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
+function badRequest(reason: string) {
+  return NextResponse.json({ error: "E_BAD_REQUEST", reason }, { status: 400 });
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limit by IP — 20 requests per hour
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const rl = await checkRateLimit(`analyze:${ip}`, 20, 3600);
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.`, _debug: `ip=${ip}` },
-        { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.reset) } }
-      );
-    }
+    const rejected = rejectUntrustedRequest(request, "analyze");
+    if (rejected) return rejected;
 
-    // Parse request body
-    let body: {
-      input?: string;
-      inputType?: string;
-      outputLanguage?: string;
-      allergenPreset?: string[];
-      dietaryBeliefs?: string[];
-      dislikedIngredients?: string[];
-      stream?: boolean;
-    };
-
+    let body: Record<string, unknown>;
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "E_BAD_REQUEST", reason: "Invalid JSON in request body" },
-        { status: 400, headers: corsHeaders }
-      );
+      return badRequest("Invalid JSON in request body");
     }
+    if (!body || typeof body !== "object") return badRequest("Invalid JSON in request body");
 
-    // Validate required fields
-    if (!body.input || typeof body.input !== 'string') {
-      return NextResponse.json(
-        { error: "E_BAD_REQUEST", reason: "Missing or invalid 'input' field" },
-        { status: 400, headers: corsHeaders }
-      );
-    }
-
-    const inputType = (body.inputType || 'image') as InputType;
+    const inputType = (body.inputType || "image") as InputType;
     if (!VALID_INPUT_TYPES.includes(inputType)) {
-      return NextResponse.json(
-        { error: "E_BAD_REQUEST", reason: `Invalid inputType: ${body.inputType}. Must be one of: ${VALID_INPUT_TYPES.join(', ')}` },
-        { status: 400, headers: corsHeaders }
-      );
+      return badRequest(`Invalid inputType. Must be one of: ${VALID_INPUT_TYPES.join(", ")}`);
     }
+
+    const input = checkMenuInput(body.input, inputType);
+    if (!input.ok) return badRequest(input.reason);
+    const outputLanguage = checkLanguage(body.outputLanguage);
+    if (!outputLanguage.ok) return badRequest(outputLanguage.reason);
+    const allergenPreset = checkStringList(body.allergenPreset, "allergenPreset");
+    if (!allergenPreset.ok) return badRequest(allergenPreset.reason);
+    const dietaryBeliefs = checkStringList(body.dietaryBeliefs, "dietaryBeliefs");
+    if (!dietaryBeliefs.ok) return badRequest(dietaryBeliefs.reason);
+    const dislikedIngredients = checkStringList(body.dislikedIngredients, "dislikedIngredients");
+    if (!dislikedIngredients.ok) return badRequest(dislikedIngredients.reason);
 
     // Resolve API key only after the request contract has been validated.
     // Mock analysis is opt-in so a missing production secret cannot silently
@@ -177,10 +161,7 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       if (demoModeEnabled) {
-        return NextResponse.json(
-          { ...MOCK_RESULT, demo: true },
-          { headers: corsHeaders },
-        );
+        return NextResponse.json({ ...MOCK_RESULT, demo: true });
       }
 
       return NextResponse.json(
@@ -188,45 +169,62 @@ export async function POST(request: NextRequest) {
           error: "E_SERVICE_UNAVAILABLE",
           reason: "Menu analysis is not configured.",
         },
-        { status: 503, headers: corsHeaders },
+        { status: 503 },
       );
     }
 
-    // Build cache key
+    // Rate limit by IP — 20 requests per hour. Only paid calls reach this point.
+    const ip = clientIp(request);
+    const rl = await checkRateLimit(`analyze:${ip}`, 20, 3600);
+    if (rl.unavailable && limiterRequired()) {
+      securityLog("rate_limiter_unavailable", { route: "analyze" });
+      return NextResponse.json(
+        { error: "E_SERVICE_UNAVAILABLE", reason: "Menu analysis is temporarily unavailable." },
+        { status: 503 },
+      );
+    }
+    if (!rl.allowed) {
+      securityLog("rate_limited", { route: "analyze", ip });
+      return NextResponse.json(
+        { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
+        { status: 429, headers: { "Retry-After": String(rl.reset) } }
+      );
+    }
+
     const cacheKey = buildCacheKey({
-      input: body.input,
+      input: input.value,
       inputType,
-      srcLang: 'auto',
-      tgtLang: body.outputLanguage || 'en',
+      srcLang: "auto",
+      tgtLang: outputLanguage.value || "en",
+      allergenPreset: allergenPreset.value,
+      dietaryBeliefs: dietaryBeliefs.value,
+      dislikedIngredients: dislikedIngredients.value,
     });
 
     // Check cache before calling AI
     const cached = await getCached(cacheKey);
     if (cached) {
-      return NextResponse.json(cached, { headers: corsHeaders });
+      return NextResponse.json(cached);
     }
 
-    // Build menu input
     const menuInput: MenuInput = {
-      input: body.input,
+      input: input.value,
       inputType,
-      outputLanguage: body.outputLanguage,
-      allergenPreset: body.allergenPreset,
-      dietaryBeliefs: body.dietaryBeliefs,
-      dislikedIngredients: body.dislikedIngredients,
+      outputLanguage: outputLanguage.value,
+      allergenPreset: allergenPreset.value,
+      dietaryBeliefs: dietaryBeliefs.value,
+      dislikedIngredients: dislikedIngredients.value,
       apiKey,
     };
 
     // Streaming mode: return SSE stream
     if (body.stream) {
-      console.log('[TransTaste] Streaming mode requested, inputType:', inputType);
       const readable = createMenuAnalysisStream(menuInput, cacheKey);
       return new Response(readable, {
         headers: {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           "X-Accel-Buffering": "no",
-          ...corsHeaders,
         },
       });
     }
@@ -238,23 +236,19 @@ export async function POST(request: NextRequest) {
     // Return error responses with appropriate status codes
     if (isAnalysisError(result)) {
       const statusCode = result.error === 'network_error' ? 502 : 422;
-      return NextResponse.json(result, { status: statusCode, headers: corsHeaders });
+      return NextResponse.json(result, { status: statusCode });
     }
 
     // Cache successful result
     const country = (result as MenuAnalysisResult).menu_meta?.country_detected;
     await setCache(cacheKey, result, country);
 
-    return NextResponse.json(result, { headers: corsHeaders });
+    return NextResponse.json(result);
   } catch (err) {
     console.error("Analyze API error:", err);
     return NextResponse.json(
-      {
-        error: "E_UNKNOWN",
-        reason: err instanceof Error ? err.message : "Internal server error",
-        _debug: `route:POST ${err instanceof Error ? err.stack?.split('\n')[1]?.trim() : ''}`,
-      },
-      { status: 500, headers: corsHeaders }
+      { error: "E_UNKNOWN", reason: "Internal server error" },
+      { status: 500 }
     );
   }
 }

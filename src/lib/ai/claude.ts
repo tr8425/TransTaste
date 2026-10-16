@@ -429,12 +429,14 @@ export const claudeSonnetProvider: AIProvider = {
         if (err.status === 401) {
           return { error: 'E_AUTH', reason: 'API authentication failed. Check your API key.', _debug: `status=401` };
         }
-        return { error: 'E_AI_ERROR', reason: `API error: ${err.message}`, _debug: `status=${err.status}` };
+        console.error('[TransTaste] Anthropic API error:', err.status, err.message);
+        return { error: 'E_AI_ERROR', reason: 'The AI service returned an error. Please try again.', _debug: `status=${err.status}` };
       }
       if (err instanceof Error && err.message.includes('Failed to parse JSON')) {
         return { error: 'E_PARSE_FAIL', reason: 'Could not parse AI response as valid menu data.' };
       }
-      return { error: 'E_UNKNOWN', reason: err instanceof Error ? err.message : 'Unknown error occurred' };
+      console.error('[TransTaste] Analyze error:', err);
+      return { error: 'E_UNKNOWN', reason: 'Unknown error occurred' };
     }
   },
 
@@ -537,12 +539,12 @@ export function createMenuAnalysisStream(
           } else if (err.status === 401) {
             emit('error', { error: 'E_AUTH', reason: 'API authentication failed.', _debug: `status=401` });
           } else {
-            emit('error', { error: 'E_AI_ERROR', reason: `API error: ${err.message}`, _debug: `status=${err.status}` });
+            emit('error', { error: 'E_AI_ERROR', reason: 'The AI service returned an error. Please try again.', _debug: `status=${err.status}` });
           }
         } else {
           emit('error', {
             error: 'E_UNKNOWN',
-            reason: err instanceof Error ? err.message : 'Unknown error',
+            reason: 'Unknown error',
           });
         }
       }

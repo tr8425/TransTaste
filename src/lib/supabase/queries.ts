@@ -32,23 +32,8 @@ export async function getUserCredits(userId: string) {
   return data?.credits_remaining ?? 0;
 }
 
-export async function deductCredit(userId: string) {
-  const credits = await getUserCredits(userId);
-  if (credits <= 0) return false;
-  await supabase
-    .from('users')
-    .update({ credits_remaining: credits - 1 })
-    .eq('id', userId);
-  return true;
-}
-
-export async function addCredits(userId: string, amount: number) {
-  const credits = await getUserCredits(userId);
-  return supabase
-    .from('users')
-    .update({ credits_remaining: credits + amount })
-    .eq('id', userId);
-}
+// Credit changes (deduct/add) are server-only; users have no UPDATE grant on
+// credits_remaining. See Docs/security-audit-2026-10-16.md #4.
 
 // Active pass check
 export async function getActivePass(userId: string) {

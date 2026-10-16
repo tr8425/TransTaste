@@ -13,6 +13,9 @@ create table public.users (
 alter table public.users enable row level security;
 create policy "Users can read own data" on public.users for select using (auth.uid() = id);
 create policy "Users can update own data" on public.users for update using (auth.uid() = id);
+-- Credits are server-managed: signed-in users may only update non-billing columns.
+revoke update on public.users from anon, authenticated;
+grant update (email) on public.users to authenticated;
 
 -- User Settings (language + allergy preset)
 create table public.user_settings (
@@ -35,9 +38,10 @@ create policy "Users can insert own settings" on public.user_settings for insert
 create table public.passes (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) on delete cascade,
-  type text check (type in ('7d', '30d')),
+  type text check (type in ('3d', '7d', '30d')),
   starts_at timestamptz default now(),
   expires_at timestamptz not null,
+  stripe_session_id text unique,
   created_at timestamptz default now()
 );
 
@@ -56,7 +60,9 @@ create table public.scan_cache (
   created_at timestamptz default now()
 );
 
--- No RLS on scan_cache (shared across users)
+-- Shared across users, but only server code (service role) may read or write it.
+-- RLS on with no policies blocks the anon and authenticated roles.
+alter table public.scan_cache enable row level security;
 
 -- Scan History
 create table public.scan_history (
@@ -78,9 +84,9 @@ create policy "Users can insert own history" on public.scan_history for insert w
 create table public.payments (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.users(id) on delete cascade,
-  type text check (type in ('credits_50', 'pass_7d', 'pass_30d')),
+  type text check (type in ('credits_50', 'pass_3d', 'pass_7d', 'pass_30d')),
   amount_usd numeric(6,2),
-  stripe_session_id text,
+  stripe_session_id text unique,
   created_at timestamptz default now()
 );
 
@@ -109,7 +115,7 @@ begin
   values (new.id);
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 create trigger on_auth_user_created
   after insert on auth.users

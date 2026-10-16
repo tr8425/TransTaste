@@ -28,12 +28,19 @@ export function buildCacheKey(params: {
   inputType: 'image' | 'url' | 'text';
   srcLang: string;
   tgtLang: string;
+  // Results flag allergens and diet conflicts per user, so these must be part of the key.
+  allergenPreset?: string[];
+  dietaryBeliefs?: string[];
+  dislikedIngredients?: string[];
 }): string {
   const normalized = params.inputType === 'text'
     ? normalizeDishName(params.input)
     : params.input;
+  const profile = [params.allergenPreset, params.dietaryBeliefs, params.dislikedIngredients]
+    .map((list) => [...(list ?? [])].map((s) => s.trim().toLowerCase()).sort().join(','))
+    .join('|');
   return createHash('sha256')
-    .update(`${params.inputType}:${normalized}:${params.srcLang}:${params.tgtLang}`)
+    .update(`${params.inputType}:${normalized}:${params.srcLang}:${params.tgtLang}:${profile}`)
     .digest('hex');
 }
 
