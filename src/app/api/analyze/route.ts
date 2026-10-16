@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { selectProvider } from "@/lib/ai/provider";
 import { MenuInput } from "@/lib/ai/provider";
 import { createMenuAnalysisStream } from "@/lib/ai/claude";
@@ -15,6 +15,7 @@ import {
   securityLog,
 } from "@/lib/api-guard";
 import { isAdminRequest } from "@/lib/admin-session";
+import { RequestLog, describeMenuInput } from "@/lib/telemetry";
 
 const VALID_INPUT_TYPES: InputType[] = ['image', 'url', 'text'];
 
@@ -121,14 +122,16 @@ const MOCK_RESULT: MenuAnalysisResult = {
   },
 } satisfies MenuAnalysisResult;
 
-function badRequest(reason: string) {
-  return NextResponse.json({ error: "E_BAD_REQUEST", reason }, { status: 400 });
-}
-
 export async function POST(request: NextRequest) {
+  const log = new RequestLog("analyze", request);
+  const badRequest = (reason: string) =>
+    log.respond({ error: "E_BAD_REQUEST", reason }, { status: 400 });
   try {
     const rejected = rejectUntrustedRequest(request, "analyze");
-    if (rejected) return rejected;
+    if (rejected) {
+      await log.finish({ status: rejected.status, code: rejected.status === 403 ? "E_FORBIDDEN" : "E_BAD_REQUEST" });
+      return rejected;
+    }
 
     let body: Record<string, unknown>;
     try {
@@ -139,6 +142,7 @@ export async function POST(request: NextRequest) {
     if (!body || typeof body !== "object") return badRequest("Invalid JSON in request body");
 
     const inputType = (body.inputType || "image") as InputType;
+    log.set({ ...describeMenuInput(body.input, inputType), stream: Boolean(body.stream) });
     if (!VALID_INPUT_TYPES.includes(inputType)) {
       return badRequest(`Invalid inputType. Must be one of: ${VALID_INPUT_TYPES.join(", ")}`);
     }
@@ -153,6 +157,12 @@ export async function POST(request: NextRequest) {
     if (!dietaryBeliefs.ok) return badRequest(dietaryBeliefs.reason);
     const dislikedIngredients = checkStringList(body.dislikedIngredients, "dislikedIngredients");
     if (!dislikedIngredients.ok) return badRequest(dislikedIngredients.reason);
+    log.set({
+      output_language: outputLanguage.value || "en",
+      allergen_count: allergenPreset.value?.length ?? 0,
+      dietary_count: dietaryBeliefs.value?.length ?? 0,
+      disliked_count: dislikedIngredients.value?.length ?? 0,
+    });
 
     // Resolve API key only after the request contract has been validated.
     // Mock analysis is opt-in so a missing production secret cannot silently
@@ -162,10 +172,11 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       if (demoModeEnabled) {
-        return NextResponse.json({ ...MOCK_RESULT, demo: true });
+        log.set({ demo: true });
+        return log.respond({ ...MOCK_RESULT, demo: true });
       }
 
-      return NextResponse.json(
+      return log.respond(
         {
           error: "E_SERVICE_UNAVAILABLE",
           reason: "Menu analysis is not configured.",
@@ -178,19 +189,20 @@ export async function POST(request: NextRequest) {
     // Admin sessions (owner access code) skip the limiter.
     const ip = clientIp(request);
     const isAdmin = isAdminRequest(request);
+    log.set({ admin: isAdmin });
     const rl = isAdmin
       ? { allowed: true, remaining: Infinity, reset: 0, unavailable: false }
       : await checkRateLimit(`analyze:${ip}`, 20, 3600);
     if (rl.unavailable && limiterRequired()) {
       securityLog("rate_limiter_unavailable", { route: "analyze" });
-      return NextResponse.json(
+      return log.respond(
         { error: "E_SERVICE_UNAVAILABLE", reason: "Menu analysis is temporarily unavailable." },
         { status: 503 },
       );
     }
     if (!rl.allowed) {
       securityLog("rate_limited", { route: "analyze", ip });
-      return NextResponse.json(
+      return log.respond(
         { error: "E_RATE_LIMIT", reason: `Too many requests. Try again in ${Math.ceil(rl.reset / 60)} minutes.` },
         { status: 429, headers: { "Retry-After": String(rl.reset) } }
       );
@@ -209,7 +221,14 @@ export async function POST(request: NextRequest) {
     // Check cache before calling AI
     const cached = await getCached(cacheKey);
     if (cached) {
-      return NextResponse.json(cached);
+      const hit = cached as MenuAnalysisResult;
+      log.set({
+        cache_hit: true,
+        dishes: hit.dishes?.length ?? 0,
+        menu_language: hit.menu_meta?.language,
+        country_detected: hit.menu_meta?.country_detected,
+      });
+      return log.respond(cached as Record<string, unknown>);
     }
 
     // Site-wide daily cap, counted only for calls that reach the AI (cache hits are free).
@@ -217,7 +236,7 @@ export async function POST(request: NextRequest) {
       const budget = await checkDailyBudget("scan");
       if (!budget.allowed || (budget.unavailable && limiterRequired())) {
         securityLog("daily_budget_exhausted", { route: "analyze" });
-        return NextResponse.json(
+        return log.respond(
           { error: "E_DAILY_LIMIT", reason: "Today's analysis capacity is used up. Please try again tomorrow." },
           { status: 503 },
         );
@@ -232,16 +251,29 @@ export async function POST(request: NextRequest) {
       dietaryBeliefs: dietaryBeliefs.value,
       dislikedIngredients: dislikedIngredients.value,
       apiKey,
+      telemetry: log.telemetry,
     };
 
-    // Streaming mode: return SSE stream
+    // Streaming mode: return SSE stream; the stream writes the log when it ends.
     if (body.stream) {
-      const readable = createMenuAnalysisStream(menuInput, cacheKey);
+      log.defer();
+      const readable = createMenuAnalysisStream(menuInput, cacheKey, {
+        ref: log.id,
+        onFinish: (outcome) =>
+          log.finish({
+            status: 200,
+            code: outcome.code,
+            dishes: outcome.dishes,
+            menu_language: outcome.menuLanguage,
+            country_detected: outcome.countryDetected,
+          }),
+      });
       return new Response(readable, {
         headers: {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           "X-Accel-Buffering": "no",
+          "X-Request-Id": log.id,
         },
       });
     }
@@ -253,17 +285,23 @@ export async function POST(request: NextRequest) {
     // Return error responses with appropriate status codes
     if (isAnalysisError(result)) {
       const statusCode = result.error === 'network_error' ? 502 : 422;
-      return NextResponse.json(result, { status: statusCode });
+      return log.respond(result as unknown as Record<string, unknown>, { status: statusCode });
     }
 
     // Cache successful result
     const country = (result as MenuAnalysisResult).menu_meta?.country_detected;
     await setCache(cacheKey, result, country);
+    log.set({
+      dishes: (result as MenuAnalysisResult).dishes?.length ?? 0,
+      menu_language: (result as MenuAnalysisResult).menu_meta?.language,
+      country_detected: country,
+    });
 
-    return NextResponse.json(result);
+    return log.respond(result as unknown as Record<string, unknown>);
   } catch (err) {
     console.error("Analyze API error:", err);
-    return NextResponse.json(
+    log.set({ server_error: err instanceof Error ? err.message.slice(0, 300) : String(err) });
+    return log.respond(
       { error: "E_UNKNOWN", reason: "Internal server error" },
       { status: 500 }
     );

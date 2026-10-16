@@ -3,10 +3,19 @@ import { MenuAnalysisResult, AnalysisError } from '../types';
 import { AIProvider, MenuInput } from './provider';
 import { IncrementalDishParser } from './stream-parser';
 import { setCache } from '../cache';
+import { normalizeDish, normalizeDishes } from '../normalize-dish';
 
 // claude-sonnet-4-20250514 was retired and now returns 404. ANTHROPIC_MODEL
 // lets production switch models without a code change.
 const ANALYSIS_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+
+function reportUpstreamError(input: MenuInput, err: unknown) {
+  input.telemetry?.report({
+    model: ANALYSIS_MODEL,
+    upstreamStatus: err instanceof Anthropic.APIError ? err.status : undefined,
+    upstreamMessage: err instanceof Error ? err.message : String(err),
+  });
+}
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
@@ -382,7 +391,7 @@ function validateResult(obj: unknown): MenuAnalysisResult | AnalysisError {
     menu_language: String(menuMeta?.language || result.menu_language || 'Unknown'),
     restaurant_type: String(menuMeta?.restaurant_type || result.restaurant_type || 'Unknown'),
     items_found: Number(menuMeta?.items_found || result.items_found || (result.dishes as unknown[]).length),
-    dishes: result.dishes as MenuAnalysisResult['dishes'],
+    dishes: normalizeDishes(result.dishes),
     recommended_combo: (result.recommended_combo as MenuAnalysisResult['recommended_combo']) || {
       budget: { items: [], reason: 'No recommendation available' },
       balanced: { items: [], reason: 'No recommendation available' },
@@ -416,6 +425,7 @@ export const claudeSonnetProvider: AIProvider = {
         ],
         messages: buildUserMessage(input),
       });
+      input.telemetry?.report({ model: ANALYSIS_MODEL, usage: response.usage, stopReason: response.stop_reason });
 
       // Extract text from response
       const textBlock = response.content.find((block) => block.type === 'text');
@@ -430,6 +440,7 @@ export const claudeSonnetProvider: AIProvider = {
       const parsed = parseJsonResponse(textBlock.text);
       return validateResult(parsed);
     } catch (err: unknown) {
+      reportUpstreamError(input, err);
       if (err instanceof Anthropic.APIError) {
         if (err.status === 429) {
           return { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again in a moment.' };
@@ -459,9 +470,17 @@ export const claudeSonnetProvider: AIProvider = {
  * Creates a ReadableStream that emits SSE events as Claude analyzes a menu.
  * Events: meta (menu_meta), dish (individual dish), done (full result), error
  */
+export interface StreamOutcome {
+  code?: string;
+  dishes?: number;
+  menuLanguage?: string;
+  countryDetected?: string;
+}
+
 export function createMenuAnalysisStream(
   input: MenuInput,
   cacheKey?: string,
+  options: { ref?: string; onFinish?: (outcome: StreamOutcome) => Promise<void> } = {},
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const parser = new IncrementalDishParser();
@@ -470,7 +489,12 @@ export function createMenuAnalysisStream(
     async start(controller) {
       let closed = false;
 
+      let outcome: StreamOutcome = {};
       const emit = (event: string, data: unknown) => {
+        if (event === 'error' && data && typeof data === 'object') {
+          outcome = { code: String((data as { error?: unknown }).error ?? 'E_UNKNOWN') };
+          data = { ...(data as object), ...(options.ref ? { ref: options.ref } : {}) };
+        }
         if (closed) return;
         try {
           controller.enqueue(
@@ -509,24 +533,24 @@ export function createMenuAnalysisStream(
           try {
             const { newMeta, newDishes } = parser.addChunk(text);
             if (newMeta) emit('meta', newMeta);
-            for (const dish of newDishes) emit('dish', dish);
+            for (const dish of newDishes) {
+              const normalized = normalizeDish(dish);
+              if (normalized) emit('dish', normalized);
+            }
           } catch (e) {
             console.error('[TransTaste] Parser error on chunk:', e);
           }
         });
 
         const finalMessage = await stream.finalMessage();
-
-        if (finalMessage.stop_reason === 'max_tokens') {
-          console.warn('[TransTaste] Streaming response truncated by max_tokens');
-          emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' });
-          close();
-          return;
-        }
+        input.telemetry?.report({ model: ANALYSIS_MODEL, usage: finalMessage.usage, stopReason: finalMessage.stop_reason });
 
         // Validate full response
         const textBlock = finalMessage.content.find((b) => b.type === 'text');
-        if (!textBlock || textBlock.type !== 'text') {
+        if (finalMessage.stop_reason === 'max_tokens') {
+          console.warn('[TransTaste] Streaming response truncated by max_tokens');
+          emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' });
+        } else if (!textBlock || textBlock.type !== 'text') {
           emit('error', { error: 'E_AI_ERROR', reason: 'No text response from AI' });
         } else {
           const parsed = parseJsonResponse(textBlock.text);
@@ -538,10 +562,21 @@ export function createMenuAnalysisStream(
             setCache(cacheKey, result, country).catch(() => {});
           }
 
-          emit('done', result);
+          if (isAnalysisError(result)) {
+            emit('error', result);
+          } else {
+            const meta = (result as MenuAnalysisResult).menu_meta;
+            outcome = {
+              dishes: (result as MenuAnalysisResult).dishes?.length ?? 0,
+              menuLanguage: meta?.language,
+              countryDetected: meta?.country_detected,
+            };
+            emit('done', result);
+          }
         }
       } catch (err) {
         console.error('[TransTaste] Stream error:', err);
+        reportUpstreamError(input, err);
         if (err instanceof Anthropic.APIError) {
           if (err.status === 429) {
             emit('error', { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again.' });
@@ -558,6 +593,9 @@ export function createMenuAnalysisStream(
         }
       }
 
+      try {
+        await options.onFinish?.(outcome);
+      } catch { /* logging must not affect the response */ }
       close();
     },
   });
@@ -611,6 +649,7 @@ export async function fetchDishDetail(
       ],
       messages,
     });
+    input.telemetry?.report({ model: ANALYSIS_MODEL, usage: response.usage, stopReason: response.stop_reason });
 
     const textBlock = response.content.find((b) => b.type === 'text');
     if (!textBlock || textBlock.type !== 'text') {
@@ -641,6 +680,7 @@ export async function fetchDishDetail(
 
     return { data: parsed as import('../types').DishDetail };
   } catch (err) {
+    reportUpstreamError(input, err);
     const msg = err instanceof Anthropic.APIError
       ? `API error ${err.status}: ${err.message}`
       : err instanceof Error ? err.message : 'Unknown error';

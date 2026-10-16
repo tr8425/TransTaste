@@ -68,14 +68,13 @@ export function useDishDetail(
         }),
       });
 
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
-      }
+      const data = await res.json().catch(() => ({}));
+      // Append the request id so a reported error can be looked up in the logs.
+      const ref = data.ref || res.headers.get("x-request-id");
+      const withRef = (message: string) => (ref ? `${message} (${ref})` : message);
 
-      const data = await res.json();
-
-      if (data.error) {
-        throw new Error(data.reason || "Failed to load detail");
+      if (!res.ok || data.error) {
+        throw new Error(withRef(data.reason || `Server error: ${res.status}`));
       }
 
       cacheRef.current.set(cacheKey, data);

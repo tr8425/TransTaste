@@ -288,17 +288,17 @@ export default function DishCard({
               isUserAllergen={matchedAllergens.includes(allergen)}
             />
           ))}
-          {dish.dietary.vegan && (
+          {dish.dietary?.vegan && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
               {t("dietary.vegan")}
             </span>
           )}
-          {dish.dietary.vegetarian && !dish.dietary.vegan && (
+          {dish.dietary?.vegetarian && !dish.dietary?.vegan && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
               {t("dietary.vegetarian")}
             </span>
           )}
-          {dish.dietary.halal && (
+          {dish.dietary?.halal && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
               {t("dietary.halal")}
             </span>

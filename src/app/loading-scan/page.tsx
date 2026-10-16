@@ -231,7 +231,7 @@ export default function LoadingScanPage() {
               navigateToResults();
               return;
             } else if (eventType === "error") {
-              sessionStorage.setItem("scanError", JSON.stringify({ error: parsed.error || 'E_UNKNOWN', reason: parsed.reason, _debug: parsed._debug }));
+              sessionStorage.setItem("scanError", JSON.stringify({ error: parsed.error || 'E_UNKNOWN', reason: parsed.reason, ref: parsed.ref }));
               navigateToResults();
               return;
             }
@@ -278,7 +278,7 @@ export default function LoadingScanPage() {
         } else {
           // JSON response (mock/cache)
           if (!res.ok) {
-            let parsedError: { error?: string; reason?: string; _debug?: string } = {};
+            let parsedError: { error?: string; reason?: string; ref?: string } = {};
             try {
               parsedError = await res.json();
             } catch {
@@ -292,7 +292,7 @@ export default function LoadingScanPage() {
               JSON.stringify({
                 error: parsedError.error || "E_FETCH_FAIL",
                 reason: parsedError.reason,
-                _debug: parsedError._debug,
+                ref: parsedError.ref || res.headers.get("x-request-id") || undefined,
               }),
             );
             navigateToResults();

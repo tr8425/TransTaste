@@ -15,6 +15,7 @@ import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { normalizeAnalysisResult } from "@/lib/normalize-dish";
 import { trackProductEvent } from "@/lib/product-events";
 import { matchUserAllergens } from "@/lib/allergen-i18n";
 import CartConflictDialog from "@/components/order/CartConflictDialog";
@@ -45,7 +46,7 @@ function ResultsContent() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [paymentBanner, setPaymentBanner] = useState<"cancelled" | null>(null);
   const comboRef = useRef<HTMLDivElement>(null);
-  const [scanError, setScanError] = useState<{ code: string; reason: string; _debug?: string } | null>(null);
+  const [scanError, setScanError] = useState<{ code: string; reason: string; ref?: string } | null>(null);
   const [menuInput, setMenuInput] = useState<StoredMenuInput | null>(null);
   const cart = useCart();
   const exchange = useExchangeRate();
@@ -172,13 +173,19 @@ function ResultsContent() {
       // Parse structured error or treat as plain code string
       try {
         const parsed = JSON.parse(errorStr);
-        setScanError({ code: parsed.error || errorStr, reason: parsed.reason || '', _debug: parsed._debug });
+        setScanError({ code: parsed.error || errorStr, reason: parsed.reason || '', ref: parsed.ref });
       } catch {
-        setScanError({ code: errorStr, reason: '', _debug: undefined });
+        setScanError({ code: errorStr, reason: '' });
       }
     } else if (resultStr) {
       try {
-        const parsed = JSON.parse(resultStr) as MenuAnalysisResult;
+        const raw = JSON.parse(resultStr) as MenuAnalysisResult & { error?: string; reason?: string; ref?: string };
+        // An analysis error stored as a result (older stream behaviour) is shown as an error.
+        if (raw.error || !Array.isArray(raw.dishes)) {
+          setScanError({ code: raw.error || "E_PARSE_FAIL", reason: raw.reason || "", ref: raw.ref });
+          return;
+        }
+        const parsed = normalizeAnalysisResult(raw);
         setData(parsed);
         trackProductEvent("analysis_completed", {
           dish_count: parsed.dishes.length,
@@ -282,15 +289,15 @@ function ResultsContent() {
               ? "warning"
               : dish.allergen_risk;
         const conflicts = dietaryBeliefs.filter((belief) => {
-          if (belief === "vegan") return !dish.dietary.vegan;
+          if (belief === "vegan") return !dish.dietary?.vegan;
           if (belief === "vegetarian") {
-            return !dish.dietary.vegetarian && !dish.dietary.vegan;
+            return !dish.dietary?.vegetarian && !dish.dietary?.vegan;
           }
-          if (belief === "halal") return dish.dietary.halal === false;
+          if (belief === "halal") return dish.dietary?.halal === false;
           return false;
         });
         const needsHalalCheck =
-          dietaryBeliefs.includes("halal") && dish.dietary.halal == null;
+          dietaryBeliefs.includes("halal") && dish.dietary?.halal == null;
         const derivedRisk = conflicts.length > 0
           ? "danger"
           : needsHalalCheck && riskRank[allergenRisk] > riskRank.check
@@ -486,7 +493,7 @@ function ResultsContent() {
           </p>
           {/* Error code for debugging */}
           <p className="text-micro text-brown-medium/40 mb-6 font-mono select-all">
-            {scanError.code}{scanError._debug ? ` · ${scanError._debug}` : ''}
+            {scanError.code}{scanError.ref ? ` · ${scanError.ref}` : ''}
           </p>
           <button
             type="button"

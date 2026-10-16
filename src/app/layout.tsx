@@ -3,6 +3,7 @@ import { Archivo_Black, Manrope, Noto_Sans_JP, Noto_Sans_KR } from "next/font/go
 import BottomNav from "@/components/ui/BottomNav";
 import CartProvider from "@/components/order/CartProvider";
 import HtmlLangSync from "@/components/common/HtmlLangSync";
+import ClientTelemetry from "@/components/common/ClientTelemetry";
 import "./globals.css";
 
 // Self-hosted fonts: no render-blocking Google Fonts request, metric-matched fallbacks.
@@ -101,6 +102,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <HtmlLangSync />
+        <ClientTelemetry />
         <CartProvider>
           <div className="mobile-container">
             <div className="app-shell">{children}</div>

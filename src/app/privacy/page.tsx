@@ -51,6 +51,15 @@ function PrivacyEn() {
           for common menu items. Cache entries are retained for up to 30 days and contain only
           the menu analysis results — not your personal allergen presets or preferences.
         </p>
+        <p className="mt-2">
+          To find and fix errors, we keep a service log for each analysis request for up to
+          30 days: the input type and size, the first 300 characters of a text menu, a summary of
+          the result, error details, processing time, approximate country, device type, and a
+          one-way hash of your IP address that changes every day. We also record in-app usage
+          events (such as pages viewed and dishes opened) and app error reports. Menu photos and
+          your allergy or dietary choices are not stored in these logs; only how many you
+          selected is counted.
+        </p>
       </section>
 
       <section>
@@ -68,7 +77,7 @@ function PrivacyEn() {
           <li><strong>Anthropic (Claude AI)</strong> — processes menu images and text for analysis</li>
           <li><strong>Stripe</strong> — handles payment processing</li>
           <li><strong>Vercel</strong> — hosts the application</li>
-          <li><strong>Upstash</strong> — caches anonymized scan results</li>
+          <li><strong>Upstash</strong> — caches anonymized scan results and stores service logs</li>
         </ul>
       </section>
 
@@ -161,6 +170,13 @@ function PrivacyKo() {
           캐시될 수 있습니다. 캐시 항목은 최대 30일 동안 보관되며, 사용자의 알레르기 정보나 선호도가
           아닌 메뉴 분석 결과만 포함합니다.
         </p>
+        <p className="mt-2">
+          오류를 찾고 고치기 위해 분석 요청마다 서비스 기록을 최대 30일 동안 보관합니다. 기록에는
+          입력 형식과 크기, 텍스트 메뉴의 앞부분 300자, 결과 요약, 오류 내용, 처리 시간, 대략적인
+          국가, 기기 종류, 그리고 매일 바뀌는 방식으로 변환해 원래 값을 알 수 없는 IP 주소가
+          들어갑니다. 앱 안에서의 이용 기록(본 화면, 연 요리 등)과 앱 오류 보고도 함께 기록합니다.
+          메뉴 사진과 알레르기·식단 설정 내용은 이 기록에 저장하지 않으며, 몇 개를 선택했는지만 셉니다.
+        </p>
       </section>
 
       <section>
@@ -178,7 +194,7 @@ function PrivacyKo() {
           <li><strong>Anthropic (Claude AI)</strong> — 분석을 위해 메뉴 이미지와 텍스트를 처리합니다</li>
           <li><strong>Stripe</strong> — 결제 처리를 담당합니다</li>
           <li><strong>Vercel</strong> — 애플리케이션을 호스팅합니다</li>
-          <li><strong>Upstash</strong> — 익명화된 스캔 결과를 캐시합니다</li>
+          <li><strong>Upstash</strong> — 익명화된 스캔 결과를 캐시하고 서비스 기록을 보관합니다</li>
         </ul>
       </section>
 

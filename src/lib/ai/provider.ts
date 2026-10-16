@@ -1,4 +1,5 @@
 import { InputType, MenuAnalysisResult, AnalysisError } from '../types';
+import type { AiTelemetry } from '../telemetry';
 
 export interface MenuInput {
   input: string; // base64 image, URL, or text
@@ -9,6 +10,7 @@ export interface MenuInput {
   dietaryBeliefs?: string[];
   dislikedIngredients?: string[];
   apiKey?: string; // resolved by the server route
+  telemetry?: AiTelemetry; // request log hook: token usage and upstream failures
 }
 
 export interface AIProvider {

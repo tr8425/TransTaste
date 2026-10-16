@@ -48,14 +48,18 @@ function isSameSite(origin: string, request: NextRequest): boolean {
  * Requests without an Origin header (curl, server-to-server) pass through and
  * are left to the rate limiter.
  */
-export function rejectUntrustedRequest(request: NextRequest, route: string): NextResponse | null {
+export function rejectUntrustedRequest(
+  request: NextRequest,
+  route: string,
+  options: { anyContentType?: boolean } = {},
+): NextResponse | null {
   const origin = request.headers.get("origin");
   if (origin && !isSameSite(origin, request)) {
     securityLog("cross_origin_rejected", { route, origin });
     return NextResponse.json({ error: "E_FORBIDDEN", reason: "Cross-origin requests are not allowed." }, { status: 403 });
   }
   const contentType = request.headers.get("content-type")?.toLowerCase() || "";
-  if (!contentType.startsWith("application/json")) {
+  if (!options.anyContentType && !contentType.startsWith("application/json")) {
     return NextResponse.json({ error: "E_BAD_REQUEST", reason: "Content-Type must be application/json." }, { status: 415 });
   }
   return null;
