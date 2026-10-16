@@ -36,6 +36,8 @@ export interface AiCallReport {
   stopReason?: string | null;
   upstreamStatus?: number;
   upstreamMessage?: string;
+  /** Last characters of a response cut off by max_tokens (menu text, no user data). */
+  outputTail?: string;
 }
 
 export interface AiTelemetry {
@@ -178,6 +180,7 @@ export class RequestLog {
             upstream_message: this.calls.find((c) => c.upstreamMessage)?.upstreamMessage?.slice(0, 300),
           }
         : {}),
+      ...(this.calls.some((c) => c.outputTail) ? { output_tail: this.calls.find((c) => c.outputTail)?.outputTail } : {}),
     };
 
     const route = String(this.data.route);
@@ -194,6 +197,7 @@ export class RequestLog {
       }
       p.hincrby(statsKey, `${route}:requests`, 1);
       if (record.cache_hit) p.hincrby(statsKey, `${route}:cache_hits`, 1);
+      if (record.truncated) p.hincrby(statsKey, `${route}:truncated`, 1);
       if (this.calls.length) {
         p.hincrby(statsKey, `${route}:ai_calls`, this.calls.length);
         p.hincrby(statsKey, "input_tokens", usage.input_tokens);

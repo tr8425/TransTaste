@@ -197,6 +197,8 @@ export interface MenuAnalysisResult {
   };
   /** True when response is mock/demo data (no API key configured) */
   demo?: boolean;
+  /** True when the AI output hit max_tokens; dishes holds only what completed before the cut */
+  truncated?: boolean;
 }
 
 export type AllergenType =

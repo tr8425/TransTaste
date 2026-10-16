@@ -8,6 +8,9 @@ import { normalizeDish, normalizeDishes } from '../normalize-dish';
 // claude-sonnet-4-20250514 was retired and now returns 404. ANTHROPIC_MODEL
 // lets production switch models without a code change.
 const ANALYSIS_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+// Long menus (60+ items, Korean output) overflow 8192 tokens. A truncated
+// response still returns the dishes parsed so far (see salvageTruncated).
+const ANALYSIS_MAX_TOKENS = Number(process.env.ANALYSIS_MAX_TOKENS) || 16000;
 
 function reportUpstreamError(input: MenuInput, err: unknown) {
   input.telemetry?.report({
@@ -415,7 +418,7 @@ export const claudeSonnetProvider: AIProvider = {
     try {
       const response = await client.messages.create({
         model: ANALYSIS_MODEL,
-        max_tokens: 8192,
+        max_tokens: ANALYSIS_MAX_TOKENS,
         system: [
           {
             type: 'text',
@@ -425,19 +428,25 @@ export const claudeSonnetProvider: AIProvider = {
         ],
         messages: buildUserMessage(input),
       });
-      input.telemetry?.report({ model: ANALYSIS_MODEL, usage: response.usage, stopReason: response.stop_reason });
-
       // Extract text from response
       const textBlock = response.content.find((block) => block.type === 'text');
-      if (!textBlock || textBlock.type !== 'text') {
+      const truncated = response.stop_reason === 'max_tokens';
+      const text = textBlock?.type === 'text' ? textBlock.text : undefined;
+      input.telemetry?.report({
+        model: ANALYSIS_MODEL,
+        usage: response.usage,
+        stopReason: response.stop_reason,
+        ...(truncated ? { outputTail: outputTail(text) } : {}),
+      });
+      if (!text) {
         return { error: 'E_AI_ERROR', reason: 'No text response from AI' };
       }
 
-      if (response.stop_reason === 'max_tokens') {
-        return { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' };
+      if (truncated) {
+        return salvageTruncated(text) ?? { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' };
       }
 
-      const parsed = parseJsonResponse(textBlock.text);
+      const parsed = parseJsonResponse(text);
       return validateResult(parsed);
     } catch (err: unknown) {
       reportUpstreamError(input, err);
@@ -475,6 +484,25 @@ export interface StreamOutcome {
   dishes?: number;
   menuLanguage?: string;
   countryDetected?: string;
+  truncated?: boolean;
+}
+
+/**
+ * Builds a partial result from a response cut off by max_tokens: every dish
+ * object that completed before the cut, flagged `truncated`. Not cached.
+ */
+function salvageTruncated(text: string): MenuAnalysisResult | null {
+  const parser = new IncrementalDishParser();
+  const { newMeta, newDishes } = parser.addChunk(text);
+  if (newDishes.length === 0) return null;
+  const result = validateResult({ menu_meta: newMeta ?? parser.menuMeta ?? undefined, dishes: newDishes });
+  if (isAnalysisError(result)) return null;
+  return { ...(result as MenuAnalysisResult), truncated: true };
+}
+
+/** Last part of a truncated response, kept in the request log to see where the tokens went. */
+function outputTail(text: string | undefined): string | undefined {
+  return text ? text.slice(-400) : undefined;
 }
 
 export function createMenuAnalysisStream(
@@ -518,7 +546,7 @@ export function createMenuAnalysisStream(
         const client = new Anthropic({ apiKey });
         const stream = client.messages.stream({
           model: ANALYSIS_MODEL,
-          max_tokens: 8192,
+          max_tokens: ANALYSIS_MAX_TOKENS,
           system: [
             {
               type: 'text',
@@ -543,13 +571,29 @@ export function createMenuAnalysisStream(
         });
 
         const finalMessage = await stream.finalMessage();
-        input.telemetry?.report({ model: ANALYSIS_MODEL, usage: finalMessage.usage, stopReason: finalMessage.stop_reason });
-
         // Validate full response
         const textBlock = finalMessage.content.find((b) => b.type === 'text');
-        if (finalMessage.stop_reason === 'max_tokens') {
+        const truncated = finalMessage.stop_reason === 'max_tokens';
+        input.telemetry?.report({
+          model: ANALYSIS_MODEL,
+          usage: finalMessage.usage,
+          stopReason: finalMessage.stop_reason,
+          ...(truncated ? { outputTail: outputTail(textBlock?.type === 'text' ? textBlock.text : undefined) } : {}),
+        });
+        if (truncated) {
           console.warn('[TransTaste] Streaming response truncated by max_tokens');
-          emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' });
+          const partial = textBlock?.type === 'text' ? salvageTruncated(textBlock.text) : null;
+          if (partial) {
+            outcome = {
+              dishes: partial.dishes.length,
+              menuLanguage: partial.menu_meta?.language,
+              countryDetected: partial.menu_meta?.country_detected,
+              truncated: true,
+            };
+            emit('done', partial);
+          } else {
+            emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' });
+          }
         } else if (!textBlock || textBlock.type !== 'text') {
           emit('error', { error: 'E_AI_ERROR', reason: 'No text response from AI' });
         } else {

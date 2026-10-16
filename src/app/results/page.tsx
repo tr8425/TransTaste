@@ -590,9 +590,17 @@ function ResultsContent() {
           {t("results.menuResults")}
         </h1>
         <p className="text-xs text-brown-medium">
-          {t("results.dishesFound", { count: data.items_found ?? 0 })} &middot; {data.menu_language}
+          {t("results.dishesFound", { count: data.truncated ? data.dishes.length : data.items_found ?? data.menu_meta?.items_found ?? data.dishes.length })} &middot; {data.menu_language}
         </p>
       </div>
+
+      {data.truncated && (
+        <div className="mx-5 mb-3 px-4 py-2.5 bg-amber-500/15 border border-amber-500/30 rounded-xl">
+          <p className="text-xs text-amber-700 leading-relaxed">
+            {t("results.truncatedBanner", { count: data.dishes.length })}
+          </p>
+        </div>
+      )}
 
       {/* Demo mode banner */}
       {data.demo && (

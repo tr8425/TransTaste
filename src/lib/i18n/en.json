@@ -144,6 +144,7 @@
     "noScans": "No scans remaining",
     "noScansDesc": "You've used the current beta allowance. Checkout is not available yet, but you can review the proposed trip passes or keep using the sample flow.",
     "somethingWrong": "Something went wrong",
+    "truncatedBanner": "This menu is long, so only the first {count} dishes were analyzed. Scan the rest as a separate photo.",
     "demoBanner": "This is example data. Scan your own menu to get a real analysis (free scans are limited).",
     "kickerLive": "Scan report · live",
     "kickerExample": "Scan report · example",

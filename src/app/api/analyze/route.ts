@@ -266,6 +266,7 @@ export async function POST(request: NextRequest) {
             dishes: outcome.dishes,
             menu_language: outcome.menuLanguage,
             country_detected: outcome.countryDetected,
+            ...(outcome.truncated ? { truncated: true } : {}),
           }),
       });
       return new Response(readable, {
