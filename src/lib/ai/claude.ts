@@ -790,7 +790,7 @@ const ORIENT_PROMPT =
 export async function detectMenuRotation(
   imageDataUrl: string,
   telemetry?: AiTelemetry,
-): Promise<{ rotation: 0 | 90 | 180 | 270 } | AnalysisError> {
+): Promise<{ rotation: 0 | 90 | 180 | 270; thinking: string } | AnalysisError> {
   const fx = fixtureDir();
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey && !fx) return { error: 'E_AI_ERROR', reason: 'ANTHROPIC_API_KEY not set' };
@@ -811,17 +811,32 @@ export async function detectMenuRotation(
         ],
       }],
     };
-    // Haiku 5.5 also thinks by default: in production it spent 856 tokens and
-    // 5.6s, past the client's 5s limit, and gave no usable number. Turn it off;
-    // if this model rejects the setting, ask once more without it.
-    let response: Anthropic.Message;
-    try {
+    // Haiku 5.5 also thinks by default (600-850 tokens, about 5s in production)
+    // for a one-number answer. Try the "off" settings in turn; a model that
+    // rejects one answers 400 at once, so a retry adds little delay. The log
+    // records which setting the model took (`orient_thinking`).
+    let response: Anthropic.Message | undefined;
+    let thinking = 'fixture';
+    if (fx) {
       // The fixture answers as text so it runs through the same parsing below.
-      response = fx ? fixtureOrient(fx) : await client.messages.create({ ...params, thinking: THINKING });
-    } catch (err) {
-      if (!(err instanceof Anthropic.APIError && err.status === 400)) throw err;
-      response = await client.messages.create(params);
+      response = fixtureOrient(fx);
+    } else {
+      const attempts: [string, Anthropic.ThinkingConfigParam | undefined][] = [
+        ['between_tools', THINKING],
+        ['disabled', { type: 'disabled' }],
+        ['default', undefined],
+      ];
+      for (const [name, config] of attempts) {
+        try {
+          response = await client.messages.create(config ? { ...params, thinking: config } : params);
+          thinking = name;
+          break;
+        } catch (err) {
+          if (!(err instanceof Anthropic.APIError && err.status === 400) || name === 'default') throw err;
+        }
+      }
     }
+    if (!response) return { error: 'E_AI_ERROR', reason: 'Orientation check failed' };
     const text = response.content.filter((b) => b.type === 'text').map((b) => (b as { text: string }).text).join(' ');
     const n = Number(text.match(/\b(0|90|180|270)\b/)?.[1] ?? NaN);
     const ok = [0, 90, 180, 270].includes(n);
@@ -832,7 +847,7 @@ export async function detectMenuRotation(
       ...(ok ? {} : { outputTail: outputTail(text || `[no text; blocks: ${response.content.map((b) => b.type).join(',')}]`) }),
     });
     if (!ok) return { error: 'E_PARSE_FAIL', reason: 'No rotation in response' };
-    return { rotation: n as 0 | 90 | 180 | 270 };
+    return { rotation: n as 0 | 90 | 180 | 270, thinking };
   } catch (err) {
     telemetry?.report({
       model: ORIENT_MODEL,

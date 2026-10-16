@@ -7,7 +7,9 @@ import { makeThumbnail } from "./image-compress";
 
 export type Rotation = 0 | 90 | 180 | 270;
 
-const TIMEOUT_MS = 5000;
+// The check runs in the background as soon as a photo is picked, so this only
+// delays a user who taps "analyze" right away. Production takes about 5s.
+const TIMEOUT_MS = 10000;
 
 /**
  * Asks the server how far (clockwise) the photo must turn to be upright.

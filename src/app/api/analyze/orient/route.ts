@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
     if ("error" in result) {
       return log.respond(result as unknown as Record<string, unknown>, { status: 422 });
     }
-    log.set({ rotation: result.rotation });
-    return log.respond(result);
+    log.set({ rotation: result.rotation, orient_thinking: result.thinking });
+    return log.respond({ rotation: result.rotation });
   } catch (err) {
     console.error("Orient API error:", err);
     log.set({ server_error: err instanceof Error ? err.message.slice(0, 300) : String(err) });
