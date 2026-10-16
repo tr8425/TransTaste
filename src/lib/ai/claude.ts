@@ -4,6 +4,10 @@ import { AIProvider, MenuInput } from './provider';
 import { IncrementalDishParser } from './stream-parser';
 import { setCache } from '../cache';
 
+// claude-sonnet-4-20250514 was retired and now returns 404. ANTHROPIC_MODEL
+// lets production switch models without a code change.
+const ANALYSIS_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
   ko: 'Korean (한국어)',
@@ -397,7 +401,7 @@ export const claudeSonnetProvider: AIProvider = {
 
     try {
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: ANALYSIS_MODEL,
         max_tokens: 8192,
         system: [
           {
@@ -484,7 +488,7 @@ export function createMenuAnalysisStream(
 
         const client = new Anthropic({ apiKey });
         const stream = client.messages.stream({
-          model: 'claude-sonnet-4-20250514',
+          model: ANALYSIS_MODEL,
           max_tokens: 8192,
           system: [
             {
@@ -591,7 +595,7 @@ export async function fetchDishDetail(
 
   try {
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: ANALYSIS_MODEL,
       max_tokens: 4096,
       system: [
         {
