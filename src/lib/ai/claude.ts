@@ -795,7 +795,7 @@ const EDGE_TO_ROTATION: Record<string, 0 | 90 | 180 | 270> = { top: 0, right: 27
 export async function detectMenuRotation(
   imageDataUrl: string,
   telemetry?: AiTelemetry,
-): Promise<{ rotation: 0 | 90 | 180 | 270; thinking: string } | AnalysisError> {
+): Promise<{ rotation: 0 | 90 | 180 | 270; thinking: string; raw?: number } | AnalysisError> {
   const fx = fixtureDir();
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey && !fx) return { error: 'E_AI_ERROR', reason: 'ANTHROPIC_API_KEY not set' };
@@ -816,21 +816,22 @@ export async function detectMenuRotation(
         ],
       }],
     };
-    // Haiku 5.5 also thinks by default (600-850 tokens, about 5s in production)
-    // for a one-number answer. Try the "off" settings in turn; a model that
-    // rejects one answers 400 at once, so a retry adds little delay. The log
-    // records which setting the model took (`orient_thinking`).
+    // Haiku 5.5 thinks by default (600-850 tokens, about 5s, $0.0004). With
+    // thinking off it answered in about 1s but got 1 of 3 test photos wrong,
+    // so the default stays: the check runs in the background while the user
+    // looks at the preview. ORIENT_THINKING=off tries the "off" settings in
+    // turn (a rejected one answers 400 at once). The log records which setting
+    // the model took (`orient_thinking`).
     let response: Anthropic.Message | undefined;
     let thinking = 'fixture';
     if (fx) {
       // The fixture answers as text so it runs through the same parsing below.
       response = fixtureOrient(fx);
     } else {
-      const attempts: [string, Anthropic.ThinkingConfigParam | undefined][] = [
-        ['between_tools', THINKING],
-        ['disabled', { type: 'disabled' }],
-        ['default', undefined],
-      ];
+      const attempts: [string, Anthropic.ThinkingConfigParam | undefined][] =
+        process.env.ORIENT_THINKING === 'off'
+          ? [['between_tools', THINKING], ['disabled', { type: 'disabled' }], ['default', undefined]]
+          : [['default', undefined]];
       for (const [name, config] of attempts) {
         try {
           response = await client.messages.create(config ? { ...params, thinking: config } : params);
@@ -853,6 +854,10 @@ export async function detectMenuRotation(
       ...(ok ? {} : { outputTail: outputTail(text || `[no text; blocks: ${response.content.map((b) => b.type).join(',')}]`) }),
     });
     if (!ok) return { error: 'E_PARSE_FAIL', reason: 'No rotation in response' };
+    // Phones rarely save a photo upside down, and a wrong 180 (seen in testing
+    // on a sideways photo) would flip it. Keep the photo as shot instead; the
+    // user can still turn it by hand. The raw answer goes to the log.
+    if (n === 180) return { rotation: 0, thinking, raw: 180 };
     return { rotation: n as 0 | 90 | 180 | 270, thinking };
   } catch (err) {
     telemetry?.report({
