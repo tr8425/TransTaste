@@ -12,6 +12,7 @@ import ComboRecommendation from "@/components/paywall/ComboRecommendation";
 import { useCart, type CartItem } from "@/hooks/useCart";
 import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
+import { useMenuEnrichment } from "@/hooks/useMenuEnrichment";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
@@ -51,8 +52,11 @@ function ResultsContent() {
   const cart = useCart();
   const exchange = useExchangeRate();
 
+  // Names repeat across sections, so cart lines are keyed by the dish id too.
+  const cartKey = (dish: DishLite) => (dish.item_id ? `${dish.item_id}:${dish.original}` : dish.original);
+
   const dishToCartItem = (dish: DishLite): CartDraft => ({
-    dish_hash: dish.original,
+    dish_hash: cartKey(dish),
     name_original: dish.original,
     name_translated: dish.translation.english,
     price: dish.price ? parseFloat(dish.price) || undefined : undefined,
@@ -72,7 +76,7 @@ function ResultsContent() {
   const isDishInCart = (dish: DishLite) =>
     cart.items.some(
       (item) =>
-        item.dish_hash === dish.original &&
+        item.dish_hash === cartKey(dish) &&
         (!item.source_key || !resultKey || item.source_key === resultKey),
     );
 
@@ -99,6 +103,16 @@ function ResultsContent() {
   // Phase 2: detail for selected dish
   const { detail, isLoading: isDetailLoading, error: detailError, retry: retryDetail } =
     useDishDetail(selectedDish, menuInput);
+
+  // Allergen and diet fields for dishes from the fast list step. Only runs when
+  // the stored menu input belongs to this result (not to a later scan).
+  const enrichment = useMenuEnrichment({
+    data,
+    setData,
+    menuInput,
+    resultKey,
+    enabled: Boolean(menuInput && resultKey && menuInput.resultKey === resultKey),
+  });
 
   // Handle payment redirect (Stripe success/cancel)
   useEffect(() => {
@@ -203,6 +217,15 @@ function ResultsContent() {
         const cachedId = searchParams.get("id");
         const resultKey = cachedId || `scan_${Date.now()}`;
         setResultKey(resultKey);
+        // Tie the stored menu input to this fresh result so enrichment and
+        // details for an older result never use a newer scan's input.
+        if (!cachedId && savedInput) {
+          try {
+            const stamped = { ...JSON.parse(savedInput), resultKey };
+            sessionStorage.setItem("menuInputForDetail", JSON.stringify(stamped));
+            setMenuInput(stamped);
+          } catch { /* ignore */ }
+        }
         try {
           // Determine output language to render preview text in the user's language
           let outputLang = "en";
@@ -279,6 +302,11 @@ function ResultsContent() {
   const allergenMatches = new Map<string, string[]>();
   const riskAdjustedDishes = data
     ? data.dishes.map((dish): DishLite => {
+        // Not analyzed yet: unknown, so ask staff. Never derive "safe" from missing data.
+        if (dish.analysis_pending) {
+          allergenMatches.set(dish.original, []);
+          return { ...dish, allergen_risk: "check", dietary_conflicts: [] };
+        }
         const matched = matchUserAllergens(dish.allergens, allergenPreset);
         allergenMatches.set(dish.original, matched);
         const allergenRisk: DishLite["allergen_risk"] = !hasAllergenPreset
@@ -351,6 +379,29 @@ function ResultsContent() {
           }
           return dish.allergen_risk === "safe";
         });
+
+  // The open dish card follows the latest data, so enrichment that arrives
+  // while it is open updates both what it shows and what "add" puts in the cart.
+  const liveSelectedDish = selectedDish
+    ? decisionDishes.find((d) => d.item_id && d.item_id === selectedDish.item_id) ?? selectedDish
+    : null;
+
+  // Items added before their allergen analysis finished carry "check"; refresh
+  // them from this result once analyzed. Pending dishes are left as they are.
+  const analysisSignature = decisionDishes
+    .filter((d) => !d.analysis_pending)
+    .map((d) => `${cartKey(d)}:${d.allergen_risk}:${d.allergens.join(",")}`)
+    .join("|");
+  useEffect(() => {
+    if (!resultKey || !analysisSignature) return;
+    cart.syncAnalysis(
+      resultKey,
+      decisionDishes
+        .filter((d) => !d.analysis_pending)
+        .map((d) => ({ dish_hash: cartKey(d), allergen_risk: d.allergen_risk, allergens: d.allergens })),
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when analysis results change
+  }, [resultKey, analysisSignature]);
 
   useEffect(() => {
     if (isPhase2Free) setIsUnlocked(true);
@@ -590,7 +641,7 @@ function ResultsContent() {
           {t("results.menuResults")}
         </h1>
         <p className="text-xs text-brown-medium">
-          {t("results.dishesFound", { count: data.truncated ? data.dishes.length : data.items_found ?? data.menu_meta?.items_found ?? data.dishes.length })} &middot; {data.menu_language}
+          {t("results.dishesFound", { count: data.dishes.length })} &middot; {data.menu_language}
         </p>
       </div>
 
@@ -599,6 +650,34 @@ function ResultsContent() {
           <p className="text-xs text-amber-700 leading-relaxed">
             {t("results.truncatedBanner", { count: data.dishes.length })}
           </p>
+        </div>
+      )}
+
+      {enrichment.pending > 0 && (
+        <div
+          className="mx-5 mb-3 px-4 py-2.5 bg-cream-dark border border-brown-dark/15 rounded-xl flex items-center justify-between gap-3"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="text-xs text-brown-dark leading-relaxed">
+            {enrichment.unavailable
+              ? t("results.enrichUnavailable", { count: enrichment.pending })
+              : enrichment.failed
+              ? t("results.enrichFailed", { count: enrichment.pending })
+              : t("results.enrichPending", { done: enrichment.total - enrichment.pending, total: enrichment.total })}
+            {enrichment.failed && enrichment.errorRef ? ` (${enrichment.errorRef})` : ""}
+          </p>
+          {enrichment.failed && !enrichment.unavailable ? (
+            <button
+              type="button"
+              onClick={enrichment.retry}
+              className="flex-shrink-0 rounded-full border border-brown-dark px-3 py-1 text-xs font-semibold text-brown-dark"
+            >
+              {t("results.enrichRetry")}
+            </button>
+          ) : enrichment.running ? (
+            <span className="h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-coral" aria-hidden="true" />
+          ) : null}
         </div>
       )}
 
@@ -688,7 +767,10 @@ function ResultsContent() {
       {/* Category filters — sticky so they remain accessible while scrolling */}
       <div className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm px-5 py-3 border-b border-brown-light/10">
         <HorizontalScroll>
-          {CATEGORY_FILTERS.map((cat) => (
+          {CATEGORY_FILTERS.filter(
+            // Only categories this menu has, so every dish sits under some chip.
+            (cat) => cat === "all" || data.dishes.some((d) => d.category === cat),
+          ).map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
@@ -800,7 +882,7 @@ function ResultsContent() {
 
       {/* Dish detail bottom sheet */}
       <DishCard
-        dish={selectedDish}
+        dish={liveSelectedDish}
         detail={detail}
         isDetailLoading={isDetailLoading}
         detailError={detailError}
@@ -809,8 +891,8 @@ function ResultsContent() {
         onClose={() => setSelectedDish(null)}
         isUnlocked={isUnlocked}
         onUnlock={handleUnlock}
-        onAddToCart={selectedDish ? () => addDishToCart(selectedDish) : undefined}
-        isInCart={selectedDish ? isDishInCart(selectedDish) : false}
+        onAddToCart={liveSelectedDish ? () => addDishToCart(liveSelectedDish) : undefined}
+        isInCart={liveSelectedDish ? isDishInCart(liveSelectedDish) : false}
         matchedAllergens={selectedDish ? allergenMatches.get(selectedDish.original) : undefined}
         hasAllergenPreset={hasAllergenPreset}
       />

@@ -199,9 +199,11 @@ export default function DishCard({
         <h2 className="text-xl font-bold text-brown-dark tracking-tight mb-1">
           {dish.original}
         </h2>
-        <p className="text-sm text-brown-medium italic mb-0.5">
-          &ldquo;{dish.translation.literal}&rdquo;
-        </p>
+        {dish.translation.literal && (
+          <p className="text-sm text-brown-medium italic mb-0.5">
+            &ldquo;{dish.translation.literal}&rdquo;
+          </p>
+        )}
         <p className="text-base font-medium text-brown-dark">
           {dish.translation.meaning}
         </p>
@@ -227,17 +229,19 @@ export default function DishCard({
             {dish.price_display || dish.price}
           </span>
         )}
-        <span className="text-xs text-brown-medium bg-cream-dark px-2 py-0.5 rounded-full capitalize">
-          {t(`categories.${dish.price_tier}`)}
-        </span>
+        {!dish.analysis_pending && (
+          <span className="text-xs text-brown-medium bg-cream-dark px-2 py-0.5 rounded-full capitalize">
+            {t(`categories.${dish.price_tier}`)}
+          </span>
+        )}
         <span className="text-xs text-brown-medium bg-cream-dark px-2 py-0.5 rounded-full capitalize">
           {t(`categories.${dish.category}`)}
         </span>
-        {dish.estimated_calories && (
+        {dish.estimated_calories ? (
           <span className="text-xs text-brown-medium/70 bg-cream-dark px-2 py-0.5 rounded-full">
             {t("dish.calorieEstimate", { kcal: dish.estimated_calories })}
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* Allergens & dietary — Phase 1 data */}
@@ -246,8 +250,17 @@ export default function DishCard({
           {t("dish.allergensAndDietary")}
         </h3>
 
+        {dish.analysis_pending && (
+          <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-cream-dark rounded-lg border border-brown-dark/15" role="status">
+            <span className="mt-1 h-2 w-2 flex-shrink-0 animate-pulse rounded-full bg-coral" aria-hidden="true" />
+            <p className="text-xs text-brown-dark font-medium leading-relaxed">
+              {t("dish.analysisPendingDetail")}
+            </p>
+          </div>
+        )}
+
         {/* Risk-level action guide */}
-        {dish.allergen_risk === "danger" && (
+        {!dish.analysis_pending && dish.allergen_risk === "danger" && (
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-danger/10 rounded-lg border border-danger/20">
             <span className="text-sm flex-shrink-0">{"❌"}</span>
             <p className="text-xs text-danger font-medium leading-relaxed">
@@ -263,7 +276,7 @@ export default function DishCard({
             </p>
           </div>
         )}
-        {dish.allergen_risk === "warning" && (
+        {!dish.analysis_pending && dish.allergen_risk === "warning" && (
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
             <span className="text-sm flex-shrink-0">{"⚠️"}</span>
             <p className="text-xs text-amber-700 font-medium leading-relaxed">
@@ -271,7 +284,7 @@ export default function DishCard({
             </p>
           </div>
         )}
-        {dish.allergen_risk === "check" && (
+        {!dish.analysis_pending && dish.allergen_risk === "check" && (
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-amber-brand/10 rounded-lg border border-amber-brand/20">
             <span className="text-sm flex-shrink-0">{"〰️"}</span>
             <p className="text-xs text-amber-brand font-medium leading-relaxed">

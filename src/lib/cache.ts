@@ -21,6 +21,10 @@ export function buildCacheKey(params: {
   allergenPreset?: string[];
   dietaryBeliefs?: string[];
   dislikedIngredients?: string[];
+  // 'list' (streaming name/price step) and 'enrich' results have their own shapes.
+  mode?: 'full' | 'list' | 'enrich';
+  // Extra key material, e.g. the dish names of an enrich chunk.
+  extra?: string;
 }): string {
   const normalized = params.inputType === 'text'
     ? normalizeMenuText(params.input)
@@ -29,7 +33,11 @@ export function buildCacheKey(params: {
     .map((list) => [...(list ?? [])].map((s) => s.trim().toLowerCase()).sort().join(','))
     .join('|');
   return createHash('sha256')
-    .update(`${CACHE_KEY_VERSION}:${params.inputType}:${normalized}:${params.srcLang}:${params.tgtLang}:${profile}`)
+    .update(
+      `${CACHE_KEY_VERSION}:${params.mode && params.mode !== 'full' ? `${params.mode}:` : ''}` +
+      `${params.inputType}:${normalized}:${params.srcLang}:${params.tgtLang}:${profile}` +
+      (params.extra ? `:${params.extra}` : ''),
+    )
     .digest('hex');
 }
 

@@ -49,6 +49,9 @@ export const CATEGORY_FILTERS = [
   "side",
   "drink",
   "dessert",
+  "appetizer",
+  "salad",
+  "set",
 ] as const;
 
 export const FUN_FACTS_LOADING_COUNT = 10;

@@ -72,7 +72,7 @@ export default function DishRow({
         type="button"
         onClick={onClick}
         className="min-w-0 flex-1 text-left active:scale-[0.99]"
-        aria-label={`${dish.original}, ${dish.translation.english}, ${t(`risk.${dish.allergen_risk}`)}`}
+        aria-label={`${dish.original}, ${dish.translation.english}, ${dish.analysis_pending ? t("dish.analysisPending") : t(`risk.${dish.allergen_risk}`)}`}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -87,11 +87,11 @@ export default function DishRow({
                 {dish.translation.pronunciation}
               </p>
             )}
-            {dish.estimated_calories && (
+            {dish.estimated_calories ? (
               <span className="text-micro text-brown-medium/50">
                 {t("dish.calorieEstimate", { kcal: dish.estimated_calories })}
               </span>
-            )}
+            ) : null}
           </div>
           {(dish.price_display || dish.price) && (
             <div className="flex flex-col items-end">
@@ -107,8 +107,15 @@ export default function DishRow({
           )}
         </div>
 
-        {/* Allergen risk badge + tags */}
-        {dish.allergen_risk && (
+        {/* Allergen risk badge + tags; a dish from the list step shows a pending badge instead */}
+        {dish.analysis_pending ? (
+          <div className="flex items-center gap-1 mt-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-cream-dark px-2 py-0.5 text-micro font-medium text-brown-medium">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" aria-hidden="true" />
+              {t("dish.analysisPending")}
+            </span>
+          </div>
+        ) : dish.allergen_risk && (
           <div className="flex flex-wrap items-center gap-1 mt-1.5">
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-micro font-bold uppercase tracking-caps ${
               riskStyle || "bg-success/10 text-success"

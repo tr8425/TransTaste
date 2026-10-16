@@ -1,4 +1,4 @@
-import type { DishLite, MenuAnalysisResult } from "./types";
+import type { DishEnrichment, DishLite, MenuAnalysisResult } from "./types";
 
 // The model sometimes omits fields (e.g. `dietary` on drinks). UI code reads
 // them unguarded, so every dish passes through here on the server and again on
@@ -26,6 +26,7 @@ export function normalizeDish(raw: unknown): DishLite | null {
   const dietary = (d.dietary && typeof d.dietary === "object" ? d.dietary : {}) as Record<string, unknown>;
   const allergens = strList(d.allergens);
   const risk = str(d.allergen_risk);
+  const pending = d.analysis_pending === true;
 
   return {
     ...(d as object),
@@ -50,8 +51,10 @@ export function normalizeDish(raw: unknown): DishLite | null {
       gluten_free: bool(dietary.gluten_free),
     },
     allergens,
-    // Unknown risk with listed allergens should prompt a check, never read as safe.
-    allergen_risk: (RISKS.has(risk) ? risk : allergens.length ? "check" : "safe") as DishLite["allergen_risk"],
+    // Unknown risk with listed allergens, or a dish not analyzed yet, should
+    // prompt a check, never read as safe.
+    allergen_risk: (pending ? "check" : RISKS.has(risk) ? risk : allergens.length ? "check" : "safe") as DishLite["allergen_risk"],
+    analysis_pending: pending || undefined,
     alternative_dishes: strList(d.alternative_dishes),
     estimated_calories: typeof d.estimated_calories === "number" && Number.isFinite(d.estimated_calories) ? d.estimated_calories : null,
     price_tier: (TIERS.has(str(d.price_tier)) ? d.price_tier : "mid") as DishLite["price_tier"],
@@ -60,7 +63,58 @@ export function normalizeDish(raw: unknown): DishLite | null {
 }
 
 export function normalizeDishes(raw: unknown): DishLite[] {
-  return Array.isArray(raw) ? raw.map(normalizeDish).filter((d): d is DishLite => d !== null) : [];
+  const dishes = Array.isArray(raw) ? raw.map(normalizeDish).filter((d): d is DishLite => d !== null) : [];
+  // Names are not unique (the same dish can appear in two sections), so every
+  // dish gets an id for matching enrichment. Existing ids are kept.
+  const taken = new Set(dishes.map((d) => d.item_id).filter(Boolean));
+  let next = 0;
+  return dishes.map((d) => {
+    if (d.item_id) return d;
+    while (taken.has(`d${next}`)) next++;
+    taken.add(`d${next}`);
+    return { ...d, item_id: `d${next}` };
+  });
+}
+
+/**
+ * An enrichment entry counts only when it carries the safety fields. A partial
+ * entry (e.g. only a name) must leave the dish pending, never mark it analyzed
+ * with empty allergens, which would read as safe.
+ */
+export function isCompleteEnrichment(e: unknown): e is DishEnrichment {
+  if (!e || typeof e !== "object") return false;
+  const x = e as Record<string, unknown>;
+  const dietary = x.dietary as Record<string, unknown> | undefined;
+  return (
+    typeof x.id === "string" &&
+    Array.isArray(x.allergens) &&
+    x.allergens.every((a) => typeof a === "string") &&
+    RISKS.has(String(x.allergen_risk)) &&
+    !!dietary && typeof dietary === "object" &&
+    typeof dietary.vegan === "boolean" &&
+    typeof dietary.vegetarian === "boolean"
+  );
+}
+
+/**
+ * Applies enrichment entries to list dishes (matched by id) and clears their
+ * pending flag. Dishes without a complete matching entry stay pending.
+ */
+export function mergeEnrichment(dishes: DishLite[], entries: DishEnrichment[]): DishLite[] {
+  const byId = new Map(entries.filter(isCompleteEnrichment).map((e) => [e.id, e]));
+  return dishes.map((dish) => {
+    const e = dish.item_id ? byId.get(dish.item_id) : undefined;
+    if (!e) return dish;
+    const { id: _id, original: _original, literal, ...fields } = e;
+    void _id;
+    void _original;
+    return normalizeDish({
+      ...dish,
+      ...fields,
+      translation: { ...dish.translation, ...(literal ? { literal } : {}) },
+      analysis_pending: false,
+    }) ?? dish;
+  });
 }
 
 /** Returns the result with every dish normalized; leaves non-result objects untouched. */

@@ -129,6 +129,10 @@
   },
 
   "results": {
+    "enrichPending": "Checking allergens and diet ({done}/{total})",
+    "enrichFailed": "Allergen info is missing for {count} dishes.",
+    "enrichUnavailable": "Allergen checks did not finish for {count} dishes. Scan the menu again to see them.",
+    "enrichRetry": "Retry",
     "menuResults": "Menu Results",
     "dishesFound": "{count} dishes found",
     "noCategory": "No dishes in this category",
@@ -162,6 +166,8 @@
   },
 
   "dish": {
+    "analysisPending": "Checking allergens",
+    "analysisPendingDetail": "Allergen and diet info for this dish is still being checked. Ask the staff until it appears.",
     "flavorRadarChart": "Flavor Radar Chart",
     "flavorProfile": "Flavor Profile",
     "ingredients": "Ingredients",
@@ -431,6 +437,11 @@
   },
 
   "camera": {
+    "prepareFailed": "Could not prepare the photos. Remove any broken photo and try again.",
+    "orientChecking": "Checking direction",
+    "rotateImage": "Rotate photo",
+    "rotateHint": "Photos are turned upright automatically. Tap ↻ if one is still sideways.",
+    "preparing": "Preparing photos…",
     "turnFlashOn": "Turn flash on",
     "turnFlashOff": "Turn flash off",
     "takePhoto": "Take Photo",

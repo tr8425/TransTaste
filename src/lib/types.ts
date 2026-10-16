@@ -153,6 +153,30 @@ export interface DishLite {
   estimated_calories?: number | null;
   price_tier: "budget" | "mid" | "premium";
   image_search_query: string;
+  /**
+   * True while the dish only has list fields (name, translation, price).
+   * Allergen, diet and calorie fields arrive from /api/analyze/enrich; until
+   * then the UI must treat the dish as unknown, never as safe.
+   */
+  analysis_pending?: boolean;
+  /** Position-based id within one result ("d0", "d1", ...); enrichment is matched on it. */
+  item_id?: string;
+}
+
+/** Per-dish fields returned by /api/analyze/enrich, matched to the list by `id` (DishLite.item_id). */
+export interface DishEnrichment {
+  id: string;
+  original: string;
+  literal?: string;
+  confidence?: DishLite["confidence"];
+  dietary?: DishLite["dietary"];
+  allergens?: string[];
+  allergen_risk?: DishLite["allergen_risk"];
+  alternative_dishes?: string[];
+  disliked_ingredients?: string[];
+  estimated_calories?: number | null;
+  price_tier?: DishLite["price_tier"];
+  image_search_query?: string;
 }
 
 // === Phase 2: Detail fetched on demand per dish ===

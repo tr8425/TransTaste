@@ -170,6 +170,7 @@ export default function LoadingScanPage() {
       outputLanguage: (detailSettings.output_language as string) || undefined,
       allergenPreset: Array.isArray(detailSettings.allergen_preset) ? detailSettings.allergen_preset : undefined,
       dietaryBeliefs: Array.isArray(detailSettings.dietary_beliefs) ? detailSettings.dietary_beliefs : undefined,
+      dislikedIngredients: Array.isArray(detailSettings.disliked_ingredients) ? detailSettings.disliked_ingredients : undefined,
     }));
 
     sessionStorage.removeItem("scanImage");
@@ -391,7 +392,7 @@ export default function LoadingScanPage() {
         <div className="w-full max-w-sm mb-6 flex-shrink-0">
           <p className="text-xs text-brown-medium mb-2 px-1">
             {t("loading.found", { count: dishes.length })}
-            {menuMeta?.items_found ? ` / ~${menuMeta.items_found}` : ""}
+            {menuMeta?.items_found && menuMeta.items_found > dishes.length ? ` / ~${menuMeta.items_found}` : ""}
           </p>
           <div className="space-y-1.5">
             {dishes.map((dish, i) => (
@@ -420,7 +421,7 @@ export default function LoadingScanPage() {
                         {dish.price_display || dish.price}
                       </span>
                     ) : null}
-                    {dish.allergen_risk && dish.allergen_risk !== "safe" && (
+                    {!dish.analysis_pending && dish.allergen_risk && dish.allergen_risk !== "safe" && (
                       <span className={`text-micro font-bold uppercase tracking-caps px-1.5 py-0.5 rounded-full ${
                         dish.allergen_risk === "danger" ? "bg-danger text-white" :
                         dish.allergen_risk === "warning" ? "bg-amber-500 text-white" :

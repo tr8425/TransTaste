@@ -208,15 +208,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cacheKey = buildCacheKey({
-      input: input.value,
-      inputType,
-      srcLang: "auto",
-      tgtLang: outputLanguage.value || "en",
-      allergenPreset: allergenPreset.value,
-      dietaryBeliefs: dietaryBeliefs.value,
-      dislikedIngredients: dislikedIngredients.value,
-    });
+    // Streaming scans run the fast list step (names, translations, prices) and
+    // the client fills in allergen fields via /api/analyze/enrich. The list does
+    // not depend on the user's profile, so its key leaves the profile out.
+    const cacheKey = body.stream
+      ? buildCacheKey({ input: input.value, inputType, srcLang: "auto", tgtLang: outputLanguage.value || "en", mode: "list" })
+      : buildCacheKey({
+          input: input.value,
+          inputType,
+          srcLang: "auto",
+          tgtLang: outputLanguage.value || "en",
+          allergenPreset: allergenPreset.value,
+          dietaryBeliefs: dietaryBeliefs.value,
+          dislikedIngredients: dislikedIngredients.value,
+        });
 
     // Check cache before calling AI
     const cached = await getCached(cacheKey);

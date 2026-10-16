@@ -8,21 +8,32 @@ const JPEG_QUALITY = 0.75;
 
 /**
  * Compress a Blob (from camera/gallery) into a smaller base64 data URI.
+ * `rotation` (0/90/180/270, clockwise) turns a sideways menu photo upright in
+ * the same pass.
  */
-export async function compressBlob(blob: Blob): Promise<string> {
-  const bitmap = await createImageBitmap(blob);
-  const { width, height } = getScaledDimensions(bitmap.width, bitmap.height);
+export async function compressBlob(blob: Blob, rotation = 0): Promise<string> {
+  return drawToDataUrl(blob, MAX_DIMENSION, JPEG_QUALITY, rotation);
+}
 
-  const canvas = new OffscreenCanvas(width, height);
+/** Small JPEG for the orientation check (/api/analyze/orient). */
+export async function makeThumbnail(blob: Blob, maxDimension = 512): Promise<string> {
+  return drawToDataUrl(blob, maxDimension, 0.7, 0);
+}
+
+async function drawToDataUrl(blob: Blob, maxDimension: number, quality: number, rotation: number): Promise<string> {
+  const bitmap = await createImageBitmap(blob);
+  const { width, height } = getScaledDimensions(bitmap.width, bitmap.height, maxDimension);
+  const turn = ((rotation % 360) + 360) % 360;
+  const sideways = turn === 90 || turn === 270;
+
+  const canvas = new OffscreenCanvas(sideways ? height : width, sideways ? width : height);
   const ctx = canvas.getContext('2d')!;
-  ctx.drawImage(bitmap, 0, 0, width, height);
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((turn * Math.PI) / 180);
+  ctx.drawImage(bitmap, -width / 2, -height / 2, width, height);
   bitmap.close();
 
-  const compressed = await canvas.convertToBlob({
-    type: 'image/jpeg',
-    quality: JPEG_QUALITY,
-  });
-
+  const compressed = await canvas.convertToBlob({ type: 'image/jpeg', quality });
   return blobToBase64(compressed);
 }
 
@@ -34,9 +45,9 @@ export async function compressBase64(dataUri: string): Promise<string> {
   return compressBlob(blob);
 }
 
-function getScaledDimensions(w: number, h: number): { width: number; height: number } {
-  if (w <= MAX_DIMENSION && h <= MAX_DIMENSION) return { width: w, height: h };
-  const ratio = Math.min(MAX_DIMENSION / w, MAX_DIMENSION / h);
+function getScaledDimensions(w: number, h: number, max = MAX_DIMENSION): { width: number; height: number } {
+  if (w <= max && h <= max) return { width: w, height: h };
+  const ratio = Math.min(max / w, max / h);
   return {
     width: Math.round(w * ratio),
     height: Math.round(h * ratio),

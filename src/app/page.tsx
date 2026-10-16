@@ -11,6 +11,7 @@ import type { RecentScan } from "@/lib/types";
 import { trackProductEvent } from "@/lib/product-events";
 import { SAMPLE_MENU_TEXT } from "@/lib/sample-menu";
 import { compressBlob } from "@/lib/image-compress";
+import { detectRotation } from "@/lib/image-orient";
 
 // Mirrors the server-side cap on text menu input.
 const MAX_TEXT_INPUT_LENGTH = 20000;
@@ -136,8 +137,8 @@ export default function HomePage() {
     trackProductEvent("scan_cta_click", { method: "gallery" });
     let base64: string;
     try {
-      // Same path as the camera: resize + JPEG to keep the payload small.
-      base64 = await compressBlob(file);
+      // Same path as the camera: turn upright, resize + JPEG to keep the payload small.
+      base64 = await compressBlob(file, await detectRotation(file));
     } catch {
       base64 = await blobToBase64(file);
     }

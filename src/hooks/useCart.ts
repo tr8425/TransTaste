@@ -41,6 +41,11 @@ export interface CartContextType {
   conflictsWithCart: (item: Pick<CartItem, "currency">, sourceKey?: string) => boolean;
   removeItem: (dish_hash: string) => void;
   updateQuantity: (dish_hash: string, quantity: number) => void;
+  /**
+   * Refresh allergen fields of items added from `sourceKey`, e.g. when a dish
+   * added before its allergen analysis finished gets analyzed.
+   */
+  syncAnalysis: (sourceKey: string, updates: Pick<CartItem, "dish_hash" | "allergen_risk" | "allergens">[]) => void;
   clearCart: () => void;
   setMenuLanguage: (lang: string) => void;
   setUserLanguage: (lang: string) => void;
@@ -188,6 +193,25 @@ export function useCartProvider() {
     setItems([]);
   }, []);
 
+  const syncAnalysis = useCallback<CartContextType["syncAnalysis"]>((sourceKey, updates) => {
+    if (!sourceKey || updates.length === 0) return;
+    const byHash = new Map(updates.map((u) => [u.dish_hash, u]));
+    setItems((prev) => {
+      let changed = false;
+      const next = prev.map((item) => {
+        const u = item.source_key === sourceKey ? byHash.get(item.dish_hash) : undefined;
+        if (!u) return item;
+        const same =
+          u.allergen_risk === item.allergen_risk &&
+          JSON.stringify(u.allergens ?? []) === JSON.stringify(item.allergens ?? []);
+        if (same) return item;
+        changed = true;
+        return { ...item, allergen_risk: u.allergen_risk, allergens: u.allergens };
+      });
+      return changed ? next : prev;
+    });
+  }, []);
+
   const totalItems = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
     [items]
@@ -212,6 +236,7 @@ export function useCartProvider() {
       conflictsWithCart,
       removeItem,
       updateQuantity,
+      syncAnalysis,
       clearCart,
       setMenuLanguage,
       setUserLanguage,
@@ -232,6 +257,7 @@ export function useCartProvider() {
       conflictsWithCart,
       removeItem,
       updateQuantity,
+      syncAnalysis,
       clearCart,
       totalItems,
       totalPrice,

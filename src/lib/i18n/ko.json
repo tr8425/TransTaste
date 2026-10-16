@@ -129,6 +129,10 @@
   },
 
   "results": {
+    "enrichPending": "알레르기·식단 정보 분석 중 ({done}/{total})",
+    "enrichFailed": "{count}개 요리의 알레르기 정보를 아직 받지 못했습니다.",
+    "enrichUnavailable": "{count}개 요리는 알레르기 분석이 끝나지 않았습니다. 메뉴를 다시 스캔하면 확인할 수 있습니다.",
+    "enrichRetry": "다시 시도",
     "menuResults": "메뉴 분석 결과",
     "dishesFound": "{count}개 요리 발견",
     "noCategory": "이 카테고리에 요리가 없습니다",
@@ -162,6 +166,8 @@
   },
 
   "dish": {
+    "analysisPending": "알레르기 분석 중",
+    "analysisPendingDetail": "이 요리의 알레르기·식단 정보를 분석하고 있습니다. 끝나기 전에는 직원에게 확인해주세요.",
     "flavorRadarChart": "맛 레이더 차트",
     "flavorProfile": "맛 프로필",
     "ingredients": "재료",
@@ -431,6 +437,11 @@
   },
 
   "camera": {
+    "prepareFailed": "사진을 준비하지 못했습니다. 문제가 있는 사진을 지우고 다시 시도해주세요.",
+    "orientChecking": "방향 확인 중",
+    "rotateImage": "사진 돌리기",
+    "rotateHint": "글자가 바로 보이도록 자동으로 돌려 둡니다. 방향이 틀리면 ↻를 누르세요.",
+    "preparing": "사진 준비 중…",
     "turnFlashOn": "플래시 켜기",
     "turnFlashOff": "플래시 끄기",
     "takePhoto": "사진 찍기",

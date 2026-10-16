@@ -9,6 +9,9 @@ interface StoredMenuInput {
   outputLanguage?: string;
   allergenPreset?: string[];
   dietaryBeliefs?: string[];
+  dislikedIngredients?: string[];
+  /** Result this input belongs to; set by the results page for a fresh scan. */
+  resultKey?: string;
 }
 
 interface UseDishDetailReturn {

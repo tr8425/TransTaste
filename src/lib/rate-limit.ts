@@ -64,9 +64,9 @@ export async function checkRateLimit(
  * Site-wide daily cap on paid AI calls, across all IPs. The limit comes from an
  * env var so it can follow the API budget; 0 or a non-number disables the cap.
  */
-export async function checkDailyBudget(scope: 'scan' | 'detail'): Promise<RateLimitResult> {
-  const envName = scope === 'scan' ? 'DAILY_SCAN_LIMIT' : 'DAILY_DETAIL_LIMIT';
-  const fallback = scope === 'scan' ? DEFAULT_DAILY_SCAN_LIMIT : DEFAULT_DAILY_DETAIL_LIMIT;
+export async function checkDailyBudget(scope: 'scan' | 'detail' | 'enrich' | 'orient'): Promise<RateLimitResult> {
+  const envName = { scan: 'DAILY_SCAN_LIMIT', detail: 'DAILY_DETAIL_LIMIT', enrich: 'DAILY_ENRICH_LIMIT', orient: 'DAILY_ORIENT_LIMIT' }[scope];
+  const fallback = { scan: DEFAULT_DAILY_SCAN_LIMIT, detail: DEFAULT_DAILY_DETAIL_LIMIT, enrich: DEFAULT_DAILY_ENRICH_LIMIT, orient: DEFAULT_DAILY_ORIENT_LIMIT }[scope];
   const raw = process.env[envName];
   const limit = raw === undefined || raw === '' ? fallback : Number.parseInt(raw, 10);
   if (!Number.isFinite(limit) || limit <= 0) {
@@ -76,6 +76,11 @@ export async function checkDailyBudget(scope: 'scan' | 'detail'): Promise<RateLi
   return checkRateLimit(`daily:${scope}:${day}`, limit, 26 * 60 * 60);
 }
 
-// Defaults sized for a small API budget; override with DAILY_SCAN_LIMIT / DAILY_DETAIL_LIMIT.
+// Defaults sized for a small API budget; override with DAILY_SCAN_LIMIT /
+// DAILY_DETAIL_LIMIT / DAILY_ENRICH_LIMIT. A scan of a long menu uses about
+// one enrich call per 20 dishes.
 const DEFAULT_DAILY_SCAN_LIMIT = 30;
 const DEFAULT_DAILY_DETAIL_LIMIT = 100;
+const DEFAULT_DAILY_ENRICH_LIMIT = 120;
+// Orientation checks cost well under a cent each; up to 10 photos per scan.
+const DEFAULT_DAILY_ORIENT_LIMIT = 300;
