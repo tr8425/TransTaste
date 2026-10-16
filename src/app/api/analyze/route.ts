@@ -4,7 +4,7 @@ import { MenuInput } from "@/lib/ai/provider";
 import { createMenuAnalysisStream } from "@/lib/ai/claude";
 import { isAnalysisError, InputType, MenuAnalysisResult } from "@/lib/types";
 import { buildCacheKey, getCached, setCache } from "@/lib/cache";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkDailyBudget, checkRateLimit } from "@/lib/rate-limit";
 import {
   checkLanguage,
   checkMenuInput,
@@ -177,7 +177,8 @@ export async function POST(request: NextRequest) {
     // Rate limit by IP — 20 requests per hour. Only paid calls reach this point.
     // Admin sessions (owner access code) skip the limiter.
     const ip = clientIp(request);
-    const rl = isAdminRequest(request)
+    const isAdmin = isAdminRequest(request);
+    const rl = isAdmin
       ? { allowed: true, remaining: Infinity, reset: 0, unavailable: false }
       : await checkRateLimit(`analyze:${ip}`, 20, 3600);
     if (rl.unavailable && limiterRequired()) {
@@ -209,6 +210,18 @@ export async function POST(request: NextRequest) {
     const cached = await getCached(cacheKey);
     if (cached) {
       return NextResponse.json(cached);
+    }
+
+    // Site-wide daily cap, counted only for calls that reach the AI (cache hits are free).
+    if (!isAdmin) {
+      const budget = await checkDailyBudget("scan");
+      if (!budget.allowed || (budget.unavailable && limiterRequired())) {
+        securityLog("daily_budget_exhausted", { route: "analyze" });
+        return NextResponse.json(
+          { error: "E_DAILY_LIMIT", reason: "Today's analysis capacity is used up. Please try again tomorrow." },
+          { status: 503 },
+        );
+      }
     }
 
     const menuInput: MenuInput = {

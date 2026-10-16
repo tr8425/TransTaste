@@ -3,8 +3,8 @@ import type { NextRequest } from "next/server";
 
 // Owner access: a code from ADMIN_ACCESS_CODE unlocks unlimited scans on the
 // server's API key without sign-in. The code never reaches the client; the
-// browser only holds an httpOnly cookie signed with a key derived from it, so
-// changing the code revokes every existing admin session.
+// browser only holds an httpOnly cookie signed with a key derived from it (and
+// ADMIN_SESSION_SECRET when set), so changing either revokes every admin session.
 
 export const ADMIN_COOKIE = "tt_admin";
 export const ADMIN_SESSION_DAYS = 30;
@@ -29,8 +29,13 @@ export function verifyAdminCode(candidate: unknown): boolean {
   return timingSafeEqual(digest(candidate.trim()), digest(code));
 }
 
+// ADMIN_SESSION_SECRET (optional, 32+ random chars) keeps a leaked cookie from
+// being used to guess the code offline. Without it the key derives from the code.
 function sign(expiresAt: number, code: string): string {
-  const key = digest(`transtaste-admin:${code}`);
+  const secret = process.env.ADMIN_SESSION_SECRET?.trim();
+  const key = secret && secret.length >= 32
+    ? digest(`transtaste-admin:${secret}:${code}`)
+    : digest(`transtaste-admin:${code}`);
   return createHmac("sha256", key).update(String(expiresAt)).digest("base64url");
 }
 

@@ -34,11 +34,8 @@ function isSameSite(origin: string, request: NextRequest): boolean {
   } catch {
     return false;
   }
-  const hosts = [
-    request.headers.get("x-forwarded-host"),
-    request.headers.get("host"),
-    request.nextUrl.host,
-  ];
+  // x-forwarded-host is deliberately ignored: it is client-settable off Vercel.
+  const hosts = [request.headers.get("host"), request.nextUrl.host];
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (siteUrl) {
     try { hosts.push(new URL(siteUrl).host); } catch { /* ignore malformed */ }
@@ -80,16 +77,19 @@ export function checkString(value: unknown, field: string, maxChars: number, req
   return { ok: true, value };
 }
 
+/**
+ * Preference lists are trimmed to the caps rather than rejected: settings saved
+ * before the caps existed must not make every scan fail.
+ */
 export function checkStringList(value: unknown, field: string): Checked<string[] | undefined> {
   if (value === undefined || value === null) return { ok: true, value: undefined };
   if (!Array.isArray(value)) return { ok: false, reason: `'${field}' must be an array` };
-  if (value.length > INPUT_LIMITS.listItems) return { ok: false, reason: `'${field}' has too many items` };
-  for (const item of value) {
-    if (typeof item !== "string" || item.length > INPUT_LIMITS.listItemChars) {
-      return { ok: false, reason: `'${field}' items must be short strings` };
-    }
-  }
-  return { ok: true, value: value as string[] };
+  const items = value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter((item) => item && item.length <= INPUT_LIMITS.listItemChars)
+    .slice(0, INPUT_LIMITS.listItems);
+  return { ok: true, value: items };
 }
 
 export function checkLanguage(value: unknown): Checked<string | undefined> {

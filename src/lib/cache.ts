@@ -2,13 +2,13 @@ import { getRedis } from '@/lib/redis';
 import { createHash } from 'crypto';
 
 
-// Normalize dish name for fuzzy matching (L2 cache)
-function normalizeDishName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[^\w\u3040-\u9fff\uAC00-\uD7A3]/g, '')
-    .trim();
+// Bump to invalidate every cached analysis when key semantics change.
+// v2: text keys keep all scripts (v1 stripped Thai, Arabic, Cyrillic, etc.).
+const CACHE_KEY_VERSION = 'v2';
+
+// Whitespace and Unicode-form changes don't alter a menu; everything else does.
+function normalizeMenuText(text: string): string {
+  return text.normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 // Build cache key
@@ -23,13 +23,13 @@ export function buildCacheKey(params: {
   dislikedIngredients?: string[];
 }): string {
   const normalized = params.inputType === 'text'
-    ? normalizeDishName(params.input)
+    ? normalizeMenuText(params.input)
     : params.input;
   const profile = [params.allergenPreset, params.dietaryBeliefs, params.dislikedIngredients]
     .map((list) => [...(list ?? [])].map((s) => s.trim().toLowerCase()).sort().join(','))
     .join('|');
   return createHash('sha256')
-    .update(`${params.inputType}:${normalized}:${params.srcLang}:${params.tgtLang}:${profile}`)
+    .update(`${CACHE_KEY_VERSION}:${params.inputType}:${normalized}:${params.srcLang}:${params.tgtLang}:${profile}`)
     .digest('hex');
 }
 

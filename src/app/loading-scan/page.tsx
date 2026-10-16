@@ -139,7 +139,10 @@ export default function LoadingScanPage() {
         const raw = localStorage.getItem("transtaste_credits");
         if (raw) {
           const stored = JSON.parse(raw);
-          canScan = stored.hasPass || (stored.remaining > 0);
+          const now = Date.now();
+          const passValid = stored.hasPass && (!stored.passExpiresAt || Date.parse(stored.passExpiresAt) > now);
+          const adminValid = stored.admin_expires_at && Date.parse(stored.admin_expires_at) > now;
+          canScan = Boolean(passValid || adminValid) || stored.remaining > 0;
         } else {
           canScan = true; // first visit, default 10 credits
         }
@@ -155,10 +158,18 @@ export default function LoadingScanPage() {
       // Credit deduction deferred until valid response is confirmed
     }
 
-    // Preserve menu input for Phase 2 detail requests
+    // Preserve menu input for Phase 2 detail requests, with the same language and
+    // allergy context as the scan so details come back in the user's language.
+    let detailSettings: Record<string, unknown> = {};
+    try {
+      detailSettings = JSON.parse(localStorage.getItem("transtaste_user_settings") || "{}");
+    } catch { /* ignore */ }
     sessionStorage.setItem("menuInputForDetail", JSON.stringify({
       input,
       inputType: type,
+      outputLanguage: (detailSettings.output_language as string) || undefined,
+      allergenPreset: Array.isArray(detailSettings.allergen_preset) ? detailSettings.allergen_preset : undefined,
+      dietaryBeliefs: Array.isArray(detailSettings.dietary_beliefs) ? detailSettings.dietary_beliefs : undefined,
     }));
 
     sessionStorage.removeItem("scanImage");

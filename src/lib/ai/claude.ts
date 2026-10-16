@@ -120,6 +120,9 @@ Unreadable: {"error": "ocr_failed", "reason": "..."}
   USA: $14.00 (dollar, 2 decimals)
   Thailand: ฿450 (baht)
   Europe: €12.50 (euro)
+  Hong Kong: HK$48 (HKD). Never label Hong Kong prices as ¥ or CNY.
+  Taiwan: NT$120 (TWD)
+  Mainland China: ¥38 (CNY)
 - Do NOT convert currencies. Show exactly what the menu shows.
 - If menu shows "17.0" for a Korean restaurant, interpret as ₩17,000 (만원 단위 표기)
 
@@ -129,7 +132,8 @@ Unreadable: {"error": "ocr_failed", "reason": "..."}
 3. If uncertain about halal, set to null.
 4. Natural-language fields (translation.meaning, translation.literal, recommended_combo reasons) must be written in the OUTPUT LANGUAGE specified in the user message. JSON keys, enum values, ISO codes, translation.english, and translation.pronunciation stay English.
 5. translation.pronunciation must be null for Latin-script source languages (English, Spanish, French, Italian, German, Portuguese, etc.) — never transliterate Latin script into another writing system.
-6. Keep this response CONCISE — only the fields above, nothing extra.`;
+6. Keep this response CONCISE — only the fields above, nothing extra.
+7. Chinese menus: Traditional characters (叉燒, 雞, 麵) usually mean Hong Kong, Macau or Taiwan; HK$ or Cantonese words (嘅, 唔, 冇, 走冰, 少甜, 凍) mean Hong Kong. Keep "original" in the menu's own script. Decode Hong Kong cha chaan teng shorthand in translation.meaning (e.g. 0 or 〇 = egg 蛋, T = lemon tea, OT = iced lemon tea, 走冰 = no ice, 少甜 = less sweet, 飛沙走奶 = coffee/tea without sugar or milk). For Hong Kong menus, translation.pronunciation uses Cantonese Jyutping (e.g. 叉燒 'caa1 siu1'), not Mandarin pinyin.`;
 
 // Phase 2: Detail prompt — single dish deep analysis
 const SYSTEM_PROMPT_DETAIL = `You are TransTaste. Given a menu and a specific dish name, return a detailed analysis of ONLY that one dish.
@@ -420,7 +424,7 @@ export const claudeSonnetProvider: AIProvider = {
       }
 
       if (response.stop_reason === 'max_tokens') {
-        return { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.', _debug: `tokens=${response.usage?.output_tokens}` };
+        return { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' };
       }
 
       const parsed = parseJsonResponse(textBlock.text);
@@ -428,13 +432,14 @@ export const claudeSonnetProvider: AIProvider = {
     } catch (err: unknown) {
       if (err instanceof Anthropic.APIError) {
         if (err.status === 429) {
-          return { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again in a moment.', _debug: `status=429` };
+          return { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again in a moment.' };
         }
         if (err.status === 401) {
-          return { error: 'E_AUTH', reason: 'API authentication failed. Check your API key.', _debug: `status=401` };
+          console.error('[TransTaste] Anthropic authentication failed (401)');
+          return { error: 'E_AI_ERROR', reason: 'Menu analysis is temporarily unavailable.' };
         }
         console.error('[TransTaste] Anthropic API error:', err.status, err.message);
-        return { error: 'E_AI_ERROR', reason: 'The AI service returned an error. Please try again.', _debug: `status=${err.status}` };
+        return { error: 'E_AI_ERROR', reason: 'The AI service returned an error. Please try again.' };
       }
       if (err instanceof Error && err.message.includes('Failed to parse JSON')) {
         return { error: 'E_PARSE_FAIL', reason: 'Could not parse AI response as valid menu data.' };
@@ -514,7 +519,7 @@ export function createMenuAnalysisStream(
 
         if (finalMessage.stop_reason === 'max_tokens') {
           console.warn('[TransTaste] Streaming response truncated by max_tokens');
-          emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.', _debug: `tokens=${finalMessage.usage?.output_tokens}` });
+          emit('error', { error: 'E_MAX_TOKENS', reason: 'AI response was truncated. Try a smaller menu photo.' });
           close();
           return;
         }
@@ -539,11 +544,11 @@ export function createMenuAnalysisStream(
         console.error('[TransTaste] Stream error:', err);
         if (err instanceof Anthropic.APIError) {
           if (err.status === 429) {
-            emit('error', { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again.', _debug: `status=429` });
+            emit('error', { error: 'E_AI_RATE_LIMIT', reason: 'Rate limit exceeded. Please try again.' });
           } else if (err.status === 401) {
-            emit('error', { error: 'E_AUTH', reason: 'API authentication failed.', _debug: `status=401` });
+            emit('error', { error: 'E_AI_ERROR', reason: 'Menu analysis is temporarily unavailable.' });
           } else {
-            emit('error', { error: 'E_AI_ERROR', reason: 'The AI service returned an error. Please try again.', _debug: `status=${err.status}` });
+            emit('error', { error: 'E_AI_ERROR', reason: 'The AI service returned an error. Please try again.' });
           }
         } else {
           emit('error', {
