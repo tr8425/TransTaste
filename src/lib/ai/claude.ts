@@ -785,23 +785,22 @@ export function createMenuAnalysisStream(
 const ORIENT_MODEL = process.env.ORIENT_MODEL || 'claude-haiku-5-5';
 const ORIENT_PROMPT =
   'This is a photo of a restaurant menu. How many degrees must the image be rotated clockwise so that ' +
-  'the menu text reads upright, the normal way? Answer with exactly one number: 0, 90, 180 or 270.';
+  'the menu text reads upright, the normal way? Reply with only the number: 0, 90, 180 or 270.';
 
 export async function detectMenuRotation(
   imageDataUrl: string,
   telemetry?: AiTelemetry,
 ): Promise<{ rotation: 0 | 90 | 180 | 270 } | AnalysisError> {
   const fx = fixtureDir();
-  if (fx) return fixtureOrient(fx);
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: 'E_AI_ERROR', reason: 'ANTHROPIC_API_KEY not set' };
+  if (!apiKey && !fx) return { error: 'E_AI_ERROR', reason: 'ANTHROPIC_API_KEY not set' };
 
   const match = imageDataUrl.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
   if (!match) return { error: 'E_PARSE_FAIL', reason: 'Expected a base64 image data URL' };
 
   try {
     const client = new Anthropic({ apiKey });
-    const response = await client.messages.create({
+    const params: Anthropic.MessageCreateParamsNonStreaming = {
       model: ORIENT_MODEL,
       max_tokens: 1024,
       messages: [{
@@ -811,11 +810,28 @@ export async function detectMenuRotation(
           { type: 'text', text: ORIENT_PROMPT },
         ],
       }],
-    });
-    telemetry?.report({ model: ORIENT_MODEL, usage: response.usage, stopReason: response.stop_reason });
+    };
+    // Haiku 5.5 also thinks by default: in production it spent 856 tokens and
+    // 5.6s, past the client's 5s limit, and gave no usable number. Turn it off;
+    // if this model rejects the setting, ask once more without it.
+    let response: Anthropic.Message;
+    try {
+      // The fixture answers as text so it runs through the same parsing below.
+      response = fx ? fixtureOrient(fx) : await client.messages.create({ ...params, thinking: THINKING });
+    } catch (err) {
+      if (!(err instanceof Anthropic.APIError && err.status === 400)) throw err;
+      response = await client.messages.create(params);
+    }
     const text = response.content.filter((b) => b.type === 'text').map((b) => (b as { text: string }).text).join(' ');
-    const n = Number(text.match(/(0|90|180|270)/)?.[1] ?? NaN);
-    if (![0, 90, 180, 270].includes(n)) return { error: 'E_PARSE_FAIL', reason: 'No rotation in response' };
+    const n = Number(text.match(/\b(0|90|180|270)\b/)?.[1] ?? NaN);
+    const ok = [0, 90, 180, 270].includes(n);
+    telemetry?.report({
+      model: ORIENT_MODEL,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+      ...(ok ? {} : { outputTail: outputTail(text || `[no text; blocks: ${response.content.map((b) => b.type).join(',')}]`) }),
+    });
+    if (!ok) return { error: 'E_PARSE_FAIL', reason: 'No rotation in response' };
     return { rotation: n as 0 | 90 | 180 | 270 };
   } catch (err) {
     telemetry?.report({

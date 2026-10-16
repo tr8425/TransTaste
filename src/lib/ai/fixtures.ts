@@ -73,12 +73,15 @@ export async function fixtureEnrich(dir: string, requested: { id: string; origin
   return message(JSON.stringify({ dishes }));
 }
 
-/** Orientation answer from orient.json ({"rotation": 270}); 0 when the file is absent. */
-export function fixtureOrient(dir: string): { rotation: 0 | 90 | 180 | 270 } {
+/**
+ * Orientation answer as the model's text, from orient.json: {"text": "270"}
+ * (or {"rotation": 270}). "0" when the file is absent.
+ */
+export function fixtureOrient(dir: string): Anthropic.Message {
   const file = path.join(dir, 'orient.json');
-  if (!existsSync(file)) return { rotation: 0 };
-  const n = Number(JSON.parse(readFileSync(file, 'utf8')).rotation);
-  return { rotation: ([0, 90, 180, 270].includes(n) ? n : 0) as 0 | 90 | 180 | 270 };
+  if (!existsSync(file)) return message('0');
+  const j = JSON.parse(readFileSync(file, 'utf8')) as { text?: string; rotation?: number };
+  return message(j.text ?? String(j.rotation ?? 0));
 }
 
 export function fixtureDetail(dir: string): Anthropic.Message {
