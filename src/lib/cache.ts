@@ -1,17 +1,6 @@
-import { Redis } from '@upstash/redis';
+import { getRedis } from '@/lib/redis';
 import { createHash } from 'crypto';
 
-// Lazy init — returns null if env vars not set
-let redis: Redis | null = null;
-function getRedis(): Redis | null {
-  if (redis) return redis;
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null;
-  redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
-  });
-  return redis;
-}
 
 // Normalize dish name for fuzzy matching (L2 cache)
 function normalizeDishName(name: string): string {

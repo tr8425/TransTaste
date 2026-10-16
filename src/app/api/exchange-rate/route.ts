@@ -1,16 +1,9 @@
 import { NextResponse } from 'next/server';
-import { Redis } from '@upstash/redis';
+import { getRedis } from '@/lib/redis';
 
 const CACHE_KEY = 'exchange_rates';
 const CACHE_TTL = 23 * 60 * 60; // 23 hours
 
-function getRedis(): Redis | null {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null;
-  return new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
-  });
-}
 
 interface ExchangeRates {
   base: string;
