@@ -135,3 +135,63 @@
 ## 기존 DB에 적용할 SQL
 
 `supabase/migrations/20261016_security_hardening.sql` 참고. `schema.sql`은 새로 만드는 DB 기준으로 같은 내용을 반영했다.
+
+## 후속 수정 목록 (리뷰·QA, 2026-10-16)
+
+`df1d7e9`까지를 Codex 1건, Claude 리뷰 2건(보안, 회귀), Claude QA 1건으로 검토한 결과. 아직 고치지 않았다.
+
+| # | 등급 | 내용 | 위치 | 출처 | 상태 |
+|---|---|---|---|---|---|
+| F1 | 높음 | 태국어·아랍어·키릴 문자 텍스트 메뉴가 같은 캐시 키로 묶임. 다른 메뉴의 요리와 알레르기 결과가 30일간 나갈 수 있음. 원문 해시로 바꾸고 캐시 키에 버전을 붙인다 | `src/lib/cache.ts:10` | Codex, Claude 보안 | 완료 |
+| F2 | 높음 | 전체 사용량 상한 없음. IP마다 시간당 분석 20회와 상세 30회까지 가능. Redis에 하루 전체 상한을 두고 Anthropic 콘솔 한도도 건다. 상한 값은 사용자 결정 필요 | `analyze/route.ts`, `detail/route.ts` | Codex, Claude 보안 | 완료 (하루 스캔 30, 상세 100) |
+| F3 | 중간 | 싫어하는 재료가 20개 초과나 60자 초과면 모든 스캔이 400. 서버는 잘라서 받고, 입력란에 상한을 둔다 | `src/lib/api-guard.ts:85`, `profile/page.tsx:489`, `QuickDietarySetup.tsx:31` | Codex, Claude 회귀 | 완료 |
+| F4 | 중간 | 요청 제한의 INCR와 EXPIRE가 따로 실행됨. 중간에 실패하면 그 IP가 영구 차단되고 관리자 코드 입력도 막힘 | `src/lib/rate-limit.ts:34` | Codex, Claude 보안 | 완료 |
+| F5 | 중간 | 관리자 모드 끄기에서 쿠키 삭제가 실패해도 꺼진 것으로 표시됨 | `AdminAccess.tsx:52` | Codex | 완료 |
+| F6 | 중간 | 마이그레이션의 unique 제약 추가가 재실행 시 실패하고, 실패하면 트랜잭션 전체가 적용되지 않음. 기존 중복 결제 확인도 필요. 결제를 켜기 전에 실행해야 함 | `supabase/migrations/20261016_security_hardening.sql:16` | Codex, Claude 회귀 | 완료 |
+| F7 | 중간 | 상세 요청이 출력 언어와 알레르기 설정을 보내지 않아서 한국어 사용자도 영어 상세를 받음 (기존 문제) | `loading-scan/page.tsx:159` | Claude 회귀 | 완료 |
+| F8 | 낮음 | 응답의 `_debug: "status=401"`, "Check your API key" 문구 노출 | `src/lib/ai/claude.ts:434`, `:544` | Claude QA | 완료 |
+| F9 | 낮음 | 관리자 모드에서 사용량 카드에 패스 구매 버튼이 남아 있고, 만료일 표시 형식이 두 곳에서 다름 | `profile/page.tsx`, `AdminAccess.tsx` | Claude QA | 완료 |
+| F10 | 낮음 | `activateAdmin`이 기존 7d/30d 패스를 덮어씀. 관리자 플래그를 패스와 분리 | `src/hooks/useCredits.ts:142` | Claude 회귀 | 완료 |
+| F11 | 낮음 | `x-forwarded-host`를 같은 출처 판정에 씀. 지금은 악용 불가, CORS를 열면 우회 경로가 됨 | `src/lib/api-guard.ts:37` | Claude 보안 | 완료 |
+| F12 | 낮음 | 관리자 쿠키 서명 키를 코드에서 만들어서, 쿠키가 유출되면 코드를 오프라인으로 추측 가능. 별도 `ADMIN_SESSION_SECRET` 사용 | `src/lib/admin-session.ts:33` | Claude 보안 | 완료 |
+| F13 | 낮음 | 클라이언트 입력 상한 없음 (붙여넣기 2만 자, QR의 http 외 스킴, 홈 갤러리 업로드 미압축) | `page.tsx:133`, `CameraView` | Claude 회귀 | 완료 |
+| F14 | 낮음 | 예시 데이터 결과에 "LIVE" 표시 (기존 문제) | 결과 화면 | Claude QA | 완료 |
+
+확인된 것 (문제없음): 쿠키 위조, 타이밍 비교, 코드 교체 후 재사용, CSRF, Content-Type 우회는 세 리뷰 모두 발견하지 못했다. CSP로 깨지는 기능 없음. 로컬 QA 57/57, API·관리자·375px 시나리오 전부 통과.
+
+운영 확인 (2026-10-16): 코드의 `claude-sonnet-4-20250514`가 종료되어 모든 실제 스캔이 404로 실패하고 있었다. `70b9794`에서 `claude-sonnet-5-5`로 바꾸고 `ANTHROPIC_MODEL`로 바꿀 수 있게 했다. 이후 텍스트 메뉴 스캔과 상세 200, 캐시 재요청 0.2초를 확인했다.
+
+## 외부 QA 결과 반영 (2026-10-16)
+
+사용자가 별도로 돌린 브라우저 QA 보고서 2건(`TransTaste_QA_2026-10-16_ko_fixed.txt`, `TransTaste_Admin_QA_2026-10-16_ko_fixed.txt`)을 코드와 대조했다.
+
+| # | 등급 | 내용 | 코드 확인 | 위치 | 상태 |
+|---|---|---|---|---|---|
+| F15 | 높음 | 통화가 다른 메뉴의 항목을 담으면 숫자를 그대로 더하고 첫 항목 통화로 표시 (JPY 420 + US$5 = JPY 425). 직원용 카드도 같음. 장바구니가 `sourceResultKey`를 갖고 있지만 다른 결과에서 담을 때 확인하거나 분리하지 않음 | 확인 | `src/hooks/useCart.ts:126`, `order/page.tsx:71`, `order/present/page.tsx:59` | 완료 |
+| F16 | 높음 | "내 조건으로 한눈에 보기"가 사용자 알레르기와 무관한 위험도를 씀. 프롬프트가 `allergen_risk`를 "흔한 알레르기 성분 전체" 기준으로 정의해서, 대두만 고른 사용자에게도 연어가 '피하는 편이 좋음'으로 나옴. 위험도를 사용자 설정과 `allergens`의 교집합으로 클라이언트에서 계산하는 방안 검토 (그러면 캐시 키에서 알레르기 설정을 뺄 수 있어 비용안 C3와도 맞물림) | 확인 | `src/lib/ai/claude.ts` ALLERGEN RISK 규칙, `results/page.tsx:224` | 완료 |
+| F17 | 중간 | 예시 결과가 고정 데이터인데 "Contains your allergen", "내 조건으로" 같은 개인화 문구가 함께 나옴. 대두를 골라도 Edamame가 '명시된 우려 없음'에 들어감 | 보고서 기준 | 샘플 결과 화면 | 완료 |
+| F18 | 중간 | 예시 배너 문구 "실제 AI 분석은 허용된 테스트 환경에서만"이 사실과 다름. 운영에 키가 들어간 뒤 비로그인 방문자도 무료 3회 안에서 실제 분석을 씀 (F2 비용 노출과 연결) | 확인 | `ko.json:146` `demoBanner` | 완료 |
+| F19 | 낮음 | 알레르기 회화 문구의 발음 줄에 원어 재료명이 그대로 들어감 ("大豆o nuki de onegaishimasu"). 발음용 로마자 이름이 필요 | 확인 | `src/app/phrases/page.tsx:194` | 완료 |
+| F20 | 낮음 | 7일 패스 가격 불일치: 잠금 버튼 문구는 $2.99, `/pricing`과 Stripe 상품은 $3.99. 제품 결정 필요 | 확인 | `en.json:164,533,542`, `pricing-experiment.ts:15`, `stripe/checkout/route.ts` | 결정 대기 |
+| F21 | 낮음 | "안전한 대안" 문구가 "안전을 보장하지 않습니다" 안내와 충돌 | 보고서 기준 | 결과 화면 | 완료 |
+| F22 | 낮음 | 회화 화면 장식 문구 "05 LANGUAGES"와 실제 8개 언어 불일치, 한국어 모드에 영어 일부 잔존 ("Soy allergy" 등) | 위치 추가 확인 필요 | `/phrases` | 완료 |
+
+외부 QA가 실제 분석에 쓴 입력 (아티팩트 리포트에 포함할 것):
+- 관리자 세션: 합성 메뉴 이미지 `synthetic-menu-ja.png` (PNG 900×620, 45,599 bytes, SHA-256 `5f8e7f300445e160ef83def6d6729f85afa4b334291149f75d9d2894504d5646`, Edamame 420 / Grilled salmon 980 / Tomato salad 650 JPY) 1회, 스페인어 합성 텍스트 메뉴 1회. 둘 다 성공.
+- 비로그인 방문자: 합성 텍스트 "QA TEST MENU (synthetic) / Tomato soup - $5 / Green salad - $6" 1회. 성공, 무료 스캔 3회에서 2회로 감소.
+
+### 수정 결과 (2026-10-16)
+
+- F20(7일 패스 가격)을 뺀 F1~F22를 모두 고쳤다. F2 하루 상한은 기본 스캔 30회, 상세 100회이고 `DAILY_SCAN_LIMIT`, `DAILY_DETAIL_LIMIT`로 바꿀 수 있다. 캐시 응답과 관리자 요청은 세지 않는다.
+- 함께 고친 것: 팁 안내가 국가 이름과 코드 불일치로 어디서도 나오지 않던 문제(`resolveTipCulture`, 홍콩·대만 추가), 예시 데이터에서 에다마메의 위험도가 `safe`로 잘못 들어간 문제, 홍콩 메뉴용 프롬프트(HK$ 표기, 차찬텡 약어, 광둥어 Jyutping).
+- 검증: tsc, lint, build 통과, `qa:non-api` 57/57, API 시나리오 38/38, 375px 화면 시나리오(알레르기 기준, 통화 충돌 창, 통화별 합계, 팁 안내, 발음 줄, 관리자 카드, 입력 상한, 한국어 화면) 통과.
+
+### 남은 항목
+
+| # | 등급 | 내용 | 위치 |
+|---|---|---|---|
+| F20 | 낮음 | 7일 패스 가격 $2.99와 $3.99 중 결정 | 문구, `pricing-experiment.ts`, Stripe 상품 |
+| F23 | 낮음 | 이전 버전에서 통화가 섞인 장바구니는 팁 안내가 첫 항목 통화 기준으로만 나옴 | `src/app/order/page.tsx` |
+| F24 | 낮음 | 회화 화면 언어 버튼 8개가 375px에서 좁아 코드가 줄바꿈됨 | `src/app/phrases/page.tsx` 언어 선택 |
+| F25 | 낮음 | 알레르기 미설정 상태의 대안 문구가 여전히 안전하다는 인상을 줄 수 있음 | 결과 화면 대안 문구 |
+| F26 | 중간 | 홍콩: 직원용 카드와 회화 문구가 간체 표준중국어. 번체 카드와 광둥어(Jyutping) 회화 추가 필요 | `src/lib/allergen-i18n.ts`, `src/lib/phrases/data` |
