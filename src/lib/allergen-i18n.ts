@@ -224,7 +224,112 @@ export const ALLERGEN_INGREDIENT_NAMES: Record<string, Record<string, string>> =
   pork: { ja: "豚肉", zh: "猪肉", th: "หมู", vi: "thịt heo", es: "cerdo", fr: "porc", it: "maiale", en: "pork", ko: "돼지고기" },
   beef: { ja: "牛肉", zh: "牛肉", th: "เนื้อวัว", vi: "thịt bò", es: "ternera", fr: "bœuf", it: "manzo", en: "beef", ko: "소고기" },
   alcohol: { ja: "お酒", zh: "酒", th: "แอลกอฮอล์", vi: "rượu", es: "alcohol", fr: "alcool", it: "alcol", en: "alcohol", ko: "술" },
+  // Preset ids from onboarding/profile that differ from the AI tag names
+  wheat_gluten: { ja: "小麦", zh: "面粉", th: "แป้งสาลี", vi: "gluten", es: "trigo/gluten", fr: "blé/gluten", it: "grano/glutine", en: "wheat/gluten", ko: "밀가루" },
+  sulphites: { ja: "亜硫酸塩", zh: "亚硫酸盐", th: "ซัลไฟต์", vi: "sulfit", es: "sulfitos", fr: "sulfites", it: "solfiti", en: "sulphites", ko: "아황산염" },
+  molluscs: { ja: "貝類・イカ・タコ", zh: "贝类", th: "หอย ปลาหมึก", vi: "nhuyễn thể", es: "moluscos", fr: "mollusques", it: "molluschi", en: "molluscs", ko: "연체류" },
+  lupin: { ja: "ルピナス", zh: "羽扇豆", th: "ลูพิน", vi: "đậu lupin", es: "altramuces", fr: "lupin", it: "lupini", en: "lupin", ko: "루핀" },
 };
+
+/**
+ * Romanized ingredient names for the pronunciation line of phrase templates.
+ * Only non-Latin-script languages need an entry; Latin-script languages reuse
+ * ALLERGEN_INGREDIENT_NAMES as-is.
+ */
+export const ALLERGEN_INGREDIENT_ROMANIZED: Record<string, Partial<Record<"ja" | "zh" | "th", string>>> = {
+  shellfish: { ja: "ebi kani", zh: "xiā xiè", th: "kung pu" },
+  peanuts: { ja: "pīnattsu", zh: "huāshēng", th: "thua lisong" },
+  tree_nuts: { ja: "nattsu", zh: "jiānguǒ", th: "thua plueak khaeng" },
+  milk: { ja: "nyūseihin", zh: "niúnǎi", th: "nom" },
+  dairy: { ja: "nyūseihin", zh: "niúnǎi", th: "nom" },
+  eggs: { ja: "tamago", zh: "jīdàn", th: "khai" },
+  egg: { ja: "tamago", zh: "jīdàn", th: "khai" },
+  gluten: { ja: "komugi", zh: "miànfěn", th: "paeng sali" },
+  wheat_gluten: { ja: "komugi", zh: "miànfěn", th: "paeng sali" },
+  fish: { ja: "sakana", zh: "yú", th: "pla" },
+  soy: { ja: "daizu", zh: "dàdòu", th: "thua lueang" },
+  sesame: { ja: "goma", zh: "zhīma", th: "nga" },
+  celery: { ja: "serori", zh: "qíncài", th: "khuen chai" },
+  mustard: { ja: "karashi", zh: "jièmo", th: "mustat" },
+  sulfites: { ja: "aryūsan'en", zh: "yàliúsuānyán", th: "sanfai" },
+  sulphites: { ja: "aryūsan'en", zh: "yàliúsuānyán", th: "sanfai" },
+  molluscs: { ja: "kairui ika tako", zh: "bèilèi", th: "hoi pla muek" },
+  lupin: { ja: "rupinasu", zh: "yǔshàndòu", th: "lupin" },
+  pork: { ja: "butaniku", zh: "zhūròu", th: "mu" },
+  beef: { ja: "gyūniku", zh: "niúròu", th: "nuea wua" },
+  alcohol: { ja: "osake", zh: "jiǔ", th: "aelkohol" },
+};
+
+/** Ingredient name to splice into a pronunciation line for `lang`. */
+export function ingredientPronunciation(allergen: string, lang: string): string {
+  const romanized = ALLERGEN_INGREDIENT_ROMANIZED[allergen]?.[lang as "ja" | "zh" | "th"];
+  if (romanized) return romanized;
+  const names = ALLERGEN_INGREDIENT_NAMES[allergen];
+  // Non-Latin scripts without a romanization fall back to English, never to native script.
+  if (lang === "ja" || lang === "zh" || lang === "th") return names?.en || allergen;
+  return names?.[lang] || names?.en || allergen;
+}
+
+/**
+ * Canonical allergen groups used to match the user's preset ids
+ * (onboarding/profile: "milk", "eggs", "wheat_gluten", "tree_nuts", ...)
+ * against the AI's dish tags ("dairy", "egg", "gluten", "nuts", ...).
+ * A token can belong to several groups when the tag is broader than the
+ * preset (e.g. "nuts" covers peanuts and tree nuts).
+ */
+const ALLERGEN_GROUPS: Record<string, string[]> = {
+  shellfish: ["shellfish", "molluscs"],
+  crustacean: ["shellfish"],
+  crustaceans: ["shellfish"],
+  shrimp: ["shellfish"],
+  molluscs: ["molluscs"],
+  mollusks: ["molluscs"],
+  mollusc: ["molluscs"],
+  mollusk: ["molluscs"],
+  peanuts: ["peanuts"],
+  peanut: ["peanuts"],
+  tree_nuts: ["tree_nuts"],
+  tree_nut: ["tree_nuts"],
+  nuts: ["peanuts", "tree_nuts"],
+  nut: ["peanuts", "tree_nuts"],
+  milk: ["milk"],
+  dairy: ["milk"],
+  lactose: ["milk"],
+  eggs: ["eggs"],
+  egg: ["eggs"],
+  fish: ["fish"],
+  soy: ["soy"],
+  soya: ["soy"],
+  soybean: ["soy"],
+  soybeans: ["soy"],
+  wheat_gluten: ["wheat_gluten"],
+  wheat: ["wheat_gluten"],
+  gluten: ["wheat_gluten"],
+  sesame: ["sesame"],
+  celery: ["celery"],
+  mustard: ["mustard"],
+  lupin: ["lupin"],
+  lupine: ["lupin"],
+  sulphites: ["sulphites"],
+  sulfites: ["sulphites"],
+  sulphite: ["sulphites"],
+  sulfite: ["sulphites"],
+};
+
+function allergenGroups(token: string): string[] {
+  const key = token.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return ALLERGEN_GROUPS[key] ?? [key];
+}
+
+/**
+ * Returns the dish allergen tags that match the user's allergen preset,
+ * after synonym normalisation (dairy~milk, soy~soybean, nuts~peanuts, ...).
+ */
+export function matchUserAllergens(dishAllergens: string[] | undefined, preset: string[]): string[] {
+  if (!dishAllergens?.length || !preset.length) return [];
+  const wanted = new Set(preset.flatMap(allergenGroups));
+  return dishAllergens.filter((tag) => allergenGroups(tag).some((group) => wanted.has(group)));
+}
 
 export const CONFIRM_LABELS: Record<string, string> = {
   ja: "確認しました",
@@ -361,6 +466,8 @@ export const TIP_CULTURE: Record<string, { percent: number; noteKey: string }> =
   JP: { percent: 0, noteKey: "noTipJP" },
   KR: { percent: 0, noteKey: "noTipKR" },
   CN: { percent: 0, noteKey: "noTipCN" },
+  HK: { percent: 0, noteKey: "serviceChargeHK" },
+  TW: { percent: 0, noteKey: "noTipTW" },
   TH: { percent: 0, noteKey: "noTipTH" },
   VN: { percent: 0, noteKey: "noTipVN" },
   US: { percent: 18, noteKey: "tip18" },
@@ -373,3 +480,28 @@ export const TIP_CULTURE: Record<string, { percent: number; noteKey: string }> =
   AU: { percent: 0, noteKey: "noTipAU" },
   MX: { percent: 15, noteKey: "tip15" },
 };
+
+// The analysis returns country names ("Japan", "Hong Kong"), while TIP_CULTURE is
+// keyed by ISO code. Accept either, plus the menu currency as a fallback hint.
+const COUNTRY_NAME_TO_CODE: Record<string, string> = {
+  japan: "JP", "south korea": "KR", korea: "KR", "republic of korea": "KR",
+  china: "CN", "mainland china": "CN", "hong kong": "HK", "hong kong sar": "HK",
+  taiwan: "TW", thailand: "TH", vietnam: "VN", "viet nam": "VN",
+  "united states": "US", usa: "US", "united states of america": "US",
+  canada: "CA", "united kingdom": "GB", uk: "GB", england: "GB",
+  france: "FR", italy: "IT", germany: "DE", spain: "ES", australia: "AU", mexico: "MX",
+};
+const CURRENCY_TO_CODE: Record<string, string> = {
+  HKD: "HK", TWD: "TW", JPY: "JP", KRW: "KR", THB: "TH", VND: "VN", CNY: "CN", MXN: "MX", AUD: "AU", CAD: "CA", GBP: "GB",
+};
+
+export function resolveTipCulture(
+  country: string | undefined | null,
+  currency?: string | null,
+): { percent: number; noteKey: string } | null {
+  const raw = (country || "").trim();
+  const code = raw.length === 2 ? raw.toUpperCase() : COUNTRY_NAME_TO_CODE[raw.toLowerCase()];
+  if (code && TIP_CULTURE[code]) return TIP_CULTURE[code];
+  const fromCurrency = currency ? CURRENCY_TO_CODE[currency.toUpperCase()] : undefined;
+  return fromCurrency ? TIP_CULTURE[fromCurrency] ?? null : null;
+}

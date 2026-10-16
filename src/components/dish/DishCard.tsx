@@ -21,6 +21,10 @@ interface DishCardProps {
   onUnlock?: () => void;
   onAddToCart?: () => void;
   isInCart?: boolean;
+  /** Dish allergen tags that match the user's own allergen preset. */
+  matchedAllergens?: string[];
+  /** True when the user has an allergen preset (copy can say "your"). */
+  hasAllergenPreset?: boolean;
 }
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
@@ -65,6 +69,8 @@ export default function DishCard({
   onUnlock,
   onAddToCart,
   isInCart,
+  matchedAllergens = [],
+  hasAllergenPreset = false,
 }: DishCardProps) {
   const { t } = useTranslation();
   if (!dish) return null;
@@ -245,7 +251,15 @@ export default function DishCard({
           <div className="flex items-start gap-2 mb-2.5 p-2.5 bg-danger/10 rounded-lg border border-danger/20">
             <span className="text-sm flex-shrink-0">{"❌"}</span>
             <p className="text-xs text-danger font-medium leading-relaxed">
-              {t("dish.allergenDanger")}
+              {matchedAllergens.length > 0
+                ? t("dish.allergenDanger")
+                : dish.dietary_conflicts && dish.dietary_conflicts.length > 0
+                  ? t("dish.dietaryMismatch", {
+                      items: dish.dietary_conflicts
+                        .map((belief) => t(`quickSetup.${belief}`))
+                        .join(", "),
+                    })
+                  : t("dish.allergenDangerGeneral")}
             </p>
           </div>
         )}
@@ -268,7 +282,11 @@ export default function DishCard({
 
         <div className="flex flex-wrap gap-1.5">
           {dish.allergens?.map((allergen) => (
-            <AllergyTag key={allergen} allergen={allergen} />
+            <AllergyTag
+              key={allergen}
+              allergen={allergen}
+              isUserAllergen={matchedAllergens.includes(allergen)}
+            />
           ))}
           {dish.dietary.vegan && (
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-success">
@@ -292,7 +310,7 @@ export default function DishCard({
           (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") && (
           <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
             <h4 className="text-xs font-medium text-success uppercase tracking-caps mb-2 flex items-center gap-1">
-              <span>✅</span> {t("dish.saferAlternatives")}
+              <span>✅</span> {t(hasAllergenPreset ? "dish.saferAlternatives" : "dish.saferAlternativesGeneral")}
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {dish.alternative_dishes.map((alt) => (

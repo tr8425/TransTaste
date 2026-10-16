@@ -4,12 +4,15 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCredits } from "@/hooks/useCredits";
-import AdminAccess from "@/components/common/AdminAccess";
+import AdminAccess, { formatExpiryDate } from "@/components/common/AdminAccess";
 import { useTranslation } from "@/lib/i18n";
 
 /* ─── Constants ─── */
 
 const SETTINGS_KEY = "transtaste_user_settings";
+// Mirrors the server-side cap on disliked ingredients (count and length).
+const MAX_DISLIKED_ITEMS = 20;
+const MAX_DISLIKED_LENGTH = 60;
 
 const OUTPUT_LANGUAGES = [
   { value: "en", label: "English" },
@@ -172,14 +175,22 @@ function ProfileContent() {
     save({ ...settings, dietary_beliefs: next });
   };
 
-  // Format pass expiry — locale-aware
-  const dateLocale = locale === "ko" ? "ko-KR" : "en-US";
-  const passExpiry = credits.passExpiresAt
-    ? new Date(credits.passExpiresAt).toLocaleDateString(dateLocale, {
-        month: "short",
-        day: "numeric",
-      })
-    : null;
+  // Format expiry with the same formatter AdminAccess uses (year included).
+  const shownExpiry = credits.isAdmin ? credits.adminExpiresAt : credits.passExpiresAt;
+  const passExpiry = shownExpiry ? formatExpiryDate(shownExpiry, locale) : null;
+
+  const addDisliked = () => {
+    const v = dislikedInput.trim().slice(0, MAX_DISLIKED_LENGTH);
+    if (!v) return;
+    if (settings.disliked_ingredients.length >= MAX_DISLIKED_ITEMS) return;
+    if (!settings.disliked_ingredients.includes(v)) {
+      save({
+        ...settings,
+        disliked_ingredients: [...settings.disliked_ingredients, v],
+      });
+    }
+    setDislikedInput("");
+  };
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -259,12 +270,14 @@ function ProfileContent() {
               {t("profile.expires", { date: passExpiry || "" })}
             </p>
           )}
-          <Link
-            href="/pricing"
-            className="mt-3 block w-full rounded-xl bg-coral py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-coral-dark active:scale-[0.98]"
-          >
-            {t("profile.getMoreScans")}
-          </Link>
+          {!credits.isAdmin && (
+            <Link
+              href="/pricing"
+              className="mt-3 block w-full rounded-xl bg-coral py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-coral-dark active:scale-[0.98]"
+            >
+              {t("profile.getMoreScans")}
+            </Link>
+          )}
         </div>
 
         {/* ── Language Settings ── */}
@@ -460,7 +473,7 @@ function ProfileContent() {
               {settings.disliked_ingredients.map((item) => (
                 <span
                   key={item}
-                  className="inline-flex items-center gap-1 text-xs font-medium bg-brown-medium/15 text-brown-dark px-2.5 py-1 rounded-full"
+                  className="inline-flex max-w-full items-center gap-1 break-all text-xs font-medium bg-brown-medium/15 text-brown-dark px-2.5 py-1 rounded-full"
                 >
                   {item}
                   <button
@@ -484,22 +497,22 @@ function ProfileContent() {
             type="text"
             placeholder={t("profile.dislikedPlaceholder")}
             value={dislikedInput}
+            maxLength={MAX_DISLIKED_LENGTH}
+            disabled={settings.disliked_ingredients.length >= MAX_DISLIKED_ITEMS}
             onChange={(e) => setDislikedInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                const v = dislikedInput.trim();
-                if (v && !settings.disliked_ingredients.includes(v)) {
-                  save({
-                    ...settings,
-                    disliked_ingredients: [...settings.disliked_ingredients, v],
-                  });
-                }
-                setDislikedInput("");
+                addDisliked();
               }
             }}
-            className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30"
+            className="w-full bg-cream border border-brown-light/20 rounded-lg px-3 py-2.5 text-sm text-brown-dark placeholder:text-brown-medium/30 focus:outline-none focus:ring-2 focus:ring-coral/30 disabled:opacity-50"
           />
+          {settings.disliked_ingredients.length >= MAX_DISLIKED_ITEMS && (
+            <p role="status" className="mt-1.5 text-xs text-brown-medium">
+              {t("profile.dislikedLimit", { count: MAX_DISLIKED_ITEMS })}
+            </p>
+          )}
         </div>
 
         {/* ── Tip Guide Settings ── */}
@@ -556,7 +569,7 @@ function ProfileContent() {
         {/* ── Admin access ── */}
         <AdminAccess
           isAdmin={credits.isAdmin}
-          expiresAt={credits.passExpiresAt}
+          expiresAt={credits.adminExpiresAt}
           onActivate={credits.activateAdmin}
           onDeactivate={credits.deactivateAdmin}
         />

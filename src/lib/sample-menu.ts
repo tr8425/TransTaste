@@ -48,7 +48,8 @@ export const SAMPLE_MENU_RESULT: MenuAnalysisResult = {
       dietary: { halal: null, vegan: false, vegetarian: false, gluten_free: false },
       allergens: ["shellfish", "gluten", "egg"],
       allergen_risk: "danger",
-      alternative_dishes: [],
+      // Filtered on the results page to those that are clear for the user's settings.
+      alternative_dishes: ["唐揚げ", "枝豆"],
       estimated_calories: 400,
       price_tier: "mid",
       image_search_query: "ebi fry japanese shrimp tempura",
@@ -98,7 +99,7 @@ export const SAMPLE_MENU_RESULT: MenuAnalysisResult = {
       category: "side",
       dietary: { halal: true, vegan: true, vegetarian: true, gluten_free: true },
       allergens: ["soy"],
-      allergen_risk: "safe",
+      allergen_risk: "danger",
       alternative_dishes: [],
       estimated_calories: 120,
       price_tier: "budget",

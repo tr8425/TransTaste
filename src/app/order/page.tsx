@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
-import { ALLERGEN_LABELS, TIP_CULTURE, normalizeMenuLang } from "@/lib/allergen-i18n";
+import { ALLERGEN_LABELS, resolveTipCulture } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
 
 interface UserSettings {
@@ -42,14 +42,12 @@ export default function OrderPage() {
     removeItem,
     clearCart,
     totalItems,
-    totalPrice,
+    subtotals,
     countryDetected,
-    menuLanguage,
     sourceResultKey,
   } = useCart();
 
-  const { t } = useTranslation();
-  const langCode = normalizeMenuLang(menuLanguage);
+  const { t, locale } = useTranslation();
   const [allergens, setAllergens] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const [showConfirmedBanner, setShowConfirmedBanner] = useState(false);
@@ -68,11 +66,10 @@ export default function OrderPage() {
 
   if (!mounted) return null;
 
-  const currency = items[0]?.currency;
-  const tipInfo = TIP_CULTURE[countryDetected] ?? null;
-  const tipAmount =
-    tipInfo && tipInfo.percent > 0 ? totalPrice * (tipInfo.percent / 100) : 0;
-  const grandTotal = totalPrice + tipAmount;
+  const tipInfo = resolveTipCulture(countryDetected, items[0]?.currency);
+  const tipRate = tipInfo && tipInfo.percent > 0 ? tipInfo.percent / 100 : 0;
+  // Never add amounts across currencies; legacy carts may still mix them.
+  const isMixedCurrency = subtotals.length > 1;
   const itemsNeedingConfirmation = items.filter(
     (item) =>
       item.allergen_risk === "danger" ||
@@ -165,7 +162,7 @@ export default function OrderPage() {
                     key={a}
                     className="text-xs bg-danger/10 text-danger px-2 py-0.5 rounded-full font-medium"
                   >
-                    {ALLERGEN_LABELS[a]?.[langCode] ?? ALLERGEN_LABELS[a]?.en ?? a}
+                    {ALLERGEN_LABELS[a]?.[locale] ?? ALLERGEN_LABELS[a]?.en ?? a}
                   </span>
                 ))}
               </div>
@@ -214,11 +211,14 @@ export default function OrderPage() {
                     }`}>
                       {t(`risk.${item.allergen_risk}`)}
                     </span>
-                    {item.allergens?.slice(0, 3).map((allergen) => (
-                      <span key={allergen} className="text-micro text-brown-medium">
-                        {allergen}
-                      </span>
-                    ))}
+                    {item.allergens?.slice(0, 3).map((allergen) => {
+                      const label = t(`allergens.${allergen}`);
+                      return (
+                        <span key={allergen} className="text-micro text-brown-medium">
+                          {label === `allergens.${allergen}` ? allergen : label}
+                        </span>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
@@ -313,30 +313,51 @@ export default function OrderPage() {
       </div>
 
       {/* Summary */}
-        <div className="mx-4 mt-4 border border-brown-dark bg-white p-4 tabular-nums shadow-[4px_4px_0_rgba(23,23,18,.12)]">
-        <div className="flex justify-between text-sm text-brown-dark mb-2">
-          <span>{t("order.subtotal")}</span>
-          <span className="font-medium">
-            {formatPrice(totalPrice, currency)}
-          </span>
-        </div>
-
-        {tipInfo && (
-          <div className="flex justify-between text-sm text-brown-medium mb-2">
-            <span>{t(`tipCulture.tipNote.${tipInfo.noteKey}`)}</span>
-            <span>
-              {tipAmount > 0
-                ? formatPrice(tipAmount, currency)
-                : "—"}
-            </span>
-          </div>
+      {subtotals.length > 0 && (
+      <div className="mx-4 mt-4 border border-brown-dark bg-white p-4 tabular-nums shadow-[4px_4px_0_rgba(23,23,18,.12)]">
+        {isMixedCurrency && (
+          <p className="mb-3 rounded-lg bg-amber-brand/10 px-3 py-2 text-xs leading-5 text-brown-dark">
+            {t("order.mixedCurrencyNote")}
+          </p>
         )}
+        {subtotals.map(({ currency, total }, index) => {
+          const tipAmount = total * tipRate;
+          return (
+            <div
+              key={currency || "none"}
+              className={index > 0 ? "mt-3 border-t border-brown-light/10 pt-3" : ""}
+            >
+              <div className="flex justify-between text-sm text-brown-dark mb-2">
+                <span>
+                  {isMixedCurrency
+                    ? t("order.subtotalIn", { currency: currency || "?" })
+                    : t("order.subtotal")}
+                </span>
+                <span className="font-medium">{formatPrice(total, currency || undefined)}</span>
+              </div>
 
-        <div className="border-t border-brown-light/10 pt-2 mt-2 flex justify-between text-base font-bold text-brown-dark">
-          <span>{t("order.total")}</span>
-          <span>{formatPrice(grandTotal, currency)}</span>
-        </div>
+              {tipInfo && (
+                <div className="flex justify-between gap-3 text-sm text-brown-medium mb-2">
+                  <span className="min-w-0">{t(`tipCulture.tipNote.${tipInfo.noteKey}`)}</span>
+                  <span className="shrink-0">
+                    {tipAmount > 0 ? formatPrice(tipAmount, currency || undefined) : "-"}
+                  </span>
+                </div>
+              )}
+
+              <div className="border-t border-brown-light/10 pt-2 mt-2 flex justify-between text-base font-bold text-brown-dark">
+                <span>
+                  {isMixedCurrency
+                    ? t("order.totalIn", { currency: currency || "?" })
+                    : t("order.total")}
+                </span>
+                <span>{formatPrice(total + tipAmount, currency || undefined)}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
+      )}
 
       {/* Bottom actions */}
       <div className="px-4 mt-6 space-y-3">

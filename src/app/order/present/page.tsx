@@ -49,14 +49,13 @@ function formatPrice(amount: number, currency?: string): string {
 export default function PresentPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { items, menuLanguage, totalPrice } = useCart();
+  const { items, menuLanguage, subtotals } = useCart();
 
   const [allergens, setAllergens] = useState<string[]>([]);
   const [dietaryBeliefs, setDietaryBeliefs] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
   const lang = normalizeMenuLang(menuLanguage);
-  const currency = items[0]?.currency;
 
   // Hydrate allergens from localStorage
   useEffect(() => {
@@ -211,15 +210,22 @@ export default function PresentPage() {
           ))}
         </div>
 
-        {/* Total in menu language */}
-        <div className="mt-6 flex items-center justify-between border-t-2 border-brown-dark pt-4">
-          <span className="text-2xl font-bold text-brown-dark">
-            {TOTAL_LABELS[lang] ?? TOTAL_LABELS.en}
-          </span>
-          <span className="text-2xl font-bold tabular-nums text-brown-dark">
-            {formatPrice(totalPrice, currency)}
-          </span>
-        </div>
+        {/* Total in menu language; one line per currency so amounts are never mixed */}
+        {subtotals.length > 0 && (
+          <div className="mt-6 space-y-2 border-t-2 border-brown-dark pt-4">
+            {subtotals.map(({ currency, total }) => (
+              <div key={currency || "none"} className="flex items-center justify-between gap-3">
+                <span className="text-2xl font-bold text-brown-dark">
+                  {TOTAL_LABELS[lang] ?? TOTAL_LABELS.en}
+                  {subtotals.length > 1 && currency ? ` (${currency})` : ""}
+                </span>
+                <span className="text-2xl font-bold tabular-nums text-brown-dark">
+                  {formatPrice(total, currency || undefined)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Disclaimer */}
         <p className="mt-6 text-micro text-gray-400 text-center leading-relaxed">

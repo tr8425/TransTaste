@@ -28,11 +28,30 @@ function readSettings(): StoredSettings {
   }
 }
 
-function parseIngredients(value: string): string[] {
+// Mirrors the server-side cap on disliked ingredients (count and length).
+const MAX_DISLIKED_ITEMS = 20;
+const MAX_DISLIKED_LENGTH = 60;
+const MAX_INPUT_LENGTH = MAX_DISLIKED_ITEMS * (MAX_DISLIKED_LENGTH + 2);
+
+function splitIngredients(value: string): string[] {
   return value
     .split(",")
     .map((item) => item.trim())
     .filter((item, index, items) => item.length > 0 && items.indexOf(item) === index);
+}
+
+function parseIngredients(value: string): string[] {
+  return splitIngredients(value)
+    .map((item) => item.slice(0, MAX_DISLIKED_LENGTH))
+    .slice(0, MAX_DISLIKED_ITEMS);
+}
+
+function exceedsIngredientLimits(value: string): boolean {
+  const items = splitIngredients(value);
+  return (
+    items.length > MAX_DISLIKED_ITEMS ||
+    items.some((item) => item.length > MAX_DISLIKED_LENGTH)
+  );
 }
 
 export default function QuickDietarySetup() {
@@ -188,9 +207,15 @@ export default function QuickDietarySetup() {
           type="text"
           value={ingredients}
           onChange={(event) => setIngredients(event.target.value)}
+          maxLength={MAX_INPUT_LENGTH}
           placeholder={t("quickSetup.avoidPlaceholder")}
           className="mt-3 min-h-12 w-full rounded-2xl border border-brown-light/20 bg-white/70 px-4 text-sm text-brown-dark outline-none transition placeholder:text-brown-medium/45 focus:border-coral focus:ring-2 focus:ring-coral/10"
         />
+        {exceedsIngredientLimits(ingredients) ? (
+          <p role="status" className="mt-1.5 text-xs leading-5 text-brown-medium">
+            {t("quickSetup.avoidLimit", { count: MAX_DISLIKED_ITEMS, chars: MAX_DISLIKED_LENGTH })}
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-7 rounded-2xl bg-cream-dark p-3 text-caption leading-5 text-brown-medium">

@@ -10,7 +10,22 @@ export interface CartItem {
   currency?: string;
   allergen_risk?: "danger" | "warning" | "check" | "safe";
   allergens?: string[];
+  /** Result the item was added from (older carts may not have it). */
+  source_key?: string;
   quantity: number;
+}
+
+export interface CurrencySubtotal {
+  /** Currency code/symbol as stored on the items ("" when unknown). */
+  currency: string;
+  total: number;
+}
+
+/** Scan metadata recorded alongside items so the order card matches them. */
+export interface CartSourceMeta {
+  sourceResultKey: string;
+  menuLanguage?: string;
+  countryDetected?: string;
 }
 
 export interface CartContextType {
@@ -19,7 +34,11 @@ export interface CartContextType {
   userLanguage: string;
   countryDetected: string;
   sourceResultKey: string;
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity" | "source_key">, meta?: CartSourceMeta) => void;
+  /** Clear the cart and add this item as the first line of a new order. */
+  startNewOrderWith: (item: Omit<CartItem, "quantity" | "source_key">, meta?: CartSourceMeta) => void;
+  /** True when adding `item` would mix menus or currencies in one order. */
+  conflictsWithCart: (item: Pick<CartItem, "currency">, sourceKey?: string) => boolean;
   removeItem: (dish_hash: string) => void;
   updateQuantity: (dish_hash: string, quantity: number) => void;
   clearCart: () => void;
@@ -28,7 +47,21 @@ export interface CartContextType {
   setCountryDetected: (country: string) => void;
   setSourceResultKey: (key: string) => void;
   totalItems: number;
+  /** Sum of all prices. Only meaningful when `subtotals.length <= 1`. */
   totalPrice: number;
+  /** One entry per currency in the cart (several only for legacy carts). */
+  subtotals: CurrencySubtotal[];
+}
+
+/** Group item totals by currency so different currencies are never summed. */
+export function subtotalsByCurrency(items: CartItem[]): CurrencySubtotal[] {
+  const totals = new Map<string, number>();
+  for (const item of items) {
+    if (item.price == null) continue;
+    const key = item.currency ?? "";
+    totals.set(key, (totals.get(key) ?? 0) + item.price * item.quantity);
+  }
+  return Array.from(totals, ([currency, total]) => ({ currency, total }));
 }
 
 const STORAGE_KEY = "transtaste_cart";
@@ -86,19 +119,56 @@ export function useCartProvider() {
     }
   }, [items, menuLanguage, userLanguage, countryDetected, sourceResultKey, hydrated]);
 
-  const addItem = useCallback((item: Omit<CartItem, "quantity">) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.dish_hash === item.dish_hash);
-      if (existing) {
-        return prev.map((i) =>
-          i.dish_hash === item.dish_hash
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        );
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
+  const applyMeta = useCallback((meta?: CartSourceMeta) => {
+    if (!meta) return;
+    setSourceResultKey(meta.sourceResultKey);
+    if (meta.menuLanguage) setMenuLanguage(meta.menuLanguage);
+    if (meta.countryDetected) setCountryDetected(meta.countryDetected);
   }, []);
+
+  const addItem = useCallback(
+    (item: Omit<CartItem, "quantity" | "source_key">, meta?: CartSourceMeta) => {
+      const source_key = meta?.sourceResultKey || undefined;
+      setItems((prev) => {
+        const existing = prev.find((i) => i.dish_hash === item.dish_hash);
+        if (existing) {
+          return prev.map((i) =>
+            i.dish_hash === item.dish_hash
+              ? { ...i, quantity: i.quantity + 1 }
+              : i
+          );
+        }
+        return [...prev, { ...item, source_key, quantity: 1 }];
+      });
+      applyMeta(meta);
+    },
+    [applyMeta],
+  );
+
+  const startNewOrderWith = useCallback(
+    (item: Omit<CartItem, "quantity" | "source_key">, meta?: CartSourceMeta) => {
+      const source_key = meta?.sourceResultKey || undefined;
+      setItems([{ ...item, source_key, quantity: 1 }]);
+      applyMeta(meta);
+    },
+    [applyMeta],
+  );
+
+  const conflictsWithCart = useCallback(
+    (item: Pick<CartItem, "currency">, sourceKey?: string) => {
+      if (items.length === 0) return false;
+      const currencyClash = items.some(
+        (i) => (i.currency ?? "") !== (item.currency ?? ""),
+      );
+      if (currencyClash) return true;
+      if (!sourceKey) return false;
+      return items.some((i) => {
+        const itemSource = i.source_key || sourceResultKey;
+        return Boolean(itemSource) && itemSource !== sourceKey;
+      });
+    },
+    [items, sourceResultKey],
+  );
 
   const removeItem = useCallback((dish_hash: string) => {
     setItems((prev) => prev.filter((i) => i.dish_hash !== dish_hash));
@@ -128,6 +198,8 @@ export function useCartProvider() {
     [items]
   );
 
+  const subtotals = useMemo(() => subtotalsByCurrency(items), [items]);
+
   return useMemo<CartContextType>(
     () => ({
       items,
@@ -136,6 +208,8 @@ export function useCartProvider() {
       countryDetected,
       sourceResultKey,
       addItem,
+      startNewOrderWith,
+      conflictsWithCart,
       removeItem,
       updateQuantity,
       clearCart,
@@ -145,6 +219,7 @@ export function useCartProvider() {
       setSourceResultKey,
       totalItems,
       totalPrice,
+      subtotals,
     }),
     [
       items,
@@ -153,11 +228,14 @@ export function useCartProvider() {
       countryDetected,
       sourceResultKey,
       addItem,
+      startNewOrderWith,
+      conflictsWithCart,
       removeItem,
       updateQuantity,
       clearCart,
       totalItems,
       totalPrice,
+      subtotals,
     ]
   );
 }

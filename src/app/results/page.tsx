@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CATEGORY_FILTERS } from "@/lib/constants";
@@ -9,13 +9,17 @@ import DishRow from "@/components/dish/DishRow";
 import DishCard from "@/components/dish/DishCard";
 import LockedBlock from "@/components/common/LockedBlock";
 import ComboRecommendation from "@/components/paywall/ComboRecommendation";
-import { useCart } from "@/hooks/useCart";
+import { useCart, type CartItem } from "@/hooks/useCart";
 import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 import { trackProductEvent } from "@/lib/product-events";
+import { matchUserAllergens } from "@/lib/allergen-i18n";
+import CartConflictDialog from "@/components/order/CartConflictDialog";
+
+type CartDraft = Omit<CartItem, "quantity" | "source_key">;
 
 export default function ResultsPage() {
   return (
@@ -32,6 +36,9 @@ function ResultsContent() {
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [decisionFilter, setDecisionFilter] = useState<"all" | "safer" | "check" | "avoid">("all");
   const [dietaryBeliefs, setDietaryBeliefs] = useState<string[]>([]);
+  const [allergenPreset, setAllergenPreset] = useState<string[]>([]);
+  const [resultKey, setResultKey] = useState("");
+  const [pendingCartItem, setPendingCartItem] = useState<CartDraft | null>(null);
   const [showCombo, setShowCombo] = useState(false);
   const credits = useCredits();
   const { isPhase2Free } = credits;
@@ -43,18 +50,47 @@ function ResultsContent() {
   const cart = useCart();
   const exchange = useExchangeRate();
 
-  const dishToCartItem = (dish: DishLite) => ({
+  const dishToCartItem = (dish: DishLite): CartDraft => ({
     dish_hash: dish.original,
     name_original: dish.original,
     name_translated: dish.translation.english,
     price: dish.price ? parseFloat(dish.price) || undefined : undefined,
-    currency: dish.currency || "\u20A9",
+    // Fall back to the menu's currency (not a hardcoded one) so items from one
+    // menu always share a currency.
+    currency: dish.currency || data?.dishes.find((d) => d.currency)?.currency || undefined,
     allergen_risk: dish.allergen_risk,
     allergens: dish.allergens,
   });
 
+  const cartMeta = () => ({
+    sourceResultKey: resultKey,
+    menuLanguage: data?.menu_language || data?.menu_meta?.language || undefined,
+    countryDetected: data?.menu_meta?.country_detected || undefined,
+  });
+
   const isDishInCart = (dish: DishLite) =>
-    cart.items.some((item) => item.dish_hash === dish.original);
+    cart.items.some(
+      (item) =>
+        item.dish_hash === dish.original &&
+        (!item.source_key || !resultKey || item.source_key === resultKey),
+    );
+
+  // Never mix menus/currencies in one order: ask before replacing the cart.
+  const addDishToCart = (dish: DishLite) => {
+    const item = dishToCartItem(dish);
+    if (cart.conflictsWithCart(item, resultKey)) {
+      setPendingCartItem(item);
+      return;
+    }
+    cart.addItem(item, cartMeta());
+  };
+
+  const confirmStartNewOrder = () => {
+    if (pendingCartItem) cart.startNewOrderWith(pendingCartItem, cartMeta());
+    setPendingCartItem(null);
+  };
+
+  const cancelPendingCartItem = useCallback(() => setPendingCartItem(null), []);
 
   // Use MenuAnalysisResult for both lite and full results (shape-compatible)
   const [data, setData] = useState<MenuAnalysisResult | null>(null);
@@ -83,10 +119,18 @@ function ResultsContent() {
     try {
       const rawSettings = localStorage.getItem("transtaste_user_settings");
       if (rawSettings) {
-        const settings = JSON.parse(rawSettings) as { dietary_beliefs?: string[] };
+        const settings = JSON.parse(rawSettings) as {
+          dietary_beliefs?: string[];
+          allergen_preset?: unknown[];
+        };
         setDietaryBeliefs(
           Array.isArray(settings.dietary_beliefs)
             ? settings.dietary_beliefs
+            : [],
+        );
+        setAllergenPreset(
+          Array.isArray(settings.allergen_preset)
+            ? settings.allergen_preset.filter((a): a is string => typeof a === "string")
             : [],
         );
       }
@@ -141,11 +185,9 @@ function ResultsContent() {
           demo: Boolean(parsed.demo),
         });
 
-        // Connect scan metadata to cart context
-        const lang = parsed.menu_language || parsed.menu_meta?.language || "";
-        if (lang) cart.setMenuLanguage(lang);
-        const country = parsed.menu_meta?.country_detected || "";
-        if (country) cart.setCountryDetected(country);
+        // Scan metadata (language, country, result key) is attached to the
+        // cart only when an item is added, so viewing another result never
+        // relabels an existing order.
 
         // Cache full result and save to scan history
         // Use a resultKey we can dedupe on: if we restored from a cached id,
@@ -153,7 +195,7 @@ function ResultsContent() {
         // duplicating history entries).
         const cachedId = searchParams.get("id");
         const resultKey = cachedId || `scan_${Date.now()}`;
-        cart.setSourceResultKey(resultKey);
+        setResultKey(resultKey);
         try {
           // Determine output language to render preview text in the user's language
           let outputLang = "en";
@@ -222,8 +264,23 @@ function ResultsContent() {
     check: 2,
     safe: 3,
   };
+  const hasAllergenPreset = allergenPreset.length > 0;
+  const isPersonalized = hasAllergenPreset || dietaryBeliefs.length > 0;
+  // The model's allergen_risk is relative to ALL common allergens. When the
+  // user picked their own allergens, derive risk from the overlap instead.
+  // Applies to sample/demo data too, so example results match the settings.
+  const allergenMatches = new Map<string, string[]>();
   const riskAdjustedDishes = data
     ? data.dishes.map((dish): DishLite => {
+        const matched = matchUserAllergens(dish.allergens, allergenPreset);
+        allergenMatches.set(dish.original, matched);
+        const allergenRisk: DishLite["allergen_risk"] = !hasAllergenPreset
+          ? dish.allergen_risk
+          : matched.length === 0
+            ? "safe"
+            : riskRank[dish.allergen_risk] > riskRank.warning
+              ? "warning"
+              : dish.allergen_risk;
         const conflicts = dietaryBeliefs.filter((belief) => {
           if (belief === "vegan") return !dish.dietary.vegan;
           if (belief === "vegetarian") {
@@ -236,9 +293,9 @@ function ResultsContent() {
           dietaryBeliefs.includes("halal") && dish.dietary.halal == null;
         const derivedRisk = conflicts.length > 0
           ? "danger"
-          : needsHalalCheck && riskRank[dish.allergen_risk] > riskRank.check
+          : needsHalalCheck && riskRank[allergenRisk] > riskRank.check
             ? "check"
-            : dish.allergen_risk;
+            : allergenRisk;
 
         return {
           ...dish,
@@ -377,6 +434,7 @@ function ResultsContent() {
       E_STREAM_END: t("errors.streamEnded"),
       E_FETCH_FAIL: t("errors.unexpected"),
       E_RATE_LIMIT: t("errors.rateLimited"),
+      E_DAILY_LIMIT: t("errors.dailyLimit"),
       E_BAD_REQUEST: t("errors.unexpected"),
       E_AUTH: t("errors.authFailed"),
       E_SERVICE_UNAVAILABLE: t("errors.serviceUnavailable"),
@@ -518,7 +576,9 @@ function ResultsContent() {
             {data.restaurant_type}
           </span>
         </div>
-        <p className="mengto-kicker mb-1 text-coral">Scan report · live</p>
+        <p className="mengto-kicker mb-1 text-coral">
+          {data.demo ? t("results.kickerExample") : t("results.kickerLive")}
+        </p>
         <h1 className="text-2xl font-bold text-brown-dark">
           {t("results.menuResults")}
         </h1>
@@ -539,7 +599,7 @@ function ResultsContent() {
 
       <section className="mx-5 mb-4 border border-brown-dark bg-white/70 p-4 shadow-[5px_5px_0_rgba(23,23,18,.14)]" aria-labelledby="decision-summary">
         <p className="text-caption font-semibold uppercase tracking-[0.14em] text-coral">
-          {t("results.decisionEyebrow")}
+          {isPersonalized ? t("results.decisionEyebrow") : t("results.decisionEyebrowGeneral")}
         </p>
         <h2 id="decision-summary" className="mt-1 text-base font-bold text-brown-dark">
           {t("results.decisionTitle")}
@@ -564,6 +624,14 @@ function ResultsContent() {
             </button>
           ))}
         </div>
+        {!hasAllergenPreset ? (
+          <p className="mt-3 text-micro leading-4 text-brown-medium">
+            {t("results.generalRiskNote")}{" "}
+            <Link href="/profile#profile-dietary" className="font-semibold text-coral underline underline-offset-2">
+              {t("results.setAllergens")}
+            </Link>
+          </p>
+        ) : null}
         <p className="mt-3 text-micro leading-4 text-brown-medium">
           {t("results.decisionSafety")}
         </p>
@@ -642,10 +710,12 @@ function ResultsContent() {
                 }}
                 onAddToCart={() => {
                   trackProductEvent("dish_added_to_order", { risk: d.allergen_risk });
-                  cart.addItem(dishToCartItem(d));
+                  addDishToCart(d);
                 }}
                 isInCart={isDishInCart(d)}
                 convertedPrice={converted}
+                matchedAllergens={allergenMatches.get(d.original)}
+                hasAllergenPreset={hasAllergenPreset}
               />
             );
           })
@@ -724,8 +794,16 @@ function ResultsContent() {
         onClose={() => setSelectedDish(null)}
         isUnlocked={isUnlocked}
         onUnlock={handleUnlock}
-        onAddToCart={selectedDish ? () => cart.addItem(dishToCartItem(selectedDish)) : undefined}
+        onAddToCart={selectedDish ? () => addDishToCart(selectedDish) : undefined}
         isInCart={selectedDish ? isDishInCart(selectedDish) : false}
+        matchedAllergens={selectedDish ? allergenMatches.get(selectedDish.original) : undefined}
+        hasAllergenPreset={hasAllergenPreset}
+      />
+
+      <CartConflictDialog
+        isOpen={pendingCartItem !== null}
+        onStartNew={confirmStartNewOrder}
+        onCancel={cancelPendingCartItem}
       />
 
     </div>

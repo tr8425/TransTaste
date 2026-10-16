@@ -17,23 +17,36 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
     useCamera();
   const [isCapturing, setIsCapturing] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const [qrRejected, setQrRejected] = useState(false);
 
   useEffect(() => {
     start();
   }, [start]);
 
-  // Handle QR code detection
+  // Handle QR code detection: only http(s) links are accepted as menu URLs.
   useEffect(() => {
-    if (qrData && onQrDetected) {
-      try {
-        new URL(qrData); // Validate it's a URL
-        onQrDetected(qrData);
-        clearQr();
-      } catch {
-        clearQr(); // Not a URL, ignore
-      }
+    if (!qrData || !onQrDetected) return;
+    let isWebLink = false;
+    try {
+      const url = new URL(qrData);
+      isWebLink = url.protocol === "http:" || url.protocol === "https:";
+    } catch {
+      isWebLink = false;
+    }
+    clearQr();
+    if (isWebLink) {
+      setQrRejected(false);
+      onQrDetected(qrData);
+    } else {
+      setQrRejected(true);
     }
   }, [qrData, onQrDetected, clearQr]);
+
+  useEffect(() => {
+    if (!qrRejected) return;
+    const timer = setTimeout(() => setQrRejected(false), 3500);
+    return () => clearTimeout(timer);
+  }, [qrRejected]);
 
   const handleCapture = async () => {
     if (isCapturing) return;
@@ -99,6 +112,14 @@ export default function CameraView({ onCapture, onGallery, onBack, onQrDetected 
             {t("camera.placeMenu")}
           </span>
         </div>
+
+        {qrRejected && (
+          <div className="absolute left-4 right-4 top-28 z-10 flex justify-center pointer-events-none">
+            <p role="status" className="max-w-[320px] border border-white/30 bg-black/75 px-4 py-2 text-center text-xs font-medium leading-5 text-white">
+              {t("camera.qrNotWebLink")}
+            </p>
+          </div>
+        )}
 
         {/* Shutter flash overlay — fades out within ~220ms */}
         {showFlash && (

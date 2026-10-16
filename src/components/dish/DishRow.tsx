@@ -10,6 +10,10 @@ interface DishRowProps {
   onAddToCart?: () => void;
   isInCart?: boolean;
   convertedPrice?: string | null;
+  /** Dish allergen tags that match the user's own allergen preset. */
+  matchedAllergens?: string[];
+  /** True when the user has an allergen preset (copy can say "your"). */
+  hasAllergenPreset?: boolean;
 }
 
 const RISK_STYLE: Record<string, string | null> = {
@@ -29,7 +33,15 @@ const CATEGORY_COLORS: Record<string, string> = {
   dessert: "bg-pink-200",
 };
 
-export default function DishRow({ dish, onClick, onAddToCart, isInCart, convertedPrice }: DishRowProps) {
+export default function DishRow({
+  dish,
+  onClick,
+  onAddToCart,
+  isInCart,
+  convertedPrice,
+  matchedAllergens = [],
+  hasAllergenPreset = false,
+}: DishRowProps) {
   const { t } = useTranslation();
   const bgColor = CATEGORY_COLORS[dish.category] || "bg-cream-dark";
   const riskStyle = dish.allergen_risk ? RISK_STYLE[dish.allergen_risk] : null;
@@ -104,7 +116,11 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
                 {t(`risk.${dish.allergen_risk}`)}
             </span>
             {dish.allergens?.map((allergen) => (
-              <AllergyTag key={allergen} allergen={allergen} />
+              <AllergyTag
+                key={allergen}
+                allergen={allergen}
+                isUserAllergen={matchedAllergens.includes(allergen)}
+              />
             ))}
           </div>
         )}
@@ -114,7 +130,7 @@ export default function DishRow({ dish, onClick, onAddToCart, isInCart, converte
           (dish.allergen_risk === "danger" || dish.allergen_risk === "warning") && (
           <div className="flex items-center gap-1 mt-1">
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-micro font-medium bg-green-100 text-green-800">
-              ✅ {t("dish.saferAlternatives")}: {dish.alternative_dishes.slice(0, 2).join(", ")}
+              {t(hasAllergenPreset ? "dish.saferAlternatives" : "dish.saferAlternativesGeneral")}: {dish.alternative_dishes.slice(0, 2).join(", ")}
             </span>
           </div>
         )}

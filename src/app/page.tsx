@@ -10,6 +10,10 @@ import { useTranslation } from "@/lib/i18n";
 import type { RecentScan } from "@/lib/types";
 import { trackProductEvent } from "@/lib/product-events";
 import { SAMPLE_MENU_TEXT } from "@/lib/sample-menu";
+import { compressBlob } from "@/lib/image-compress";
+
+// Mirrors the server-side cap on text menu input.
+const MAX_TEXT_INPUT_LENGTH = 20000;
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -130,7 +134,13 @@ export default function HomePage() {
     const file = event.target.files?.[0];
     if (!file) return;
     trackProductEvent("scan_cta_click", { method: "gallery" });
-    const base64 = await blobToBase64(file);
+    let base64: string;
+    try {
+      // Same path as the camera: resize + JPEG to keep the payload small.
+      base64 = await compressBlob(file);
+    } catch {
+      base64 = await blobToBase64(file);
+    }
     sessionStorage.setItem("scanImage", base64);
     sessionStorage.setItem("scanInputType", "image");
     router.push("/scan-setup");
@@ -161,7 +171,7 @@ export default function HomePage() {
         <p className="mengto-display text-lg tracking-[-0.05em] text-brown-dark" aria-label="TransTaste">
           Trans<span className="text-coral">/Taste</span>
         </p>
-        <CreditBadge credits={credits.remaining} hasPass={credits.hasPass} />
+        <CreditBadge credits={credits.remaining} hasPass={credits.hasPass} isAdmin={credits.isAdmin} />
       </nav>
 
       <section className="mengto-hero px-5 pb-10 pt-7">
@@ -353,6 +363,7 @@ export default function HomePage() {
             value={textInput}
             onChange={(event) => setTextInput(event.target.value)}
             placeholder={t("home.textPlaceholder")}
+            maxLength={MAX_TEXT_INPUT_LENGTH}
             rows={5}
             className="mb-4 w-full resize-none rounded-xl border border-brown-light/20 bg-cream-dark px-4 py-3 text-sm text-brown-dark outline-none transition placeholder:text-brown-medium/50 focus:border-coral"
             autoFocus

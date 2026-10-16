@@ -150,9 +150,9 @@ export const ORDER_PHRASES: Phrase[] = [
   {
     key: 'no_ingredient',
     category: 'order',
-    ko: '___빼고 주세요',
+    ko: '___ 빼고 주세요',
     translations: {
-      ja: { text: '___を抜きでお願いします', pronunciation: '___o nuki de onegaishimasu' },
+      ja: { text: '___を抜きでお願いします', pronunciation: '___ o nuki de onegaishimasu' },
       zh: { text: '请不要放___', pronunciation: 'Qing buyao fang ___' },
       th: { text: 'ไม่ใส่___ครับ/ค่ะ', pronunciation: 'Mai sai ___ khrap/kha' },
       vi: { text: 'Khong bo ___ vao', pronunciation: 'Khong bo ___ vao' },

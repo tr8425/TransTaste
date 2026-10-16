@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases";
-import { ALLERGEN_INGREDIENT_NAMES } from "@/lib/allergen-i18n";
+import { ALLERGEN_INGREDIENT_NAMES, ingredientPronunciation } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 
@@ -193,6 +193,9 @@ export default function PhrasesPage() {
           if (!names) continue;
           const fill = (tmpl: string, lang: string) =>
             tmpl.replace(/___/g, names[lang] || names.en || allergen);
+          // Pronunciation lines must stay romanized (no native script).
+          const fillPronunciation = (tmpl: string, lang: string) =>
+            tmpl.replace(/___/g, ingredientPronunciation(allergen, lang));
           expanded.push({
             ...phrase,
             key: `no_ingredient_${allergen}`,
@@ -200,7 +203,7 @@ export default function PhrasesPage() {
             translations: Object.fromEntries(
               Object.entries(phrase.translations).map(([lang, t]) => [
                 lang,
-                { text: fill(t.text, lang), pronunciation: fill(t.pronunciation, lang) },
+                { text: fill(t.text, lang), pronunciation: fillPronunciation(t.pronunciation, lang) },
               ])
             ),
           });
@@ -228,7 +231,9 @@ export default function PhrasesPage() {
     <main className="min-h-screen bg-cream pb-28">
       {/* Header */}
       <header className="border-b border-brown-dark/20 px-5 pb-5 pt-12">
-        <p className="mengto-kicker mb-2 text-coral">Say it clearly · 05 languages</p>
+        <p className="mengto-kicker mb-2 text-coral">
+          {t("phrases.kicker", { count: String(LANGUAGES.length).padStart(2, "0") })}
+        </p>
         <h1 className="text-3xl font-bold text-brown-dark">{t("phrases.title")}</h1>
         <p className="text-sm text-brown-medium mt-0.5">
           {t("phrases.subtitle")}

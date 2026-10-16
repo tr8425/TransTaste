@@ -13,47 +13,88 @@ export const DEFAULT_FREE_SCAN_LIMIT =
     ? configuredFreeScanLimit
     : 3;
 
-const DEFAULT_STATE: CreditState = {
+/**
+ * Stored shape of `transtaste_credits`.
+ * - `passType` / `passExpiresAt` describe a real (purchased) 7d/30d pass only.
+ * - `admin_expires_at` mirrors a server-verified owner session, kept separate
+ *   so activating/deactivating admin never touches a real pass.
+ * - `hasPass` is a derived mirror (admin active OR valid real pass). It is still
+ *   written to storage because some readers (loading-scan) check it directly.
+ */
+interface StoredCredits {
+  remaining: number;
+  hasPass: boolean;
+  passType?: "7d" | "30d";
+  passExpiresAt?: string;
+  admin_expires_at?: string;
+}
+
+const DEFAULT_STATE: StoredCredits = {
   remaining: DEFAULT_FREE_SCAN_LIMIT,
   hasPass: false,
 };
 
-/** Demote an expired pass. Returns the cleaned state and whether anything changed. */
-function reconcileExpiry(s: CreditState): { state: CreditState; changed: boolean } {
-  if (!s.hasPass || !s.passExpiresAt) return { state: s, changed: false };
-  if (new Date(s.passExpiresAt).getTime() > Date.now()) return { state: s, changed: false };
-  // Pass expired — clear pass fields, keep remaining credits intact
-  const cleaned: CreditState = { ...s, hasPass: false };
-  delete cleaned.passType;
-  delete cleaned.passExpiresAt;
-  return { state: cleaned, changed: true };
+function isFuture(iso?: string): boolean {
+  if (!iso) return false;
+  const time = new Date(iso).getTime();
+  return Number.isFinite(time) && time > Date.now();
+}
+
+/** Recompute derived fields and drop expired pass/admin entries. */
+function normalize(s: StoredCredits): StoredCredits {
+  const next: StoredCredits = { remaining: s.remaining, hasPass: false };
+  if ((s.passType === "7d" || s.passType === "30d") && isFuture(s.passExpiresAt)) {
+    next.passType = s.passType;
+    next.passExpiresAt = s.passExpiresAt;
+  }
+  if (isFuture(s.admin_expires_at)) {
+    next.admin_expires_at = s.admin_expires_at;
+  }
+  next.hasPass = Boolean(next.passType || next.admin_expires_at);
+  return next;
+}
+
+/** Parse raw storage (including the legacy shape where admin overwrote passType). */
+function parseStored(raw: string | null): StoredCredits | null {
+  if (!raw) return null;
+  const parsed = JSON.parse(raw) as Partial<CreditState> & { admin_expires_at?: string };
+  // JSON.stringify(Infinity) -> null and partial writes can leave remaining
+  // missing/non-finite. Coerce to a safe integer before reconciling.
+  const remaining = Number.isFinite(parsed.remaining)
+    ? Math.max(0, Math.floor(parsed.remaining as number))
+    : DEFAULT_STATE.remaining;
+  const base: StoredCredits = { remaining, hasPass: !!parsed.hasPass };
+  if (parsed.passType === "admin") {
+    // Legacy: admin used to be stored in the pass fields.
+    base.admin_expires_at = parsed.passExpiresAt;
+  } else if (parsed.passType) {
+    base.passType = parsed.passType;
+    base.passExpiresAt = parsed.passExpiresAt;
+  }
+  if (parsed.admin_expires_at) base.admin_expires_at = parsed.admin_expires_at;
+  return base;
+}
+
+function writeStored(next: StoredCredits) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Ignore storage errors
+  }
 }
 
 export function useCredits() {
-  const [state, setState] = useState<CreditState>(DEFAULT_STATE);
+  const [state, setState] = useState<StoredCredits>(DEFAULT_STATE);
   const [freeEvent, setFreeEvent] = useState(false);
 
   const loadAndReconcile = useCallback(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as Partial<CreditState>;
-      // JSON.stringify(Infinity) → null and partial writes can leave remaining
-      // missing/non-finite. Coerce to a safe integer before reconciling.
-      const sanitized: CreditState = {
-        remaining: Number.isFinite(parsed.remaining)
-          ? Math.max(0, Math.floor(parsed.remaining as number))
-          : DEFAULT_STATE.remaining,
-        hasPass: !!parsed.hasPass,
-        ...(parsed.passType ? { passType: parsed.passType } : {}),
-        ...(parsed.passExpiresAt ? { passExpiresAt: parsed.passExpiresAt } : {}),
-      };
-      const { state: next, changed } = reconcileExpiry(sanitized);
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = parseStored(raw);
+      if (!parsed) return;
+      const next = normalize(parsed);
       setState(next);
-      const drifted = changed || JSON.stringify(parsed) !== JSON.stringify(next);
-      if (drifted) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
-      }
+      if (raw !== JSON.stringify(next)) writeStored(next);
     } catch {
       // Ignore parse errors
     }
@@ -61,19 +102,20 @@ export function useCredits() {
 
   useEffect(() => {
     loadAndReconcile();
-    // An admin pass is only a mirror of the server cookie; drop it if the
+    // The admin flag is only a mirror of the server cookie; drop it if the
     // server no longer recognises the session (expired, code rotated, cleared).
     try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") as CreditState | null;
-      if (stored?.passType === "admin") {
+      const stored = parseStored(localStorage.getItem(STORAGE_KEY));
+      if (stored?.admin_expires_at) {
         fetch("/api/admin/session", { cache: "no-store" })
           .then((r) => r.json())
           .then((d: { admin?: boolean }) => {
             if (!d.admin) {
-              const cleaned: CreditState = { ...stored, hasPass: false };
-              delete cleaned.passType;
-              delete cleaned.passExpiresAt;
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+              const current = parseStored(localStorage.getItem(STORAGE_KEY));
+              if (current) {
+                delete current.admin_expires_at;
+                writeStored(normalize(current));
+              }
               loadAndReconcile();
             }
           })
@@ -104,13 +146,10 @@ export function useCredits() {
     };
   }, [loadAndReconcile]);
 
-  const save = (next: CreditState) => {
-    setState(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Ignore storage errors
-    }
+  const save = (next: StoredCredits) => {
+    const normalized = normalize(next);
+    setState(normalized);
+    writeStored(normalized);
   };
 
   const useCredit = (): boolean => {
@@ -129,7 +168,6 @@ export function useCredits() {
     expiresAt.setDate(expiresAt.getDate() + (type === "7d" ? 7 : 30));
     save({
       ...state,
-      hasPass: true,
       passType: type,
       passExpiresAt: expiresAt.toISOString(),
     });
@@ -139,20 +177,38 @@ export function useCredits() {
     save({ ...state, remaining: state.remaining + amount });
   };
 
+  /** Turn on the admin mirror without touching an existing 7d/30d pass. */
   const activateAdmin = (expiresAt: string) => {
-    save({ ...state, hasPass: true, passType: "admin", passExpiresAt: expiresAt });
+    save({ ...state, admin_expires_at: expiresAt });
   };
 
+  /** Turn off the admin mirror; a real pass (if any) keeps working. */
   const deactivateAdmin = () => {
-    if (state.passType !== "admin") return;
-    const next: CreditState = { ...state, hasPass: false };
-    delete next.passType;
-    delete next.passExpiresAt;
+    if (!state.admin_expires_at) return;
+    const next: StoredCredits = { ...state };
+    delete next.admin_expires_at;
     save(next);
   };
 
   const isPhase2Free = state.hasPass || freeEvent;
-  const isAdmin = state.hasPass && state.passType === "admin";
+  const isAdmin = Boolean(state.admin_expires_at);
+  const hasRealPass = Boolean(state.passType);
 
-  return { ...state, useCredit, canScan, purchasePass, purchaseCredits, activateAdmin, deactivateAdmin, isAdmin, freeEvent, isPhase2Free };
+  return {
+    remaining: state.remaining,
+    hasPass: state.hasPass,
+    passType: state.passType,
+    passExpiresAt: state.passExpiresAt,
+    adminExpiresAt: state.admin_expires_at,
+    hasRealPass,
+    useCredit,
+    canScan,
+    purchasePass,
+    purchaseCredits,
+    activateAdmin,
+    deactivateAdmin,
+    isAdmin,
+    freeEvent,
+    isPhase2Free,
+  };
 }

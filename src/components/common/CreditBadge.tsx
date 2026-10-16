@@ -5,9 +5,10 @@ import { useTranslation } from "@/lib/i18n";
 interface CreditBadgeProps {
   credits: number;
   hasPass?: boolean;
+  isAdmin?: boolean;
 }
 
-export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
+export default function CreditBadge({ credits, hasPass, isAdmin }: CreditBadgeProps) {
   const { t } = useTranslation();
   if (hasPass) {
     return (
@@ -24,7 +25,7 @@ export default function CreditBadge({ credits, hasPass }: CreditBadgeProps) {
         >
           <path d="M20 6L9 17l-5-5" />
         </svg>
-        {t("common.tripPassBadge")}
+        {isAdmin ? t("profile.adminActive") : t("common.tripPassBadge")}
       </span>
     );
   }

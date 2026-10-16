@@ -10,6 +10,17 @@ interface AdminAccessProps {
   onDeactivate: () => void;
 }
 
+/** Shared expiry formatter so the usage card and admin card always match. */
+export function formatExpiryDate(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return "";
+  return date.toLocaleDateString(locale === "ko" ? "ko-KR" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 /** Owner access code entry. The code is checked server-side; nothing secret is stored in the browser. */
 export default function AdminAccess({ isAdmin, expiresAt, onActivate, onDeactivate }: AdminAccessProps) {
   const { t, locale } = useTranslation();
@@ -48,19 +59,26 @@ export default function AdminAccess({ isAdmin, expiresAt, onActivate, onDeactiva
 
   const signOut = async () => {
     setBusy(true);
+    setError(null);
     try {
-      await fetch("/api/admin/session", {
+      const res = await fetch("/api/admin/session", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
-    } catch { /* cookie may already be gone */ }
-    onDeactivate();
-    setBusy(false);
+      if (res.ok) {
+        onDeactivate();
+      } else {
+        // Cookie may still be set server-side; keep admin state so UI matches.
+        setError(t("profile.adminSignOutFailed"));
+      }
+    } catch {
+      setError(t("profile.adminSignOutFailed"));
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const expiry = expiresAt
-    ? new Date(expiresAt).toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })
-    : "";
+  const expiry = expiresAt ? formatExpiryDate(expiresAt, locale) : "";
 
   return (
     <div id="profile-admin" className="scroll-mt-16 bg-cream-dark rounded-xl p-4">
@@ -82,6 +100,7 @@ export default function AdminAccess({ isAdmin, expiresAt, onActivate, onDeactiva
           >
             {t("profile.adminSignOut")}
           </button>
+          {error && <p role="alert" className="text-xs text-danger mt-2">{error}</p>}
         </>
       ) : (
         <form onSubmit={unlock}>
