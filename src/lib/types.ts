@@ -213,7 +213,8 @@ export type DietaryLabel = "vegan" | "vegetarian" | "halal" | "gluten-free";
 export interface CreditState {
   remaining: number;
   hasPass: boolean;
-  passType?: "7d" | "30d";
+  // "admin" mirrors a server-verified owner session (httpOnly cookie).
+  passType?: "7d" | "30d" | "admin";
   passExpiresAt?: string;
 }
 

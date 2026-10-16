@@ -61,6 +61,25 @@ export function useCredits() {
 
   useEffect(() => {
     loadAndReconcile();
+    // An admin pass is only a mirror of the server cookie; drop it if the
+    // server no longer recognises the session (expired, code rotated, cleared).
+    try {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") as CreditState | null;
+      if (stored?.passType === "admin") {
+        fetch("/api/admin/session", { cache: "no-store" })
+          .then((r) => r.json())
+          .then((d: { admin?: boolean }) => {
+            if (!d.admin) {
+              const cleaned: CreditState = { ...stored, hasPass: false };
+              delete cleaned.passType;
+              delete cleaned.passExpiresAt;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+              loadAndReconcile();
+            }
+          })
+          .catch(() => {});
+      }
+    } catch { /* ignore */ }
     fetch("/api/event-status")
       .then((r) => r.json())
       .then((d) => { if (d.active) setFreeEvent(true); })
@@ -120,7 +139,20 @@ export function useCredits() {
     save({ ...state, remaining: state.remaining + amount });
   };
 
-  const isPhase2Free = state.hasPass || freeEvent;
+  const activateAdmin = (expiresAt: string) => {
+    save({ ...state, hasPass: true, passType: "admin", passExpiresAt: expiresAt });
+  };
 
-  return { ...state, useCredit, canScan, purchasePass, purchaseCredits, freeEvent, isPhase2Free };
+  const deactivateAdmin = () => {
+    if (state.passType !== "admin") return;
+    const next: CreditState = { ...state, hasPass: false };
+    delete next.passType;
+    delete next.passExpiresAt;
+    save(next);
+  };
+
+  const isPhase2Free = state.hasPass || freeEvent;
+  const isAdmin = state.hasPass && state.passType === "admin";
+
+  return { ...state, useCredit, canScan, purchasePass, purchaseCredits, activateAdmin, deactivateAdmin, isAdmin, freeEvent, isPhase2Free };
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCredits } from "@/hooks/useCredits";
+import AdminAccess from "@/components/common/AdminAccess";
 import { useTranslation } from "@/lib/i18n";
 
 /* ─── Constants ─── */
@@ -240,7 +241,7 @@ function ProfileContent() {
               {credits.hasPass ? (
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-brown-dark">
-                    {t("profile.tripPassActive")}
+                    {credits.isAdmin ? t("profile.adminActive") : t("profile.tripPassActive")}
                   </span>
                   <span className="text-micro font-bold text-success bg-success/15 px-2 py-0.5 rounded-full">
                     {t("profile.active")}
@@ -551,6 +552,14 @@ function ProfileContent() {
             </>
           )}
         </div>
+
+        {/* ── Admin access ── */}
+        <AdminAccess
+          isAdmin={credits.isAdmin}
+          expiresAt={credits.passExpiresAt}
+          onActivate={credits.activateAdmin}
+          onDeactivate={credits.deactivateAdmin}
+        />
 
         {/* ── About ── */}
         <div className="text-center pt-4 pb-4">

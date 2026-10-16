@@ -106,6 +106,19 @@
 - 10: `scan_cache`에 RLS를 켜고 정책을 두지 않았다 (service role만 접근).
 - 11: 요청 제한 초과, 출처 거부, 웹훅 서명 실패를 `[security]` 접두어로 서버 로그에 남긴다. 알림 연동은 남은 일.
 
+## 추가 기능: 관리자 코드 (2026-10-16)
+
+로그인 없이 서버의 API 키로 제한 없이 스캔하기 위한 소유자용 입력창. Profile 화면 맨 아래 "관리자 접근".
+
+- 예전 기능과 다름: 2026-03 ~ 07에는 사용자가 자기 Anthropic 키를 넣는 입력란(`transtaste_api_key`, `x-api-key` 헤더)이 있었고 `de5b921`에서 제거됐다. 관리자 코드 기능은 없었다.
+- 코드는 서버 환경변수 `ADMIN_ACCESS_CODE`(12자 이상)에만 있다. 비어 있거나 짧으면 기능이 꺼진다.
+- `POST /api/admin/session`이 코드를 상수 시간 비교로 확인하고, 30일짜리 httpOnly·Secure·SameSite=Strict 쿠키(`tt_admin`)를 발급한다. 쿠키는 코드에서 파생한 키로 서명하므로, 코드를 바꾸면 기존 세션이 모두 무효가 된다.
+- 코드 입력은 IP당 15분에 5회로 제한하고, 운영 환경에서 요청 제한을 확인할 수 없으면 503으로 막는다. 틀린 입력과 세션 발급은 `[security]` 로그에 남는다.
+- 관리자 쿠키가 있는 요청은 분석 API의 요청 제한을 건너뛴다. 클라이언트는 `transtaste_credits`에 `passType: "admin"` 패스를 두어 무료 스캔 횟수와 페이월을 건너뛰고, 서버 세션이 사라지면 이 패스도 지운다.
+- 관리자 모드를 끄면 쿠키를 지운다 (`DELETE /api/admin/session`).
+
+운영 환경에서 쓰려면 Vercel에 `ADMIN_ACCESS_CODE`와 Upstash 변수를 넣어야 한다. Upstash 없이 로컬 `next start`로 쓸 때는 `RATE_LIMIT_FAIL_OPEN=true`를 넣는다. `next dev`에서는 필요 없다.
+
 ## 문제없음으로 확인한 항목
 
 - git 이력 전체에서 실제 키 없음 (`sk-ant-your-key-here` 같은 예시 문자열만 있음).
@@ -117,6 +130,7 @@
 
 - `tsc`, `next lint`, `npm run build` 통과. `qa:non-api` 57/57 (CSP 적용 상태, 콘솔 오류 없음).
 - API 직접 호출로 확인: 다른 출처 403, `text/plain` 415, 입력 상한 초과 400, 운영 환경에서 Redis 없이 실제 키를 쓰는 요청 503.
+- 관리자 코드: 틀린 코드 401, 맞는 코드 200과 쿠키 발급, 쿠키로 요청 제한 통과, 서명을 바꾼 쿠키 거부, 해제 시 쿠키 삭제. 실제 키 대신 가짜 키로 시험해 API 크레딧은 쓰지 않았다.
 
 ## 기존 DB에 적용할 SQL
 

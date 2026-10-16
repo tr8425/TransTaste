@@ -381,7 +381,16 @@
     "noCurrency": "설정 안 됨",
     "sectionNavigation": "프로필 섹션",
     "sectionUsage": "이용 현황·패스",
-    "sectionDietary": "음식 선호"
+    "sectionDietary": "음식 선호",
+    "adminTitle": "관리자 접근",
+    "adminDesc": "관리자 코드를 입력하면 이 기기에서 제한 없이 스캔할 수 있어요.",
+    "adminPlaceholder": "관리자 코드",
+    "adminUnlock": "확인",
+    "adminActive": "관리자 모드 사용 중",
+    "adminSignOut": "관리자 모드 끄기",
+    "adminInvalid": "코드가 맞지 않아요.",
+    "adminTooMany": "시도 횟수가 많아요. 15분 뒤에 다시 해 주세요.",
+    "adminUnavailable": "지금은 관리자 접근을 쓸 수 없어요."
   },
 
   "payment": {

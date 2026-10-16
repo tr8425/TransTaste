@@ -14,6 +14,7 @@ import {
   rejectUntrustedRequest,
   securityLog,
 } from "@/lib/api-guard";
+import { isAdminRequest } from "@/lib/admin-session";
 
 const VALID_INPUT_TYPES: InputType[] = ['image', 'url', 'text'];
 
@@ -174,8 +175,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit by IP — 20 requests per hour. Only paid calls reach this point.
+    // Admin sessions (owner access code) skip the limiter.
     const ip = clientIp(request);
-    const rl = await checkRateLimit(`analyze:${ip}`, 20, 3600);
+    const rl = isAdminRequest(request)
+      ? { allowed: true, remaining: Infinity, reset: 0, unavailable: false }
+      : await checkRateLimit(`analyze:${ip}`, 20, 3600);
     if (rl.unavailable && limiterRequired()) {
       securityLog("rate_limiter_unavailable", { route: "analyze" });
       return NextResponse.json(

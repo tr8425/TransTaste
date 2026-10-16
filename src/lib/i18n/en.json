@@ -381,7 +381,16 @@
     "noCurrency": "Not set",
     "sectionNavigation": "Profile sections",
     "sectionUsage": "Usage & passes",
-    "sectionDietary": "Food preferences"
+    "sectionDietary": "Food preferences",
+    "adminTitle": "Admin access",
+    "adminDesc": "Enter the owner code to scan without limits on this device.",
+    "adminPlaceholder": "Owner code",
+    "adminUnlock": "Unlock",
+    "adminActive": "Admin mode on",
+    "adminSignOut": "Turn off admin mode",
+    "adminInvalid": "That code doesn't match.",
+    "adminTooMany": "Too many attempts. Try again in 15 minutes.",
+    "adminUnavailable": "Admin access isn't available right now."
   },
 
   "payment": {

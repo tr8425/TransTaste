@@ -16,6 +16,7 @@ import {
   rejectUntrustedRequest,
   securityLog,
 } from "@/lib/api-guard";
+import { isAdminRequest } from "@/lib/admin-session";
 
 const DEMO_DETAIL: DishDetail = {
   flavor_profile: {
@@ -103,8 +104,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit by IP — 30 detail requests per hour. Only paid calls reach this point.
+    // Admin sessions (owner access code) skip the limiter.
     const ip = clientIp(request);
-    const rl = await checkRateLimit(`detail:${ip}`, 30, 3600);
+    const rl = isAdminRequest(request)
+      ? { allowed: true, remaining: Infinity, reset: 0, unavailable: false }
+      : await checkRateLimit(`detail:${ip}`, 30, 3600);
     if (rl.unavailable && limiterRequired()) {
       securityLog("rate_limiter_unavailable", { route: "detail" });
       return NextResponse.json(
