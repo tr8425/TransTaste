@@ -783,9 +783,14 @@ export function createMenuAnalysisStream(
 // Orientation check: a small model looks at a thumbnail and says how far to
 // turn it. Costs well under a cent; the client falls back to 0 on any error.
 const ORIENT_MODEL = process.env.ORIENT_MODEL || 'claude-haiku-5-5';
+// Asking for clockwise degrees without thinking got the direction backwards
+// (90 for a photo that needs 270). Asking which edge the tops of the letters
+// face is an observation, not arithmetic; the code turns it into degrees.
 const ORIENT_PROMPT =
-  'This is a photo of a restaurant menu. How many degrees must the image be rotated clockwise so that ' +
-  'the menu text reads upright, the normal way? Reply with only the number: 0, 90, 180 or 270.';
+  'This is a photo of a restaurant menu. Look at the printed text. The tops of the letters point toward ' +
+  'one edge of the image. Which edge: top, right, bottom or left? Reply with only that one word.';
+// Clockwise turn that brings the tops of the letters to the top edge.
+const EDGE_TO_ROTATION: Record<string, 0 | 90 | 180 | 270> = { top: 0, right: 270, bottom: 180, left: 90 };
 
 export async function detectMenuRotation(
   imageDataUrl: string,
@@ -838,8 +843,9 @@ export async function detectMenuRotation(
     }
     if (!response) return { error: 'E_AI_ERROR', reason: 'Orientation check failed' };
     const text = response.content.filter((b) => b.type === 'text').map((b) => (b as { text: string }).text).join(' ');
-    const n = Number(text.match(/\b(0|90|180|270)\b/)?.[1] ?? NaN);
-    const ok = [0, 90, 180, 270].includes(n);
+    const edge = text.toLowerCase().match(/\b(top|right|bottom|left)\b/)?.[1];
+    const n = edge ? EDGE_TO_ROTATION[edge] : NaN;
+    const ok = edge !== undefined;
     telemetry?.report({
       model: ORIENT_MODEL,
       usage: response.usage,
