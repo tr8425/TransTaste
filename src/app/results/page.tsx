@@ -102,9 +102,12 @@ function ResultsContent() {
   // Use MenuAnalysisResult for both lite and full results (shape-compatible)
   const [data, setData] = useState<MenuAnalysisResult | null>(null);
 
-  // Phase 2: detail for selected dish
+  // Phase 2: detail for selected dish. Like enrichment, only with the menu
+  // input of this result: the sample menu once sent the previous scan's text
+  // with a sample dish name, and the paid call failed (422).
+  const detailInput = menuInput && resultKey && menuInput.resultKey === resultKey ? menuInput : null;
   const { detail, isLoading: isDetailLoading, error: detailError, retry: retryDetail } =
-    useDishDetail(selectedDish, menuInput);
+    useDishDetail(selectedDish, detailInput);
 
   // Allergen and diet fields for dishes from the fast list step. Only runs when
   // the stored menu input belongs to this result (not to a later scan).

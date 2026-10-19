@@ -124,6 +124,8 @@ export default function LoadingScanPage() {
 
     if (isSample) {
       sessionStorage.setItem("scanResult", JSON.stringify(SAMPLE_MENU_RESULT));
+      // The sample has no menu input; a previous scan's must not be tied to it.
+      sessionStorage.removeItem("menuInputForDetail");
       sessionStorage.removeItem("scanIsSample");
       sessionStorage.removeItem("scanImage");
       sessionStorage.removeItem("scanText");
