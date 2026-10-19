@@ -1,5 +1,6 @@
 "use client";
 
+import { PASS_7D_PRICE } from "@/lib/pricing-experiment";
 import { useTranslation } from "@/lib/i18n";
 
 interface NoCreditScreenProps {
@@ -39,7 +40,7 @@ export default function NoCreditScreen({ onPurchase }: NoCreditScreenProps) {
           onClick={onPurchase}
           className="mt-2 w-full rounded-xl bg-coral py-3.5 text-sm font-semibold text-white shadow-sm active:bg-coral-dark transition-colors"
         >
-          {t("noCredit.getPass")}
+          {t("noCredit.getPass", { price: PASS_7D_PRICE })}
         </button>
 
         {/* Secondary link */}

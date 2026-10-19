@@ -1,4 +1,5 @@
 import type { DishEnrichment, DishLite, MenuAnalysisResult } from "./types";
+import { parseMenuPrice } from "./price";
 
 // The model sometimes omits fields (e.g. `dietary` on drinks). UI code reads
 // them unguarded, so every dish passes through here on the server and again on
@@ -27,12 +28,16 @@ export function normalizeDish(raw: unknown): DishLite | null {
   const allergens = strList(d.allergens);
   const risk = str(d.allergen_risk);
   const pending = d.analysis_pending === true;
+  const currency = strOrNull(d.currency);
+  const price = parseMenuPrice(d.price, currency);
 
   return {
     ...(d as object),
     original,
-    price: strOrNull(d.price),
-    currency: strOrNull(d.currency),
+    // Plain "6.5" from "6,50", so parseFloat works downstream; the menu's own
+    // formatting stays in price_display.
+    price: price == null ? null : String(price),
+    currency,
     price_display: strOrNull(d.price_display),
     language_detected: str(d.language_detected, "unknown"),
     translation: {

@@ -174,7 +174,7 @@
     "howToEat": "How to Eat",
     "culturalNote": "Cultural Note",
     "allergensAndDietary": "Allergens & Dietary",
-    "unlockFlavors": "Unlock dish details · $2.99",
+    "unlockFlavors": "Unlock dish details · {price}",
     "tripPassNote": "7-Day Trip Pass \u00b7 One-time payment",
     "allergenDanger": "Contains your allergen. Consider an alternative dish.",
     "allergenDangerGeneral": "A common allergen is a core ingredient. If it affects you, consider another dish.",
@@ -564,7 +564,7 @@
   "noCredit": {
     "title": "You're out of credits",
     "subtitle": "Get a Trip Pass to keep exploring menus",
-    "getPass": "Get Trip Pass · $2.99",
+    "getPass": "Get 7-Day Trip Pass · {price}",
     "buyCredits": "Buy 50 Credits · $1.99",
     "finePrint": "7-day pass · One-time payment"
   },
@@ -573,7 +573,7 @@
     "title": "Recommended Combos",
     "bestValue": "Best Value",
     "balanced": "Balanced Pick",
-    "unlockCombos": "Unlock Combos · $2.99"
+    "unlockCombos": "Unlock Combos · {price}"
   },
 
   "dishCard": {

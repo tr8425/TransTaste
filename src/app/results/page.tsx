@@ -13,6 +13,7 @@ import { useCart, type CartItem } from "@/hooks/useCart";
 import { useCredits } from "@/hooks/useCredits";
 import { useDishDetail, StoredMenuInput } from "@/hooks/useDishDetail";
 import { useMenuEnrichment } from "@/hooks/useMenuEnrichment";
+import { PASS_7D_PRICE } from "@/lib/pricing-experiment";
 import { useTranslation } from "@/lib/i18n";
 import HorizontalScroll from "@/components/ui/HorizontalScroll";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
@@ -20,6 +21,7 @@ import { normalizeAnalysisResult } from "@/lib/normalize-dish";
 import { trackProductEvent } from "@/lib/product-events";
 import { matchUserAllergens } from "@/lib/allergen-i18n";
 import CartConflictDialog from "@/components/order/CartConflictDialog";
+import { parseMenuPrice } from "@/lib/price";
 
 type CartDraft = Omit<CartItem, "quantity" | "source_key">;
 
@@ -59,7 +61,7 @@ function ResultsContent() {
     dish_hash: cartKey(dish),
     name_original: dish.original,
     name_translated: dish.translation.english,
-    price: dish.price ? parseFloat(dish.price) || undefined : undefined,
+    price: parseMenuPrice(dish.price, dish.currency) || undefined,
     // Fall back to the menu's currency (not a hardcoded one) so items from one
     // menu always share a currency.
     currency: dish.currency || data?.dishes.find((d) => d.currency)?.currency || undefined,
@@ -795,7 +797,7 @@ function ResultsContent() {
         ) : (
           filteredDishes.map((dish, i) => {
             const d = dish;
-            const price = d.price ? parseFloat(d.price) : null;
+            const price = parseMenuPrice(d.price, d.currency);
             const converted = price && d.currency ? exchange.convert(price, d.currency) : null;
             return (
               <DishRow
@@ -833,7 +835,7 @@ function ResultsContent() {
                 onClick={handleUnlock}
                 className="w-full mt-3 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors"
               >
-                {t("combo.unlockCombos")}
+                {t("combo.unlockCombos", { price: PASS_7D_PRICE })}
               </button>
             </div>
           )}

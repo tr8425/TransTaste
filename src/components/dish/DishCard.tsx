@@ -7,6 +7,7 @@ import IngredientChip from "./IngredientChip";
 import FlavorRadar from "./FlavorRadar";
 import FunFactCard from "@/components/common/FunFactCard";
 import LockedBlock from "@/components/common/LockedBlock";
+import { PASS_7D_PRICE } from "@/lib/pricing-experiment";
 import { useTranslation } from "@/lib/i18n";
 
 interface DishCardProps {
@@ -430,7 +431,7 @@ export default function DishCard({
                 clipRule="evenodd"
               />
             </svg>
-            {t("dish.unlockFlavors")}
+            {t("dish.unlockFlavors", { price: PASS_7D_PRICE })}
           </button>
           <p className="text-center text-xs text-brown-medium/60">
             {t("dish.tripPassNote")}

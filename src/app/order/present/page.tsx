@@ -37,7 +37,9 @@ function formatPrice(amount: number, currency?: string): string {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
       currency,
-      minimumFractionDigits: 0,
+      // Whole amounts drop the decimals (EUR 12); others keep the currency's
+      // own digits (EUR 6.50, not 6.5).
+      minimumFractionDigits: Number.isInteger(amount) ? 0 : undefined,
       maximumFractionDigits: 2,
     }).format(amount);
   } catch {

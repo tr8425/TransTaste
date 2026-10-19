@@ -27,5 +27,8 @@ export const PRICING_EXPERIMENT_PLANS = [
   },
 ] as const;
 
+// Paywall buttons quote this so they match /pricing and the Stripe product.
+export const PASS_7D_PRICE = PRICING_EXPERIMENT_PLANS.find((p) => p.id === "pass_7d")!.price;
+
 export type PricingExperimentPlanId =
   (typeof PRICING_EXPERIMENT_PLANS)[number]["id"];
