@@ -166,3 +166,58 @@ p { text-wrap: pretty; }
 .animate-camera-flash {
   animation: camera-flash 220ms ease-out forwards;
 }
+
+/* Motion adapted from the Rostra UX/UI gallery (item ids in brackets),
+   restyled with the app palette. Reduced motion is handled by the global
+   override above. */
+:root {
+  --tt-ease: cubic-bezier(.2, .8, .2, 1);
+  --tt-spring: cubic-bezier(.34, 1.45, .64, 1);
+}
+
+/* [019] Choice chip: a check slides in from the left when selected */
+.tt-chip { transition: background-color .35s var(--tt-ease), color .3s var(--tt-ease), box-shadow .3s var(--tt-ease), border-color .3s var(--tt-ease), transform .4s var(--tt-spring); }
+.tt-chip:active { transform: scale(.94); }
+.tt-chip-check { display: inline-grid; place-items: center; flex: none; width: 0; height: 1em; margin-right: 0; overflow: hidden; opacity: 0; transition: width .45s var(--tt-spring), margin .45s var(--tt-spring), opacity .25s var(--tt-ease); }
+.tt-chip-check svg { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.tt-chip[aria-pressed="true"] .tt-chip-check { width: 1.05em; margin-right: .3em; opacity: 1; }
+
+/* [018] Quantity stepper: digits roll like an odometer, shakes at a limit */
+.tt-step-b { transition: transform .4s var(--tt-spring), background-color .25s var(--tt-ease), color .25s var(--tt-ease), opacity .3s var(--tt-ease); }
+.tt-step-b:active { transform: scale(.82); }
+.tt-step-b[aria-disabled="true"] { opacity: .35; }
+.tt-odo { display: flex; justify-content: center; height: 1.25rem; line-height: 1.25rem; overflow: hidden; font-variant-numeric: tabular-nums; }
+.tt-odo-col { display: flex; flex-direction: column; width: .62em; transition: transform .55s var(--tt-spring), width .4s var(--tt-ease), opacity .3s var(--tt-ease); }
+.tt-odo-col span { height: 1.25rem; text-align: center; }
+.tt-odo-col.is-hide { width: 0; opacity: 0; }
+.tt-shake { animation: tt-no .42s var(--tt-ease); }
+@keyframes tt-no { 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+
+/* [039] Sliding pill / frame behind the selected tab */
+.tt-pill { position: absolute; left: 0; top: 0; width: var(--w, 0); height: var(--h, 0); transform: translate(var(--x, 0), var(--y, 0)); pointer-events: none; transition: transform .5s var(--tt-spring), width .5s var(--tt-spring), height .5s var(--tt-spring), opacity .25s var(--tt-ease), color .3s var(--tt-ease); }
+
+/* [044] Collapse: height eases open and shut, contents fade in after */
+.tt-collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--tt-ease); }
+.tt-collapse.is-open { grid-template-rows: 1fr; }
+.tt-collapse > div { overflow: hidden; min-height: 0; opacity: 0; transform: translateY(-8px); transition: opacity .25s var(--tt-ease), transform .45s var(--tt-spring); }
+.tt-collapse.is-open > div { opacity: 1; transform: none; transition-delay: .12s; }
+.tt-pill.is-off { opacity: 0; }
+
+/* [044] Accordion: one open at a time, plus turns into minus */
+.tt-acc { transition: box-shadow .5s var(--tt-ease), transform .5s var(--tt-spring); }
+.tt-acc.is-open { transform: translateY(-2px); box-shadow: 4px 4px 0 #171712; }
+.tt-acc-pm { position: relative; width: 26px; height: 26px; flex: none; border-radius: 9999px; background: rgba(23, 23, 18, .07); transition: background-color .35s var(--tt-ease), transform .45s var(--tt-spring); }
+.tt-acc-pm::before, .tt-acc-pm::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 2px; margin: -1px 0 0 -5px; border-radius: 2px; background: #171712; transition: transform .5s var(--tt-spring), background-color .3s; }
+.tt-acc-pm::after { transform: rotate(90deg); }
+.tt-acc.is-open .tt-acc-pm { background: #171712; }
+.tt-acc.is-open .tt-acc-pm::before, .tt-acc.is-open .tt-acc-pm::after { background: #f3efe7; }
+.tt-acc.is-open .tt-acc-pm::after { transform: rotate(180deg); }
+.tt-acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--tt-ease); }
+.tt-acc.is-open .tt-acc-body { grid-template-rows: 1fr; }
+.tt-acc-body > div { overflow: hidden; min-height: 0; }
+.tt-acc-a { opacity: 0; transform: translateY(-8px); transition: opacity .25s var(--tt-ease), transform .45s var(--tt-spring); }
+.tt-acc.is-open .tt-acc-a { opacity: 1; transform: none; transition-delay: .12s; }
+
+/* [079] Skeleton: one band of light sweeps every block on the same beat */
+.tt-shimmer .bg-cream-dark { background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .6) 45%, transparent 60%); background-size: 200vw 100%; background-repeat: no-repeat; background-attachment: fixed; animation: tt-shine 1.6s linear infinite; }
+@keyframes tt-shine { from { background-position: -100vw 0; } to { background-position: 100vw 0; } }

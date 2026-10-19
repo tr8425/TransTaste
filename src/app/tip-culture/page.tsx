@@ -1,5 +1,6 @@
 "use client";
 
+import { useSlidingPill } from "@/hooks/useSlidingPill";
 import { useState, useEffect } from "react";
 import { COUNTRIES, LANGUAGE_TO_COUNTRY, type CountryInfo } from "@/lib/tip-culture-data";
 import { useTranslation } from "@/lib/i18n";
@@ -30,6 +31,7 @@ function TipBadge({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, params
 function TipCalculator({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, params?: Record<string, string | number>) => string }) {
   const [billAmount, setBillAmount] = useState("");
   const [tipPercent, setTipPercent] = useState(tip.range_min || 15);
+  const presetPill = useSlidingPill<HTMLDivElement>(String(tipPercent));
 
   useEffect(() => {
     setTipPercent(tip.range_min || (tip.type === "expected" ? 15 : 5));
@@ -65,14 +67,17 @@ function TipCalculator({ tip, t }: { tip: CountryInfo["tip"]; t: (key: string, p
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div ref={presetPill.ref} className="relative flex gap-2">
+        <span aria-hidden="true" className={`tt-pill rounded-xl bg-coral ${presetPill.pillOff ? "is-off" : ""}`} style={presetPill.pillStyle} />
         {presets.map((p) => (
           <button
             key={p}
             onClick={() => setTipPercent(p)}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
+            aria-pressed={tipPercent === p}
+            data-active={tipPercent === p}
+            className={`relative flex-1 py-2 rounded-xl text-xs font-semibold transition-colors duration-300 ${
               tipPercent === p
-                ? "bg-coral text-white"
+                ? "border border-transparent text-white"
                 : "bg-cream border border-brown-light/20 text-brown-dark hover:border-coral/40"
             }`}
           >
@@ -127,6 +132,7 @@ function dismissNoTipBanner() {
 export default function TipCulturePage() {
   const { t } = useTranslation();
   const [selectedCode, setSelectedCode] = useState("JP");
+  const countryPill = useSlidingPill<HTMLDivElement>(selectedCode);
   const [detectedCountry, setDetectedCountry] = useState<{ code: string; flag: string } | null>(null);
   const [noTipDismissed, setNoTipDismissed] = useState(true); // default true to avoid flash
 
@@ -194,15 +200,18 @@ export default function TipCulturePage() {
       </div>
 
       {/* Country selector */}
-      <div className="px-5 pb-4">
+      <div ref={countryPill.ref} className="px-5 pb-4">
         <HorizontalScroll>
+          <span aria-hidden="true" className="tt-pill rounded-full bg-coral" style={countryPill.pillStyle} />
           {COUNTRIES.map((country) => (
             <button
               key={country.code}
               onClick={() => setSelectedCode(country.code)}
-              className={`flex-shrink-0 snap-start flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              aria-pressed={selectedCode === country.code}
+              data-active={selectedCode === country.code}
+              className={`relative flex-shrink-0 snap-start flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors duration-300 ${
                 selectedCode === country.code
-                  ? "bg-coral text-white"
+                  ? "text-white"
                   : "bg-cream-dark text-brown-dark hover:bg-brown-light/15"
               }`}
             >

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSlidingPill } from "@/hooks/useSlidingPill";
 import { useState, useEffect, useMemo } from "react";
 import { PHRASE_CATEGORIES, PHRASES, type Phrase } from "@/lib/phrases";
 import { ALLERGEN_INGREDIENT_NAMES, ingredientPronunciation } from "@/lib/allergen-i18n";
@@ -140,6 +141,8 @@ export default function PhrasesPage() {
   const [userLang, setUserLang] = useState("en");
   const [allergenPreset, setAllergenPreset] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const langPill = useSlidingPill<HTMLDivElement>(selectedLanguage);
+  const catPill = useSlidingPill<HTMLDivElement>(`${selectedCategory}:${favorites.size > 0}`);
   const [highlightedKey, setHighlightedKey] = useState<string | null>(null);
 
   // Read user settings + favorites from localStorage
@@ -241,17 +244,20 @@ export default function PhrasesPage() {
       </header>
 
       {/* Language selector */}
-      <div className="px-5 mb-4">
-        <div className="flex gap-1.5 pb-1">
+      <div className="px-5 mb-4 pb-1">
+        <div ref={langPill.ref} className="relative flex gap-1.5">
+          <span aria-hidden="true" className={`tt-pill rounded-full bg-coral ${langPill.pillOff ? "is-off" : ""}`} style={langPill.pillStyle} />
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => setSelectedLanguage(lang.code)}
               aria-label={t(lang.labelKey)}
+              aria-pressed={selectedLanguage === lang.code}
+              data-active={selectedLanguage === lang.code}
               title={t(lang.labelKey)}
-              className={`flex-1 min-w-0 px-1 py-1.5 rounded-full text-caption font-semibold transition-colors text-center flex items-center justify-center gap-1 ${
+              className={`relative flex-1 min-w-0 px-1 py-1.5 rounded-full text-caption font-semibold transition-colors duration-300 text-center flex items-center justify-center gap-1 ${
                 selectedLanguage === lang.code
-                  ? "bg-coral text-white"
+                  ? "text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >
@@ -263,14 +269,17 @@ export default function PhrasesPage() {
       </div>
 
       {/* Category tabs */}
-      <div className="px-5 mb-4">
+      <div ref={catPill.ref} className="px-5 mb-4">
         <HorizontalScroll>
+          <span aria-hidden="true" className={`tt-pill rounded-full bg-brown-dark ${catPill.pillOff ? "is-off" : ""}`} style={catPill.pillStyle} />
           {favorites.size > 0 && (
             <button
               onClick={() => setSelectedCategory("favorites")}
-              className={`flex-shrink-0 snap-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              aria-pressed={selectedCategory === "favorites"}
+              data-active={selectedCategory === "favorites"}
+              className={`relative flex-shrink-0 snap-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors duration-300 ${
                 selectedCategory === "favorites"
-                  ? "bg-brown-dark text-white"
+                  ? "text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >
@@ -282,9 +291,11 @@ export default function PhrasesPage() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex-shrink-0 snap-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              aria-pressed={selectedCategory === cat.id}
+              data-active={selectedCategory === cat.id}
+              className={`relative flex-shrink-0 snap-start flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors duration-300 ${
                 selectedCategory === cat.id
-                  ? "bg-brown-dark text-white"
+                  ? "text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >

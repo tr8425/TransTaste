@@ -1,5 +1,6 @@
 "use client";
 
+import ChoiceChip from "@/components/ui/ChoiceChip";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
@@ -91,14 +92,13 @@ export default function PricingPage() {
                 </div>
                 <p className="flex-none text-xl font-bold tabular-nums text-brown-dark">{plan.price}</p>
               </div>
-              <button
-                type="button"
+              <ChoiceChip
+                selected={selectedPlan === plan.id}
                 onClick={() => recordInterest(plan.id)}
-                aria-pressed={selectedPlan === plan.id}
-                className="mt-4 min-h-12 w-full rounded-xl bg-brown-dark px-4 text-sm font-semibold text-white transition hover:bg-brown-medium"
+                className="mt-4 min-h-12 w-full rounded-xl bg-brown-dark px-4 text-sm font-semibold text-white hover:bg-brown-medium"
               >
                 {selectedPlan === plan.id ? t("pricing.interestRecorded") : t("pricing.interested")}
-              </button>
+              </ChoiceChip>
             </section>
           ))}
         </div>

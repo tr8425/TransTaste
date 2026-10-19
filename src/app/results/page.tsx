@@ -1,5 +1,6 @@
 "use client";
 
+import { useSlidingPill } from "@/hooks/useSlidingPill";
 import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -39,6 +40,8 @@ function ResultsContent() {
   const [selectedDish, setSelectedDish] = useState<DishLite | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [decisionFilter, setDecisionFilter] = useState<"all" | "safer" | "check" | "avoid">("all");
+  const decisionPill = useSlidingPill<HTMLDivElement>(decisionFilter === "all" ? null : decisionFilter);
+  const categoryPill = useSlidingPill<HTMLDivElement>(activeFilter);
   const [dietaryBeliefs, setDietaryBeliefs] = useState<string[]>([]);
   const [allergenPreset, setAllergenPreset] = useState<string[]>([]);
   const [resultKey, setResultKey] = useState("");
@@ -703,7 +706,14 @@ function ResultsContent() {
         <h2 id="decision-summary" className="mt-1 text-base font-bold text-brown-dark">
           {t("results.decisionTitle")}
         </h2>
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div ref={decisionPill.ref} className="relative mt-3 grid grid-cols-3 gap-2">
+          <span
+            aria-hidden="true"
+            className={`tt-pill z-10 border-2 border-current shadow-[3px_3px_0_currentColor] ${
+              decisionFilter === "avoid" ? "text-danger" : decisionFilter === "check" ? "text-amber-brand" : "text-success"
+            } ${decisionPill.pillOff ? "is-off" : ""}`}
+            style={decisionPill.pillStyle}
+          />
           {[
             { key: "avoid" as const, count: riskCounts.avoid, label: t("results.avoid"), style: "bg-danger/10 text-danger" },
             { key: "check" as const, count: riskCounts.check, label: t("results.askStaff"), style: "bg-amber-brand/10 text-amber-brand" },
@@ -714,9 +724,8 @@ function ResultsContent() {
               type="button"
               onClick={() => setDecisionFilter((current) => current === item.key ? "all" : item.key)}
               aria-pressed={decisionFilter === item.key}
-              className={`min-h-16 border border-current/20 px-2 py-2 text-center transition ring-offset-2 ring-offset-cream ${
-                item.style
-              } ${decisionFilter === item.key ? "ring-2 ring-current" : ""}`}
+              data-active={decisionFilter === item.key}
+              className={`tt-chip min-h-16 border border-current/20 px-2 py-2 text-center ${item.style}`}
             >
               <span className="block text-lg font-bold">{item.count}</span>
               <span className="block text-micro font-semibold leading-4">{item.label}</span>
@@ -770,8 +779,9 @@ function ResultsContent() {
       ) : null}
 
       {/* Category filters — sticky so they remain accessible while scrolling */}
-      <div className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm px-5 py-3 border-b border-brown-light/10">
+      <div ref={categoryPill.ref} className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm px-5 py-3 border-b border-brown-light/10">
         <HorizontalScroll>
+          <span aria-hidden="true" className="tt-pill rounded-full bg-coral" style={categoryPill.pillStyle} />
           {CATEGORY_FILTERS.filter(
             // Only categories this menu has, so every dish sits under some chip.
             (cat) => cat === "all" || data.dishes.some((d) => d.category === cat),
@@ -779,9 +789,11 @@ function ResultsContent() {
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`flex-shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              aria-pressed={activeFilter === cat}
+              data-active={activeFilter === cat}
+              className={`relative flex-shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-300 ${
                 activeFilter === cat
-                  ? "bg-coral text-white"
+                  ? "text-white"
                   : "bg-cream-dark text-brown-medium hover:bg-brown-light/20"
               }`}
             >

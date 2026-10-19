@@ -1,5 +1,7 @@
 "use client";
 
+import Collapse from "@/components/ui/Collapse";
+import ChoiceChip from "@/components/ui/ChoiceChip";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -383,27 +385,26 @@ function ProfileContent() {
             {showAllergenGrid ? t("common.done") : t("common.edit")}
           </button>
 
-          {showAllergenGrid && (
-            <div className="grid grid-cols-3 gap-2 mt-3">
+          <Collapse open={showAllergenGrid} className="grid grid-cols-3 gap-2 mt-3">
               {ALL_ALLERGENS.map((a) => {
                 const selected = settings.allergen_preset.includes(a.value);
                 return (
-                  <button
+                  <ChoiceChip
                     key={a.value}
+                    selected={selected}
                     onClick={() => toggleAllergen(a.value)}
-                    className={`flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl text-xs font-medium transition-all ${
+                    leading={<span className="text-base">{a.emoji}</span>}
+                    className={`flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl text-xs font-medium ${
                       selected
                         ? "bg-danger text-white ring-2 ring-danger/30"
                         : "bg-cream text-brown-dark hover:bg-brown-light/10"
                     }`}
                   >
-                    <span className="text-base">{a.emoji}</span>
                     {t(`allergens.${a.value}`)}
-                  </button>
+                  </ChoiceChip>
                 );
               })}
-            </div>
-          )}
+            </Collapse>
 
           {/* Dietary */}
           <div className="mt-4 pt-4 border-t border-brown-light/10">
@@ -435,26 +436,25 @@ function ProfileContent() {
               {showDietaryGrid ? t("common.done") : t("common.edit")}
             </button>
 
-            {showDietaryGrid && (
-              <div className="grid grid-cols-2 gap-2 mt-3">
+            <Collapse open={showDietaryGrid} className="grid grid-cols-2 gap-2 mt-3">
                 {ALL_DIETARY.map((d) => {
                   const selected = settings.dietary_beliefs.includes(d.value);
                   return (
-                    <button
+                    <ChoiceChip
                       key={d.value}
+                      selected={selected}
                       onClick={() => toggleDietary(d.value)}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-medium transition-all ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-medium ${
                         selected
                           ? "bg-success text-white ring-2 ring-success/30"
                           : "bg-cream text-brown-dark hover:bg-brown-light/10"
                       }`}
                     >
                       {t(`dietary.${d.value}`)}
-                    </button>
+                    </ChoiceChip>
                   );
                 })}
-              </div>
-            )}
+              </Collapse>
           </div>
         </div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
+import QtyStepper from "@/components/ui/QtyStepper";
 import { ALLERGEN_LABELS, resolveTipCulture } from "@/lib/allergen-i18n";
 import { useTranslation } from "@/lib/i18n";
 
@@ -227,48 +228,12 @@ export default function OrderPage() {
 
               {/* Quantity stepper + remove */}
               <div className="flex items-center gap-1">
-                <div className="flex items-center bg-cream-dark rounded-lg">
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.dish_hash, item.quantity - 1)
-                    }
-                    className="w-8 h-8 flex items-center justify-center text-brown-medium hover:text-brown-dark transition-colors"
-                    aria-label={t("common.aria.decreaseQuantity")}
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                  </button>
-                  <span className="w-6 text-center text-sm font-semibold text-brown-dark">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.dish_hash, item.quantity + 1)
-                    }
-                    className="w-8 h-8 flex items-center justify-center text-brown-medium hover:text-brown-dark transition-colors"
-                    aria-label={t("common.aria.increaseQuantity")}
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                  </button>
-                </div>
+                <QtyStepper
+                  value={item.quantity}
+                  onChange={(q) => updateQuantity(item.dish_hash, q)}
+                  decreaseLabel={t("common.aria.decreaseQuantity")}
+                  increaseLabel={t("common.aria.increaseQuantity")}
+                />
 
                 <button
                   onClick={() => removeItem(item.dish_hash)}

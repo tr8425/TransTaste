@@ -1,5 +1,7 @@
 "use client";
 
+import { useSlidingPill } from "@/hooks/useSlidingPill";
+import ChoiceChip from "@/components/ui/ChoiceChip";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
@@ -122,6 +124,8 @@ export default function OnboardingPage() {
     setLocale(code);
   };
   const [currency, setCurrency] = useState("KRW");
+  const languageFrame = useSlidingPill<HTMLDivElement>(language);
+  const currencyFrame = useSlidingPill<HTMLDivElement>(currency);
   const [allergens, setAllergens] = useState<string[]>([]);
   const [dietary, setDietary] = useState<string[]>([]);
 
@@ -292,16 +296,19 @@ export default function OnboardingPage() {
           {/* Output Language */}
           <section className="mb-8">
             <h2 className="text-lg font-semibold text-brown-dark mb-3">{t("onboarding.iSpeak")}</h2>
-            <div className="grid grid-cols-2 gap-2">
+            <div ref={languageFrame.ref} className="relative grid grid-cols-2 gap-2">
+              <span aria-hidden="true" className="tt-pill z-10 rounded-xl border-2 border-coral bg-coral/10" style={languageFrame.pillStyle} />
               {LANGUAGES.map((lang) => {
                 const selected = language === lang.code;
                 return (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang.code)}
-                    className={`relative flex items-center justify-center py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
+                    aria-pressed={selected}
+                    data-active={selected}
+                    className={`relative flex items-center justify-center py-2.5 px-3 rounded-xl text-sm font-medium transition-colors duration-300 ${
                       selected
-                        ? "border-2 border-coral bg-coral/10 text-brown-dark"
+                        ? "border-2 border-transparent text-brown-dark"
                         : "border-2 border-transparent bg-cream-dark text-brown-medium hover:bg-brown-light/15"
                     }`}
                   >
@@ -321,16 +328,19 @@ export default function OnboardingPage() {
             <p className="text-sm text-brown-medium mb-3">
               {t("onboarding.homeCurrencyHint")}
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div ref={currencyFrame.ref} className="relative grid grid-cols-3 gap-2">
+              <span aria-hidden="true" className="tt-pill z-10 rounded-xl border-2 border-coral bg-coral/10" style={currencyFrame.pillStyle} />
               {CURRENCIES.map((c) => {
                 const selected = currency === c.code;
                 return (
                   <button
                     key={c.code}
                     onClick={() => setCurrency(c.code)}
-                    className={`relative flex items-center justify-center py-2.5 px-2 rounded-xl text-sm font-medium transition-all ${
+                    aria-pressed={selected}
+                    data-active={selected}
+                    className={`relative flex items-center justify-center py-2.5 px-2 rounded-xl text-sm font-medium transition-colors duration-300 ${
                       selected
-                        ? "border-2 border-coral bg-coral/10 text-brown-dark"
+                        ? "border-2 border-transparent text-brown-dark"
                         : "border-2 border-transparent bg-cream-dark text-brown-medium hover:bg-brown-light/15"
                     }`}
                   >
@@ -354,17 +364,18 @@ export default function OnboardingPage() {
               {ALLERGENS.map((item) => {
                 const selected = allergens.includes(item.id);
                 return (
-                  <button
+                  <ChoiceChip
                     key={item.id}
+                    selected={selected}
                     onClick={() => toggleAllergen(item.id)}
-                    className={`py-2 px-2 rounded-full text-xs font-medium transition-all ${
+                    className={`py-2 px-2 rounded-full text-xs font-medium ${
                       selected
                         ? "bg-danger text-white"
                         : "bg-cream-dark text-brown-medium hover:bg-brown-light/15"
                     }`}
                   >
                     {t(`allergens.${item.id}`)}
-                  </button>
+                  </ChoiceChip>
                 );
               })}
             </div>
@@ -382,17 +393,18 @@ export default function OnboardingPage() {
               {DIETARY.map((item) => {
                 const selected = dietary.includes(item.id);
                 return (
-                  <button
+                  <ChoiceChip
                     key={item.id}
+                    selected={selected}
                     onClick={() => toggleDietary(item.id)}
-                    className={`py-2 px-4 rounded-full text-sm font-medium transition-all ${
+                    className={`py-2 px-4 rounded-full text-sm font-medium ${
                       selected
                         ? "bg-success text-white"
                         : "bg-cream-dark text-brown-medium hover:bg-brown-light/15"
                     }`}
                   >
                     {t(`dietary.${item.id}`)}
-                  </button>
+                  </ChoiceChip>
                 );
               })}
             </div>

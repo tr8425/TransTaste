@@ -243,7 +243,7 @@
     "pass30dDesc": "For longer travel or multiple destinations.",
     "bestForTrip": "Recommended",
     "interested": "I would consider this",
-    "interestRecorded": "Interest recorded ✓",
+    "interestRecorded": "Interest recorded",
     "validationOnly": "No payment will be taken",
     "validationOnlyDesc": "This experiment stores an anonymous click only in this browser. It does not collect email, menu text, or payment details.",
     "resultsTitle": "Help decide whether TransTaste should become a paid product",

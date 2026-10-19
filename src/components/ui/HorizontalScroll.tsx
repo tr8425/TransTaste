@@ -54,7 +54,7 @@ export default function HorizontalScroll({
     <div className={`relative group ${className}`}>
       <div
         ref={scrollRef}
-        className={`flex ${gap} overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-1`}
+        className={`relative flex ${gap} overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-1`}
       >
         {children}
       </div>

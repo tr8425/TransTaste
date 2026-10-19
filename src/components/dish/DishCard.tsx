@@ -38,7 +38,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 
 function DetailSkeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
+    <div className="space-y-4 tt-shimmer">
       <div>
         <div className="h-3 w-20 bg-cream-dark rounded mb-3" />
         <div className="flex justify-center">

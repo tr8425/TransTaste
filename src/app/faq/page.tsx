@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "@/lib/i18n";
 
@@ -63,37 +64,33 @@ const FAQ_KO: FaqEntry[] = [
 ];
 
 function FaqList({ entries }: { entries: FaqEntry[] }) {
+  // One answer open at a time; the plus turns into a minus.
+  const [open, setOpen] = useState<number | null>(null);
   return (
-    <div className="space-y-4">
-      {entries.map((entry, i) => (
-        <details
-          key={i}
-          className="group bg-cream-dark rounded-xl px-4 py-3 open:pb-4"
-        >
-          <summary className="flex items-start justify-between gap-3 cursor-pointer list-none select-none">
-            <span className="text-sm font-semibold text-brown-dark leading-snug">
-              {entry.q}
-            </span>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#A1825F"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="flex-shrink-0 mt-0.5 transition-transform group-open:rotate-180"
-              aria-hidden="true"
+    <div className="space-y-3">
+      {entries.map((entry, i) => {
+        const isOpen = open === i;
+        return (
+          <div key={i} className={`tt-acc bg-cream-dark rounded-xl ${isOpen ? "is-open" : ""}`}>
+            <button
+              type="button"
+              id={`faq-q-${i}`}
+              aria-expanded={isOpen}
+              aria-controls={`faq-a-${i}`}
+              onClick={() => setOpen(isOpen ? null : i)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
             >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </summary>
-          <p className="text-sm text-brown-medium leading-relaxed mt-3">
-            {entry.a}
-          </p>
-        </details>
-      ))}
+              <span className="text-sm font-semibold text-brown-dark leading-snug">{entry.q}</span>
+              <span className="tt-acc-pm" aria-hidden="true" />
+            </button>
+            <div id={`faq-a-${i}`} role="region" aria-labelledby={`faq-q-${i}`} aria-hidden={!isOpen} className="tt-acc-body">
+              <div>
+                <p className="tt-acc-a px-4 pb-4 text-sm text-brown-medium leading-relaxed">{entry.a}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

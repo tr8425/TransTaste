@@ -1,5 +1,6 @@
 "use client";
 
+import Collapse from "@/components/ui/Collapse";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -229,15 +230,14 @@ export default function HomePage() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className={`transition-transform ${showOtherInputs ? "rotate-180" : ""}`}
+            className={`transition-transform duration-500 ease-[cubic-bezier(.34,1.45,.64,1)] ${showOtherInputs ? "rotate-180" : ""}`}
             aria-hidden
           >
             <path d="m6 9 6 6 6-6" />
           </svg>
         </button>
 
-        {showOtherInputs ? (
-          <div id="other-input-methods" className="grid grid-cols-3 gap-2">
+        <Collapse open={showOtherInputs} id="other-input-methods" className="grid grid-cols-3 gap-2">
             <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
               {t("home.gallery")}
             </button>
@@ -247,8 +247,7 @@ export default function HomePage() {
             <button type="button" onClick={(event) => { modalReturnFocusRef.current = event.currentTarget; setShowTextModal(true); }} className="min-h-12 rounded-xl bg-cream-dark text-xs font-semibold text-brown-medium transition hover:text-coral">
               {t("home.text")}
             </button>
-          </div>
-        ) : null}
+        </Collapse>
 
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
       </section>

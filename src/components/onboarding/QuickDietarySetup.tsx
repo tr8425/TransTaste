@@ -1,5 +1,6 @@
 "use client";
 
+import ChoiceChip from "@/components/ui/ChoiceChip";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
@@ -159,34 +160,32 @@ export default function QuickDietarySetup() {
           {t("quickSetup.dietLegend")}
         </legend>
         <div className="grid grid-cols-2 gap-2.5">
-          <button
-            type="button"
+          <ChoiceChip
+            selected={selected.length === 0}
             onClick={() => setSelected([])}
-            aria-pressed={selected.length === 0}
-            className={`min-h-14 rounded-2xl border px-3 text-sm font-semibold transition ${
+            className={`min-h-14 rounded-2xl border px-3 text-sm font-semibold ${
               selected.length === 0
                 ? "border-coral bg-coral/10 text-coral"
                 : "border-brown-light/20 bg-white/60 text-brown-medium hover:border-coral/30"
             }`}
           >
             {t("quickSetup.none")}
-          </button>
+          </ChoiceChip>
           {DIETARY_OPTIONS.map((option) => {
             const isSelected = selected.includes(option);
             return (
-              <button
+              <ChoiceChip
                 key={option}
-                type="button"
+                selected={isSelected}
                 onClick={() => toggleDietary(option)}
-                aria-pressed={isSelected}
-                className={`min-h-14 rounded-2xl border px-3 text-sm font-semibold transition ${
+                className={`min-h-14 rounded-2xl border px-3 text-sm font-semibold ${
                   isSelected
                     ? "border-coral bg-coral/10 text-coral"
                     : "border-brown-light/20 bg-white/60 text-brown-medium hover:border-coral/30"
                 }`}
               >
                 {t(`quickSetup.${option}`)}
-              </button>
+              </ChoiceChip>
             );
           })}
         </div>
