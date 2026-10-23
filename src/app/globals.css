@@ -221,3 +221,39 @@ p { text-wrap: pretty; }
 /* [079] Skeleton: one band of light sweeps every block on the same beat */
 .tt-shimmer .bg-cream-dark { background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .6) 45%, transparent 60%); background-size: 200vw 100%; background-repeat: no-repeat; background-attachment: fixed; animation: tt-shine 1.6s linear infinite; }
 @keyframes tt-shine { from { background-position: -100vw 0; } to { background-position: 100vw 0; } }
+
+/* [012] Bookmark: the star fills with a spring and a ring bursts on save */
+.tt-fav { position: relative; transition: color .3s var(--tt-ease), transform .4s var(--tt-spring); }
+.tt-fav:active { transform: scale(.84); }
+.tt-fav[aria-pressed="true"] { color: #D85A30; }
+.tt-fav-fill { transform-box: fill-box; transform-origin: center; transform: scale(0); transition: transform .2s var(--tt-ease); }
+.tt-fav[aria-pressed="true"] .tt-fav-fill { transform: scale(1); transition: transform .5s var(--tt-spring); }
+.tt-fav-ring { position: absolute; inset: 8px; border-radius: 9999px; border: 2px solid #D85A30; opacity: 0; pointer-events: none; animation: tt-ring .6s var(--tt-ease); }
+@keyframes tt-ring { from { opacity: .8; transform: scale(.35); } to { opacity: 0; transform: scale(1.3); } }
+
+/* [087] Steps on a track: the line fills to the current step, done steps get a check */
+.tt-steps { position: relative; }
+.tt-steps-line { position: absolute; left: 16.667%; right: 16.667%; top: 8px; height: 2px; background: rgba(23, 23, 18, .12); }
+.tt-steps-line i { position: absolute; inset: 0; background: #D85A30; transform-origin: 0 50%; transform: scaleX(var(--p, 0)); transition: transform .9s cubic-bezier(.5, 0, .2, 1); }
+.tt-steps-dot { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 9999px; border: 2px solid rgba(23, 23, 18, .2); background: #FDFAF5; transition: background-color .35s var(--tt-ease), border-color .35s var(--tt-ease), transform .5s var(--tt-spring); }
+.tt-steps-dot svg { width: 11px; height: 11px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 16; stroke-dashoffset: 16; transition: stroke-dashoffset .4s var(--tt-ease) .15s; }
+.tt-steps li { color: rgba(139, 106, 80, .6); transition: color .35s var(--tt-ease); }
+.tt-steps li[data-state="now"], .tt-steps li[data-state="done"] { color: #D85A30; }
+.tt-steps li[data-state="now"] .tt-steps-dot { border-color: #D85A30; transform: scale(1.12); animation: tt-beacon 1.6s var(--tt-ease) infinite; }
+.tt-steps li[data-state="done"] .tt-steps-dot { border-color: #D85A30; background: #D85A30; }
+.tt-steps li[data-state="done"] .tt-steps-dot svg { stroke-dashoffset: 0; }
+@keyframes tt-beacon { 0% { box-shadow: 0 0 0 0 rgba(216, 90, 48, .45); } 100% { box-shadow: 0 0 0 8px rgba(216, 90, 48, 0); } }
+
+/* [088] Empty state: the tile floats while its shadow breathes */
+.tt-float { animation: tt-float 3.2s ease-in-out infinite; }
+.tt-float-shadow { animation: tt-float-shadow 3.2s ease-in-out infinite; }
+@keyframes tt-float { 50% { transform: translateY(-8px); } }
+@keyframes tt-float-shadow { 50% { transform: scaleX(.72); opacity: .55; } }
+
+/* List rows rise in one after another; backwards fill keeps hover transforms working */
+.tt-rise { animation: tt-rise .5s var(--tt-spring) backwards; }
+@keyframes tt-rise { from { opacity: 0; transform: translateY(10px); } }
+
+/* Spring press for primary buttons */
+.tt-press { transition: transform .4s var(--tt-spring), background-color .25s var(--tt-ease); }
+.tt-press:active { transform: scale(.94); }

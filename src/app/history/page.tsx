@@ -102,20 +102,24 @@ export default function HistoryPage() {
       <div className="flex-1 px-5 pb-28">
         {scans.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#8B6A50"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mb-4 opacity-40"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
+            <div className="mb-5 flex flex-col items-center" aria-hidden="true">
+              <div className="tt-float grid h-20 w-20 place-items-center border border-brown-dark bg-cream-dark text-brown-medium shadow-[4px_4px_0_#171712]">
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <span className="tt-float-shadow mt-4 h-1.5 w-14 rounded-full bg-brown-dark/15" />
+            </div>
             <p className="text-sm font-medium text-brown-dark mb-1">
               {t("history.noHistory")}
             </p>
@@ -124,7 +128,7 @@ export default function HistoryPage() {
             </p>
             <Link
               href="/camera"
-              className="px-5 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark transition-colors"
+              className="tt-press px-5 py-2.5 bg-coral text-white text-sm font-semibold rounded-xl hover:bg-coral-dark"
             >
               {t("common.scanAMenu")}
             </Link>
@@ -144,7 +148,8 @@ export default function HistoryPage() {
               return (
                 <div
                   key={scan.resultKey || i}
-                  className="group relative flex w-full items-center gap-3 border border-brown-dark bg-cream-dark p-3.5 shadow-[3px_3px_0_rgba(23,23,18,.1)] transition hover:translate-x-1"
+                  className="tt-rise group relative flex w-full items-center gap-3 border border-brown-dark bg-cream-dark p-3.5 shadow-[3px_3px_0_rgba(23,23,18,.1)] transition hover:translate-x-1"
+                  style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
                 >
                   <button
                     onClick={() => handleClick(scan)}

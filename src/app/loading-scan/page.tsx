@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import { DishLite } from "@/lib/types";
 import { FUN_FACTS_LOADING_COUNT } from "@/lib/constants";
 import FunFactCard from "@/components/common/FunFactCard";
@@ -353,7 +353,7 @@ export default function LoadingScanPage() {
     >
       {/* Top loading section */}
       <div className="flex flex-col items-center pt-16 pb-4 flex-shrink-0">
-        <div className="mb-6 border border-brown-dark bg-cream-dark p-5 text-6xl shadow-[6px_6px_0_#171712] animate-bounce">
+        <div className="mb-6 border border-brown-dark bg-cream-dark p-5 text-6xl shadow-[6px_6px_0_#171712] tt-float">
           {FOOD_EMOJIS[emojiIndex]}
         </div>
         <h2
@@ -372,18 +372,23 @@ export default function LoadingScanPage() {
         >
           <div className="h-full bg-coral animate-progress" />
         </div>
-        <ol className="mt-4 flex items-center gap-2" aria-label={t("loading.progressStages")}>
+        <ol
+          className="tt-steps mt-5 grid w-64 grid-cols-3"
+          style={{ "--p": activeStage / (loadingStages.length - 1) } as CSSProperties}
+          aria-label={t("loading.progressStages")}
+        >
+          <span className="tt-steps-line" aria-hidden="true"><i /></span>
           {loadingStages.map((stage, index) => (
             <li
               key={stage}
-              className={`rounded-full px-2 py-1 text-micro font-medium ${
-                index <= activeStage
-                  ? "bg-coral/10 text-coral"
-                  : "bg-cream-dark text-brown-medium/60"
-              }`}
+              data-state={index < activeStage ? "done" : index === activeStage ? "now" : "todo"}
+              className="relative flex flex-col items-center gap-1.5"
               aria-current={index === activeStage ? "step" : undefined}
             >
-              {stage}
+              <span className="tt-steps-dot" aria-hidden="true">
+                <svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4" /></svg>
+              </span>
+              <span className="text-micro font-medium">{stage}</span>
             </li>
           ))}
         </ol>
@@ -486,7 +491,7 @@ export default function LoadingScanPage() {
           }
         }
         .animate-slideIn {
-          animation: slideIn 0.3s ease-out forwards;
+          animation: slideIn 0.45s var(--tt-spring) forwards;
           opacity: 0;
         }
       `}</style>

@@ -50,6 +50,7 @@ function PhraseCard({
   onToggleFavorite: (key: string) => void;
 }) {
   const { t } = useTranslation();
+  const [burst, setBurst] = useState(0);
   const translation = phrase.translations[targetLang];
   const responses = phrase.expectedResponses?.[targetLang] ?? [];
 
@@ -110,22 +111,30 @@ function PhraseCard({
       )}
 
       {/* Bookmark */}
-      <div className="flex justify-end mt-3">
+      <div className="flex justify-end mt-1 -mb-2 -mr-2">
         <button
-          onClick={() => onToggleFavorite(phrase.key)}
-          className="text-brown-light hover:text-coral transition-colors"
+          type="button"
+          onClick={() => {
+            if (!isFavorite) setBurst((b) => b + 1);
+            onToggleFavorite(phrase.key);
+          }}
+          aria-pressed={isFavorite}
+          className="tt-fav grid h-11 w-11 place-items-center rounded-full text-brown-light hover:text-coral"
           aria-label={isFavorite ? t("phrases.removeBookmark") : t("phrases.bookmarkPhrase")}
         >
+          {burst > 0 ? <span key={burst} className="tt-fav-ring" aria-hidden="true" /> : null}
           <svg
-            width="20"
-            height="20"
+            width="22"
+            height="22"
             viewBox="0 0 24 24"
-            fill={isFavorite ? "currentColor" : "none"}
+            fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
+            aria-hidden="true"
           >
+            <polygon className="tt-fav-fill" fill="currentColor" stroke="none" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
         </button>
